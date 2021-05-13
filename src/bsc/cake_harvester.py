@@ -120,7 +120,7 @@ class CakeHarvester(IHarvester):
         return bnb_amount_of_rewards >= HARVEST_THRESHOLD
 
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
-        return True  # strategy.functions.keeper().call() == self.keeper_address
+        return strategy.functions.keeper().call() == self.keeper_address
 
     def __process_harvest(
         self,
