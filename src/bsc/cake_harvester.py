@@ -57,6 +57,15 @@ class CakeHarvester(IHarvester):
         sett_name: str,
         strategy_address: str,
     ):
+        """Orchestration function that harvests outstanding Cake awards.
+
+        Args:
+            sett_name (str)
+            strategy_address (str)
+
+        Raises:
+            ValueError: If the keeper isn't whitelisted, throw an error and alert user.
+        """
         strategy = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(strategy_address),
             abi=self.__get_abi("strategy"),
@@ -99,6 +108,15 @@ class CakeHarvester(IHarvester):
         pool_id: int = None,
         strategy_address: str = None,
     ) -> Decimal:
+        """Get integer amount of outstanding awards waiting to be harvested.
+
+        Args:
+            pool_id (int, optional): Pancake swap liquidity pool id. Defaults to None.
+            strategy_address (str, optional): Defaults to None.
+
+        Returns:
+            Decimal: Integer amont of outstanding awards available for harvest.
+        """
         harvestable_amt = (
             self.chef.functions.pendingCake(pool_id, strategy_address).call()
             / 10 ** self.cake_decimals
@@ -110,16 +128,39 @@ class CakeHarvester(IHarvester):
         return Decimal(harvestable_amt)
 
     def get_current_rewards_price(self) -> Decimal:
+        """Get price of Cake in BNB.
+
+        Returns:
+            Decimal: Price per Cake denominated in BNB
+        """
         return Decimal(
             self.cake_bnb_oracle.functions.latestRoundData().call()[1]
             / 10 ** self.cake_decimals
         )
 
     def is_profitable(self, amount: Decimal, price_per: Decimal) -> bool:
+        """Checks if harvesting is profitable based on amount of awards and cost to harvest.
+
+        Args:
+            amount (Decimal): Integer amount of Cake available for harvest
+            price_per (Decimal): Price per Cake in BNB
+
+        Returns:
+            bool: True if we should harvest based on amount / cost, False otherwise
+        """
         bnb_amount_of_rewards = amount * price_per
         return bnb_amount_of_rewards >= HARVEST_THRESHOLD
 
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
+        """Checks if the bot we're using is whitelisted for the strategy.
+
+        Args:
+            strategy (contract)
+
+        Returns:
+            bool: True if our bot is whitelisted to make function calls to strategy, 
+            False otherwise.
+        """
         return strategy.functions.keeper().call() == self.keeper_address
 
     def __process_harvest(
@@ -129,6 +170,15 @@ class CakeHarvester(IHarvester):
         overrides: dict = None,
         harvested: Decimal = None,
     ):
+        """Private function to create, broadcast, confirm tx on bsc and then send 
+        transaction to Discord for monitoring
+
+        Args:
+            strategy (contract, optional): Defaults to None.
+            sett_name (str, optional): Defaults to None.
+            overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
+            harvested (Decimal, optional): Amount of Cake harvested. Defaults to None.
+        """
         error = None
         try:
             tx_hash = self.__send_harvest_tx(strategy, overrides)
@@ -143,6 +193,19 @@ class CakeHarvester(IHarvester):
             
 
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
+        """Sends transaction to BSC node for confirmation.
+
+        Args:
+            contract (contract)
+            overrides (dict)
+
+        Raises:
+            Exception: If we have an issue sending transaction (unable to communicate with 
+            node, etc.) we log the error and return a tx_hash of 0x00.
+
+        Returns:
+            HexBytes: Transaction hash for transaction that was sent.
+        """
         try:
             tx = contract.functions.harvest().buildTransaction(
                 {
@@ -162,11 +225,16 @@ class CakeHarvester(IHarvester):
         finally:
             return tx_hash
 
-
-        
     
-    def confirm_transaction(self, tx_hash: HexBytes):
+    def confirm_transaction(self, tx_hash: HexBytes) -> bool:
+        """Waits for transaction to appear in block for 60 seconds and then times out.
 
+        Args:
+            tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
+
+        Returns:
+            bool: True if transaction was confirmed in 60 seconds, False otherwise.
+        """
         try:
             self.web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
         except exceptions.TimeExhausted:
