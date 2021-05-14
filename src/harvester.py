@@ -1,5 +1,4 @@
 from decimal import Decimal
-from web3 import contract, Web3
 
 
 class IHarvester:

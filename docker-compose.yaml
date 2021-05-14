@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+  bsc-keeper:
+    image: keeper-bot
+    command: python scripts/harvest_cake.py
+    build: 
+      context: .
+      dockerfile: Dockerfile
+  eth-keeper:
+    image: keeper-bot
+    command: python scripts/harvest_sushi.py

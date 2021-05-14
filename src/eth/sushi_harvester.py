@@ -4,6 +4,7 @@ from hexbytes import HexBytes
 import json
 import logging
 import os
+import requests
 import sys
 from time import sleep
 from web3 import Web3, contract, exceptions
@@ -17,39 +18,42 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-GAS_MULTIPLIER = 1.2 # use 20% more gas than node reporting
-HARVEST_THRESHOLD = 2  # bnb amount rewards must exceed to claim, reward_amt (BNB) > HARVEST_THRESHOLD (BNB)
-CAKE_BNB_CHAINLINK = "0xcB23da9EA243f53194CBc2380A6d4d9bC046161f"
-BNB_USD_CHAINLINK = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE"
-CAKE_ADDRESS = "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82"
-CAKE_CHEF = "0x73feaa1eE314F8c655E354234017bE2193C9E24E"
+ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+SUSHI_ETH_CHAINLINK = "0xe572CeF69f43c2E488b33924AF04BDacE19079cf"
+WBTC_ETH_STRATEGY = "0x7A56d65254705B4Def63c68488C0182968C452ce"
+WBTC_DIGG_STRATEGY = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
+WBTC_BADGER_STRATEGY = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
+SUSHI_ADDRESS = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"
+XSUSHI_ADDRESS = "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272"
+FEE_THRESHOLD = 0.01 # ratio of gas cost to harvest amount we're ok with
 
 
-class CakeHarvester(IHarvester):
+class SushiHarvester(IHarvester):
     def __init__(self):
         self.logger = logging.getLogger()
-        self.web3 = Web3(Web3.HTTPProvider(os.getenv("BSC_NODE_URL")))
+        self.web3 = Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL")))
         self.keeper_key = os.getenv("KEEPER_KEY")
         self.keeper_address = os.getenv("KEEPER_ADDRESS")
-        self.bnb_usd_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(BNB_USD_CHAINLINK),
+        self.eth_usd_oracle = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
         )
-        self.cake_bnb_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(CAKE_BNB_CHAINLINK),
+        self.sushi_eth_oracle = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(SUSHI_ETH_CHAINLINK),
             abi=self.__get_abi("oracle"),
         )
-        self.cake = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(CAKE_ADDRESS),
-            abi=self.__get_abi("cake"),
+        self.sushi = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(SUSHI_ADDRESS),
+            abi=self.__get_abi("sushi"),
         )
-        self.cake_decimals = self.cake.functions.decimals().call()
-        self.chef = self.web3.eth.contract(
-            address=CAKE_CHEF, abi=self.__get_abi("chef")
+        self.xsushi = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(XSUSHI_ADDRESS),
+            abi=self.__get_abi("xsushi"),
         )
+        self.sushi_decimals = self.sushi.functions.decimals().call()
 
     def __get_abi(self, contract_id: str):
-        with open(f"./abi/bsc/{contract_id}.json") as f:
+        with open(f"./abi/eth/{contract_id}.json") as f:
             return json.load(f)
 
     def harvest(
@@ -57,7 +61,7 @@ class CakeHarvester(IHarvester):
         sett_name: str,
         strategy_address: str,
     ):
-        """Orchestration function that harvests outstanding Cake awards.
+        """Orchestration function that harvests outstanding Sushi awards.
 
         Args:
             sett_name (str)
@@ -74,22 +78,24 @@ class CakeHarvester(IHarvester):
         if not self.__is_keeper_whitelisted(strategy):
             raise ValueError(f"Keeper is not whitelisted for {sett_name}")
 
-        pool_id = strategy.functions.wantPid().call()
+        pool_id = strategy.functions.pid().call()
 
         claimable_rewards = self.get_harvestable_rewards_amount(
             pool_id=pool_id, strategy_address=strategy_address
         )
         self.logger.info(f"claimable rewards: {claimable_rewards}")
 
-        current_price_bnb = self.get_current_rewards_price()
-        self.logger.info(f"current rewards price per token (BNB): {current_price_bnb}")
+        current_price_eth = self.get_current_rewards_price()
+        self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
-        should_harvest = self.is_profitable(claimable_rewards, current_price_bnb)
+        gas_fee = self.estimate_gas_fee(strategy)
+
+        should_harvest = self.is_profitable(claimable_rewards, current_price_eth, gas_fee)
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
-            bnb_usd_price = Decimal(
-                self.bnb_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
+            eth_usd_price = Decimal(
+                self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
             )
 
             self.__process_harvest(
@@ -100,7 +106,7 @@ class CakeHarvester(IHarvester):
                     "gas_limit": 12000000,
                     "allow_revert": True,
                 },
-                harvested=claimable_rewards * current_price_bnb * bnb_usd_price,
+                harvested=claimable_rewards * current_price_eth * eth_usd_price,
             )
 
     def get_harvestable_rewards_amount(
@@ -111,45 +117,39 @@ class CakeHarvester(IHarvester):
         """Get integer amount of outstanding awards waiting to be harvested.
 
         Args:
-            pool_id (int, optional): Pancake swap liquidity pool id. Defaults to None.
+            pool_id (int, optional): Sushi swap liquidity pool id. Defaults to None.
             strategy_address (str, optional): Defaults to None.
 
         Returns:
             Decimal: Integer amont of outstanding awards available for harvest.
         """
-        harvestable_amt = (
-            self.chef.functions.pendingCake(pool_id, strategy_address).call()
-            / 10 ** self.cake_decimals
-        )
-        harvestable_amt += (
-            self.chef.functions.pendingCake(0, strategy_address).call()
-            / 10 ** self.cake_decimals
-        )
+        harvestable_amt = self.xsushi.functions.balanceOf(strategy_address).call() / 10 ** self.sushi_decimals
         return Decimal(harvestable_amt)
 
     def get_current_rewards_price(self) -> Decimal:
-        """Get price of Cake in BNB.
+        """Get price of Sushi in ETH.
 
         Returns:
-            Decimal: Price per Cake denominated in BNB
+            Decimal: Price per Sushi denominated in ETH
         """
-        return Decimal(
-            self.cake_bnb_oracle.functions.latestRoundData().call()[1]
-            / 10 ** self.cake_decimals
-        )
+        ratio = self.sushi.functions.balanceOf(self.xsushi.address).call() / self.xsushi.functions.totalSupply().call()
+        return Decimal((self.sushi_eth_oracle.functions.latestRoundData().call()[1] / 10 ** self.sushi_decimals) * ratio)
 
-    def is_profitable(self, amount: Decimal, price_per: Decimal) -> bool:
+    def is_profitable(self, amount: Decimal, price_per: Decimal, gas_fee: Decimal) -> bool:
         """Checks if harvesting is profitable based on amount of awards and cost to harvest.
 
         Args:
-            amount (Decimal): Integer amount of Cake available for harvest
-            price_per (Decimal): Price per Cake in BNB
+            amount (Decimal): Integer amount of Sushi available for harvest
+            price_per (Decimal): Price per Sushi in ETH
 
         Returns:
             bool: True if we should harvest based on amount / cost, False otherwise
         """
-        bnb_amount_of_rewards = amount * price_per
-        return bnb_amount_of_rewards >= HARVEST_THRESHOLD
+        fee_percent_of_claim = (
+            1 if amount * price_per == 0 else gas_fee / (amount * price_per)
+        )
+        self.logger.info(f"Fee as percent of harvest: {round(fee_percent_of_claim * 100, 2)}%")
+        return fee_percent_of_claim <= FEE_THRESHOLD
 
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
@@ -170,14 +170,14 @@ class CakeHarvester(IHarvester):
         overrides: dict = None,
         harvested: Decimal = None,
     ):
-        """Private function to create, broadcast, confirm tx on bsc and then send 
+        """Private function to create, broadcast, confirm tx on eth and then send 
         transaction to Discord for monitoring
 
         Args:
             strategy (contract, optional): Defaults to None.
             sett_name (str, optional): Defaults to None.
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
-            harvested (Decimal, optional): Amount of Cake harvested. Defaults to None.
+            harvested (Decimal, optional): Amount of Sushi harvested. Defaults to None.
         """
         error = None
         try:
@@ -191,9 +191,8 @@ class CakeHarvester(IHarvester):
         finally:
             send_transaction_to_discord(tx_hash, sett_name, harvested, succeeded, error=error)
             
-
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
-        """Sends transaction to BSC node for confirmation.
+        """Sends transaction to ETH node for confirmation.
 
         Args:
             contract (contract)
@@ -219,13 +218,12 @@ class CakeHarvester(IHarvester):
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except Exception as e:
-            self.logger.error(f"Error sending harvest tx: {e}")
+            self.logger.error(f"Error in sending harvest tx: {e}")
             tx_hash = HexBytes(0)
             raise Exception
         finally:
             return tx_hash
 
-    
     def confirm_transaction(self, tx_hash: HexBytes) -> bool:
         """Waits for transaction to appear in block for 60 seconds and then times out.
 
@@ -244,5 +242,11 @@ class CakeHarvester(IHarvester):
         self.logger.info(f"Transaction succeeded!")
         return True
         
-    def __get_gas_price(self):
-        return self.web3.eth.gasPrice * GAS_MULTIPLIER
+    def estimate_gas_fee(self, strategy: contract) -> Decimal:
+        current_gas_price = self.__get_gas_price()
+        estimated_gas_to_harvest = strategy.functions.harvest().estimateGas({"from": strategy.functions.keeper().call()})
+        return Decimal(current_gas_price * estimated_gas_to_harvest)
+
+    def __get_gas_price(self) -> int:
+        response = requests.get("https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper")
+        return int(response.json().get("data").get("rapid") * 1.1 / 10  ** 18)
