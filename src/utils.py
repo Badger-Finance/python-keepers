@@ -14,6 +14,11 @@ def send_transaction_to_discord(
 
     if success:
         embed = Embed(title=f"**Keeper transaction for {sett_name} SUCCESS**")
+        embed.add_field(
+            name="Etherscan Transaction", 
+            value=f"{etherscan_url}", 
+            inline=False
+        )
     else:
         embed = Embed(title=f"**Keeper transaction for {sett_name} FAILED**")
         message = f"Transaction {tx_hash} timed out."
@@ -23,12 +28,7 @@ def send_transaction_to_discord(
     
     embed.add_field(
         name="Keeper Action", 
-        value=f"Harvest ${str(round(amount))} using {sett_name}.", 
-        inline=False
-    )
-    embed.add_field(
-        name="Etherscan Transaction", 
-        value=f"{etherscan_url}", 
+        value=f"Harvest ${str(round(amount))} for sett {sett_name}.", 
         inline=False
     )
     webhook.send(
