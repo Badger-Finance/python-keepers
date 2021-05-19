@@ -12,7 +12,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_transaction_to_discord
+from utils import send_harvest_error_to_discord, send_harvest_success_to_discord
 
 load_dotenv()
 
@@ -183,13 +183,15 @@ class SushiHarvester(IHarvester):
         try:
             tx_hash = self.__send_harvest_tx(strategy, overrides)
             succeeded = self.confirm_transaction(tx_hash)
+            if succeeded:
+                send_harvest_success_to_discord(tx_hash, sett_name)
+            elif tx_hash:
+                send_harvest_error_to_discord(sett_name, tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
-            tx_hash = "invalid" if tx_hash == HexBytes(0) else tx_hash
-            succeeded = False
             error = e
-        finally:
-            send_transaction_to_discord(tx_hash, sett_name, harvested, succeeded, error=error)
+            send_harvest_error_to_discord(sett_name, error=error)
+            
             
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
