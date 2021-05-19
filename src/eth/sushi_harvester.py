@@ -25,7 +25,7 @@ WBTC_DIGG_STRATEGY = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
 WBTC_BADGER_STRATEGY = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
 SUSHI_ADDRESS = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"
 XSUSHI_ADDRESS = "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272"
-FEE_THRESHOLD = 0.01 # ratio of gas cost to harvest amount we're ok with
+FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 
 
 class SushiHarvester(IHarvester):
@@ -90,7 +90,9 @@ class SushiHarvester(IHarvester):
 
         gas_fee = self.estimate_gas_fee(strategy)
 
-        should_harvest = self.is_profitable(claimable_rewards, current_price_eth, gas_fee)
+        should_harvest = self.is_profitable(
+            claimable_rewards, current_price_eth, gas_fee
+        )
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
@@ -123,7 +125,10 @@ class SushiHarvester(IHarvester):
         Returns:
             Decimal: Integer amont of outstanding awards available for harvest.
         """
-        harvestable_amt = self.xsushi.functions.balanceOf(strategy_address).call() / 10 ** self.sushi_decimals
+        harvestable_amt = (
+            self.xsushi.functions.balanceOf(strategy_address).call()
+            / 10 ** self.sushi_decimals
+        )
         return Decimal(harvestable_amt)
 
     def get_current_rewards_price(self) -> Decimal:
@@ -132,10 +137,21 @@ class SushiHarvester(IHarvester):
         Returns:
             Decimal: Price per Sushi denominated in ETH
         """
-        ratio = self.sushi.functions.balanceOf(self.xsushi.address).call() / self.xsushi.functions.totalSupply().call()
-        return Decimal((self.sushi_eth_oracle.functions.latestRoundData().call()[1] / 10 ** self.sushi_decimals) * ratio)
+        ratio = (
+            self.sushi.functions.balanceOf(self.xsushi.address).call()
+            / self.xsushi.functions.totalSupply().call()
+        )
+        return Decimal(
+            (
+                self.sushi_eth_oracle.functions.latestRoundData().call()[1]
+                / 10 ** self.sushi_decimals
+            )
+            * ratio
+        )
 
-    def is_profitable(self, amount: Decimal, price_per: Decimal, gas_fee: Decimal) -> bool:
+    def is_profitable(
+        self, amount: Decimal, price_per: Decimal, gas_fee: Decimal
+    ) -> bool:
         """Checks if harvesting is profitable based on amount of awards and cost to harvest.
 
         Args:
@@ -148,7 +164,9 @@ class SushiHarvester(IHarvester):
         fee_percent_of_claim = (
             1 if amount * price_per == 0 else gas_fee / (amount * price_per)
         )
-        self.logger.info(f"Fee as percent of harvest: {round(fee_percent_of_claim * 100, 2)}%")
+        self.logger.info(
+            f"Fee as percent of harvest: {round(fee_percent_of_claim * 100, 2)}%"
+        )
         return fee_percent_of_claim <= FEE_THRESHOLD
 
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
@@ -158,7 +176,7 @@ class SushiHarvester(IHarvester):
             strategy (contract)
 
         Returns:
-            bool: True if our bot is whitelisted to make function calls to strategy, 
+            bool: True if our bot is whitelisted to make function calls to strategy,
             False otherwise.
         """
         return strategy.functions.keeper().call() == self.keeper_address
@@ -170,7 +188,7 @@ class SushiHarvester(IHarvester):
         overrides: dict = None,
         harvested: Decimal = None,
     ):
-        """Private function to create, broadcast, confirm tx on eth and then send 
+        """Private function to create, broadcast, confirm tx on eth and then send
         transaction to Discord for monitoring
 
         Args:
@@ -184,15 +202,17 @@ class SushiHarvester(IHarvester):
             tx_hash = self.__send_harvest_tx(strategy, overrides)
             succeeded = self.confirm_transaction(tx_hash)
             if succeeded:
-                send_harvest_success_to_discord(tx_hash, sett_name)
+                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                send_harvest_success_to_discord(
+                    tx_hash, sett_name, gas_price_of_tx, harvested
+                )
             elif tx_hash:
                 send_harvest_error_to_discord(sett_name, tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
             error = e
             send_harvest_error_to_discord(sett_name, error=error)
-            
-            
+
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
@@ -201,7 +221,7 @@ class SushiHarvester(IHarvester):
             overrides (dict)
 
         Raises:
-            Exception: If we have an issue sending transaction (unable to communicate with 
+            Exception: If we have an issue sending transaction (unable to communicate with
             node, etc.) we log the error and return a tx_hash of 0x00.
 
         Returns:
@@ -212,7 +232,7 @@ class SushiHarvester(IHarvester):
                 {
                     "nonce": self.web3.eth.getTransactionCount(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gasLimit": 12000000
+                    "gasLimit": 12000000,
                 }
             )
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -243,12 +263,27 @@ class SushiHarvester(IHarvester):
 
         self.logger.info(f"Transaction succeeded!")
         return True
-        
+
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
         current_gas_price = self.__get_gas_price()
-        estimated_gas_to_harvest = strategy.functions.harvest().estimateGas({"from": strategy.functions.keeper().call()})
+        estimated_gas_to_harvest = strategy.functions.harvest().estimateGas(
+            {"from": strategy.functions.keeper().call()}
+        )
         return Decimal(current_gas_price * estimated_gas_to_harvest)
 
     def __get_gas_price(self) -> int:
-        response = requests.get("https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper")
-        return int(response.json().get("data").get("rapid") * 1.1 / 10  ** 18)
+        response = requests.get(
+            "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
+        )
+        return int(response.json().get("data").get("rapid") * 1.1 / 10 ** 18)
+
+    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
+        tx = self.web3.eth.get_transaction(tx_hash)
+
+        total_gas_used = Decimal(tx.get("gas", 0))
+        gas_price_eth = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
+        eth_usd = Decimal(
+            self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
+        )
+
+        return total_gas_used * gas_price_eth * eth_usd

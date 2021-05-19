@@ -17,7 +17,7 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-GAS_MULTIPLIER = 1.2 # use 20% more gas than node reporting
+GAS_MULTIPLIER = 1.2  # use 20% more gas than node reporting
 HARVEST_THRESHOLD = 2  # bnb amount rewards must exceed to claim, reward_amt (BNB) > HARVEST_THRESHOLD (BNB)
 CAKE_BNB_CHAINLINK = "0xcB23da9EA243f53194CBc2380A6d4d9bC046161f"
 BNB_USD_CHAINLINK = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE"
@@ -158,7 +158,7 @@ class CakeHarvester(IHarvester):
             strategy (contract)
 
         Returns:
-            bool: True if our bot is whitelisted to make function calls to strategy, 
+            bool: True if our bot is whitelisted to make function calls to strategy,
             False otherwise.
         """
         return strategy.functions.keeper().call() == self.keeper_address
@@ -170,7 +170,7 @@ class CakeHarvester(IHarvester):
         overrides: dict = None,
         harvested: Decimal = None,
     ):
-        """Private function to create, broadcast, confirm tx on bsc and then send 
+        """Private function to create, broadcast, confirm tx on bsc and then send
         transaction to Discord for monitoring
 
         Args:
@@ -189,8 +189,9 @@ class CakeHarvester(IHarvester):
             succeeded = False
             error = e
         finally:
-            send_transaction_to_discord(tx_hash, sett_name, harvested, succeeded, error=error)
-            
+            send_transaction_to_discord(
+                tx_hash, sett_name, harvested, succeeded, error=error
+            )
 
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to BSC node for confirmation.
@@ -200,7 +201,7 @@ class CakeHarvester(IHarvester):
             overrides (dict)
 
         Raises:
-            Exception: If we have an issue sending transaction (unable to communicate with 
+            Exception: If we have an issue sending transaction (unable to communicate with
             node, etc.) we log the error and return a tx_hash of 0x00.
 
         Returns:
@@ -211,7 +212,7 @@ class CakeHarvester(IHarvester):
                 {
                     "nonce": self.web3.eth.getTransactionCount(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gasLimit": 12000000
+                    "gasLimit": 12000000,
                 }
             )
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -225,7 +226,6 @@ class CakeHarvester(IHarvester):
         finally:
             return tx_hash
 
-    
     def confirm_transaction(self, tx_hash: HexBytes) -> bool:
         """Waits for transaction to appear in block for 60 seconds and then times out.
 
@@ -243,6 +243,6 @@ class CakeHarvester(IHarvester):
 
         self.logger.info(f"Transaction succeeded!")
         return True
-        
+
     def __get_gas_price(self):
         return self.web3.eth.gasPrice * GAS_MULTIPLIER
