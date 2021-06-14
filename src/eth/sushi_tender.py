@@ -7,7 +7,7 @@ from web3 import contract
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from src.utils import send_transaction_to_discord
+from src.utils import send_success_to_discord, send_error_to_discord
 
 CHEF = "0xc2EdaD668740f1aA35E4D8f227fB8E17dcA888Cd"
 
@@ -114,9 +114,14 @@ class SushiTender(SushiHarvester):
             succeeded = False
             error = e
         finally:
-            send_transaction_to_discord(
-                tx_hash, "tend", sett_name, tended, succeeded, error=error
-            )
+            succeeded = self.confirm_transaction(tx_hash)
+            if succeeded:
+                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                send_success_to_discord(
+                    tx_hash, sett_name, gas_price_of_tx, tended, "Tend"
+                )
+            elif tx_hash:
+                send_error_to_discord(sett_name, "Tend", tx_hash=tx_hash)
 
     def __send_tend_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to ETH node for confirmation.

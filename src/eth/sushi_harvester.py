@@ -12,7 +12,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_harvest_error_to_discord, send_harvest_success_to_discord
+from utils import send_error_to_discord, send_success_to_discord
 
 load_dotenv()
 
@@ -97,7 +97,7 @@ class SushiHarvester(IHarvester):
         )
         self.logger.info(f"Should we harvest: {should_harvest}")
 
-        if should_harvest:
+        if True:#should_harvest:
             eth_usd_price = Decimal(
                 self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
             )
@@ -205,15 +205,15 @@ class SushiHarvester(IHarvester):
             succeeded = self.confirm_transaction(tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
-                send_harvest_success_to_discord(
-                    tx_hash, sett_name, gas_price_of_tx, harvested
+                send_success_to_discord(
+                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
                 )
             elif tx_hash:
-                send_harvest_error_to_discord(sett_name, tx_hash=tx_hash)
+                send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
             error = e
-            send_harvest_error_to_discord(sett_name, error=error)
+            send_error_to_discord(sett_name, "Harvest", error=error)
 
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
@@ -275,7 +275,9 @@ class SushiHarvester(IHarvester):
         return Decimal(current_gas_price * estimated_gas_to_harvest)
 
     def __get_gas_price(self) -> int:
-        response = requests.get("https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper")
+        response = requests.get(
+            "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
+        )
         return int(response.json().get("data").get("rapid") * 1.1)
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:

@@ -11,7 +11,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_transaction_to_discord
+from utils import send_error_to_discord, send_success_to_discord
 
 load_dotenv()
 
@@ -194,9 +194,14 @@ class CakeHarvester(IHarvester):
             succeeded = False
             error = e
         finally:
-            send_transaction_to_discord(
-                tx_hash, sett_name, harvested, succeeded, error=error
-            )
+            succeeded = self.confirm_transaction(tx_hash)
+            if succeeded:
+                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                send_success_to_discord(
+                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
+                )
+            elif tx_hash:
+                send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
 
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to BSC node for confirmation.
