@@ -10,6 +10,11 @@ from src.eth.sushi_tender import SushiTender
 from tests.utils import *
 
 
+@pytest.mark.require_network("mainnet-fork")
+def test_almost_in_prod():
+    pass
+
+
 @pytest.fixture
 def badger_wbtc_strategy() -> Tuple[str, str, Contract]:
     strategy_address = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"

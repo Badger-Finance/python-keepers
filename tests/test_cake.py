@@ -9,6 +9,11 @@ from src.bsc.cake_harvester import CakeHarvester
 from tests.utils import *
 
 
+@pytest.mark.require_network("bsc-fork")
+def test_almost_in_prod():
+    pass
+
+
 @pytest.fixture
 def bbadger_btcb_strategy() -> Tuple[str, str, Contract]:
     strategy_address = "0x2A842e01724F10d093aE8a46A01e66DbCf3C7373"
