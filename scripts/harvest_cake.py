@@ -3,7 +3,9 @@ import os
 import sys
 from time import sleep
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/bsc")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/bsc"))
+)
 
 from cake_harvester import CakeHarvester
 
@@ -24,7 +26,7 @@ def safe_harvest(harvester, sett_name, strategy):
 if __name__ == "__main__":
 
     logger = logging.getLogger()
-    
+
     while True:
 
         harvester = CakeHarvester()
@@ -38,4 +40,4 @@ if __name__ == "__main__":
         logger.info("+-----Harvesting BNB BTCB LP-----+")
         safe_harvest(harvester, "BNB BTCB LP", BNB_BTCB_STRATEGY)
 
-        sleep(30*60)
+        sleep(30 * 60)

@@ -210,7 +210,7 @@ class CakeHarvester(IHarvester):
         try:
             tx = contract.functions.harvest().buildTransaction(
                 {
-                    "nonce": self.web3.eth.getTransactionCount(self.keeper_address),
+                    "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
                     "gasLimit": 12000000,
                 }

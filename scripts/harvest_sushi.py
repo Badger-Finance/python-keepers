@@ -3,15 +3,15 @@ import os
 import sys
 from time import sleep
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth")))
-
-from sushi_harvester import SushiHarvester
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+from strategies import eth_strategies
+from eth.sushi_harvester import SushiHarvester
 
 logging.basicConfig(level=logging.INFO)
 
-BADGER_WBTC_STRATEGY = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
-DIGG_WBTC_STRATEGY = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
-ETH_WBTC_STRATEGY = "0x7A56d65254705B4Def63c68488C0182968C452ce"
+BADGER_WBTC_STRATEGY = eth_strategies["WBTC_BADGER_STRATEGY"]
+DIGG_WBTC_STRATEGY = eth_strategies["WBTC_DIGG_STRATEGY"]
+ETH_WBTC_STRATEGY = eth_strategies["WBTC_ETH_STRATEGY"]
 
 
 def safe_harvest(harvester, sett_name, strategy):
@@ -24,7 +24,7 @@ def safe_harvest(harvester, sett_name, strategy):
 if __name__ == "__main__":
 
     logger = logging.getLogger()
-    
+
     while True:
 
         harvester = SushiHarvester()
@@ -38,4 +38,4 @@ if __name__ == "__main__":
         logger.info("+-----Harvesting ETH WBTC LP-----+")
         safe_harvest(harvester, "ETH WBTC LP", ETH_WBTC_STRATEGY)
 
-        sleep(30*60)
+        sleep(30 * 60)

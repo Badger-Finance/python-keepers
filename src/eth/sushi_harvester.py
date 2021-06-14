@@ -20,20 +20,22 @@ logging.basicConfig(level=logging.INFO)
 
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 SUSHI_ETH_CHAINLINK = "0xe572CeF69f43c2E488b33924AF04BDacE19079cf"
-WBTC_ETH_STRATEGY = "0x7A56d65254705B4Def63c68488C0182968C452ce"
-WBTC_DIGG_STRATEGY = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
-WBTC_BADGER_STRATEGY = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
 SUSHI_ADDRESS = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"
 XSUSHI_ADDRESS = "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272"
 FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 
 
 class SushiHarvester(IHarvester):
-    def __init__(self):
+    def __init__(
+        self,
+        keeper_address=os.getenv("KEEPER_ADDRESS"),
+        keeper_key=os.getenv("KEEPER_KEY"),
+        web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
+    ):
         self.logger = logging.getLogger()
-        self.web3 = Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL")))
-        self.keeper_key = os.getenv("KEEPER_KEY")
-        self.keeper_address = os.getenv("KEEPER_ADDRESS")
+        self.web3 = web3
+        self.keeper_key = keeper_key
+        self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
@@ -230,9 +232,10 @@ class SushiHarvester(IHarvester):
         try:
             tx = contract.functions.harvest().buildTransaction(
                 {
-                    "nonce": self.web3.eth.getTransactionCount(self.keeper_address),
+                    "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gasLimit": 12000000,
+                    "gas": 12000000,
+                    "from": self.keeper_address,
                 }
             )
             signed_tx = self.web3.eth.account.sign_transaction(
