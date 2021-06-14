@@ -26,11 +26,16 @@ CAKE_CHEF = "0x73feaa1eE314F8c655E354234017bE2193C9E24E"
 
 
 class CakeHarvester(IHarvester):
-    def __init__(self):
+    def __init__(
+        self,
+        keeper_address=os.getenv("KEEPER_ADDRESS"),
+        keeper_key=os.getenv("KEEPER_KEY"),
+        web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
+    ):
         self.logger = logging.getLogger()
-        self.web3 = Web3(Web3.HTTPProvider(os.getenv("BSC_NODE_URL")))
-        self.keeper_key = os.getenv("KEEPER_KEY")
-        self.keeper_address = os.getenv("KEEPER_ADDRESS")
+        self.web3 = web3
+        self.keeper_key = keeper_key
+        self.keeper_address = keeper_address
         self.bnb_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(BNB_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),

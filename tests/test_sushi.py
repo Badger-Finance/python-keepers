@@ -13,19 +13,19 @@ from tests.utils import *
 @pytest.fixture
 def badger_wbtc_strategy() -> Tuple[str, str, Contract]:
     strategy_address = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
-    return (strategy_address, "BADGER WBTC LP", get_strategy(strategy_address))
+    return (strategy_address, "BADGER WBTC LP", get_strategy(strategy_address, "eth"))
 
 
 @pytest.fixture
 def digg_wbtc_strategy() -> Tuple[str, str, Contract]:
     strategy_address = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
-    return (strategy_address, "DIGG WBTC LP", get_strategy(strategy_address))
+    return (strategy_address, "DIGG WBTC LP", get_strategy(strategy_address, "eth"))
 
 
 @pytest.fixture
 def eth_wbtc_strategy() -> Tuple[str, str, Contract]:
     strategy_address = "0x7A56d65254705B4Def63c68488C0182968C452ce"
-    return (strategy_address, "ETH WBTC LP", get_strategy(strategy_address))
+    return (strategy_address, "ETH WBTC LP", get_strategy(strategy_address, "eth"))
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ def test_harvest(
         gas_fee = harvester.estimate_gas_fee(
             harvester.web3.eth.contract(
                 address=strategy_address,
-                abi=get_abi("strategy"),
+                abi=get_abi("strategy", "eth"),
             )
         )
         should_harvest = harvester.is_profitable(
@@ -109,7 +109,7 @@ def test_tend(tender, badger_wbtc_strategy, digg_wbtc_strategy, eth_wbtc_strateg
         gas_fee = tender.estimate_gas_fee(
             tender.web3.eth.contract(
                 address=strategy_address,
-                abi=get_abi("strategy"),
+                abi=get_abi("strategy", "eth"),
             )
         )
         should_tend = tender.is_profitable(before_claimable, current_price_eth, gas_fee)
