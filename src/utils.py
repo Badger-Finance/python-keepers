@@ -51,3 +51,7 @@ def send_harvest_success_to_discord(
         ],
     )
     webhook.send(embed=embed, username=f"{sett_name} Harvester")
+
+
+def send_transaction_to_discord(tx_hash: HexBytes, type: str, sett_name: str, amount: Decimal, succeeded, error=None):
+    pass

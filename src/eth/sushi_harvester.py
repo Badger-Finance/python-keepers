@@ -275,10 +275,8 @@ class SushiHarvester(IHarvester):
         return Decimal(current_gas_price * estimated_gas_to_harvest)
 
     def __get_gas_price(self) -> int:
-        response = requests.get(
-            "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
-        )
-        return int(response.json().get("data").get("rapid") * 1.1 / 10 ** 18)
+        response = requests.get("https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper")
+        return int(response.json().get("data").get("rapid") * 1.1)
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
         tx = self.web3.eth.get_transaction(tx_hash)

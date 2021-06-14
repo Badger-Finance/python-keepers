@@ -1,13 +1,13 @@
 from decimal import Decimal
 from hexbytes import HexBytes
 import os
-from sushi_harvester import SushiHarvester
+from src.eth.sushi_harvester import SushiHarvester
 import sys
 from web3 import contract
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from utils import send_transaction_to_discord
+from src.utils import send_transaction_to_discord
 
 CHEF = "0xc2EdaD668740f1aA35E4D8f227fB8E17dcA888Cd"
 
@@ -29,10 +29,10 @@ class SushiTender(SushiHarvester):
         """
         strategy = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(strategy_address),
-            abi=self.__get_abi("strategy"),
+            abi=self._SushiHarvester__get_abi("strategy"),
         )
 
-        if not self.__is_keeper_whitelisted(strategy):
+        if not self._SushiHarvester__is_keeper_whitelisted(strategy):
             raise ValueError(f"Keeper is not whitelisted for {sett_name}")
 
         pool_id = strategy.functions.pid().call()
@@ -69,7 +69,7 @@ class SushiTender(SushiHarvester):
     def get_tendable_rewards_amount(self, pool_id: int, strategy_address: str):
         chef = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(CHEF),
-            abi=self.__get_abi("chef"),
+            abi=self._SushiHarvester__get_abi("chef"),
         )
         claimable_rewards = (
             chef.functions.pendingSushi(pool_id, strategy_address).call()
