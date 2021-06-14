@@ -97,7 +97,7 @@ class SushiHarvester(IHarvester):
         )
         self.logger.info(f"Should we harvest: {should_harvest}")
 
-        if True:#should_harvest:
+        if should_harvest:
             eth_usd_price = Decimal(
                 self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
             )
