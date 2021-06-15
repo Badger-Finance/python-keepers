@@ -1,2 +1,11 @@
 autofetch_sources: True
 dotenv: .env
+
+networks:
+  default: mainnet-fork
+  bsc-fork:
+    explorer: https://www.bscscan.com/
+    cmd: ganache-cli
+    cmd_settings:
+      fork: https://bsc-dataseed1.binance.org
+      chain_id: 56
