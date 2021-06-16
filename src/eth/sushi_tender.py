@@ -116,7 +116,7 @@ class SushiTender(SushiHarvester):
         finally:
             succeeded = self.confirm_transaction(tx_hash)
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = self._SushiHarvester__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
                     tx_hash, sett_name, gas_price_of_tx, tended, "Tend"
                 )
@@ -141,8 +141,9 @@ class SushiTender(SushiHarvester):
             tx = contract.functions.tend().buildTransaction(
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-                    "gasPrice": self.__get_gas_price(),
-                    "gasLimit": 12000000,
+                    "gasPrice": self._SushiHarvester__get_gas_price(),
+                    "gas": 12000000,
+                    "from": self.keeper_address,
                 }
             )
             signed_tx = self.web3.eth.account.sign_transaction(

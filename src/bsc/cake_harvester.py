@@ -221,8 +221,9 @@ class CakeHarvester(IHarvester):
             tx = contract.functions.harvest().buildTransaction(
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-                    "gasPrice": self.__get_gas_price(),
-                    "gasLimit": 12000000,
+                    "gasPrice": self._CakeHarvester__get_gas_price(),
+                    "gas": 12000000,
+                    "from": self.keeper_address,
                 }
             )
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -255,4 +256,15 @@ class CakeHarvester(IHarvester):
         return True
 
     def __get_gas_price(self):
-        return self.web3.eth.gasPrice * GAS_MULTIPLIER
+        return int(self.web3.eth.gas_price * GAS_MULTIPLIER)
+
+    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
+        tx = self.web3.eth.get_transaction(tx_hash)
+
+        total_gas_used = Decimal(tx.get("gas", 0))
+        gas_price_bnb = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
+        bnb_usd = Decimal(
+            self.bnb_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
+        )
+
+        return total_gas_used * gas_price_bnb * bnb_usd

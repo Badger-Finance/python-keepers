@@ -31,7 +31,7 @@ def send_success_to_discord(
     )
     embed = Embed(
         title=f"**Badger {type} Report**",
-        description=f"{sett_name} Sett Harvest Details",
+        description=f"{sett_name} Sett {type} Details",
         fields=[
             {
                 "name": "Etherscan Transaction",
@@ -50,4 +50,4 @@ def send_success_to_discord(
             },
         ],
     )
-    webhook.send(embed=embed, username=f"{sett_name} Harvester")
+    webhook.send(embed=embed, username=f"{sett_name} {type}er")

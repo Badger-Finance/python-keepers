@@ -4,13 +4,16 @@ from decimal import Decimal
 from brownie import *
 from web3 import Web3
 import requests
+import os
 
 from src.bsc.cake_harvester import CakeHarvester
 from tests.utils import *
 
+os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")
+
 
 @pytest.mark.require_network("bsc-fork")
-def test_almost_in_prod():
+def test_correct_network():
     pass
 
 
@@ -51,6 +54,7 @@ def test_harvest(
     and 0 after. If not then claimable rewards should be the same before and after
     calling harvest
     """
+    accounts[0].transfer(test_address, "1 ether")
 
     def run_harvest(strategy_address, strategy_name, strategy):
         before_claimable = harvester.get_harvestable_rewards_amount(
@@ -58,6 +62,8 @@ def test_harvest(
         )
         current_price_bnb = harvester.get_current_rewards_price()
         should_harvest = harvester.is_profitable(before_claimable, current_price_bnb)
+
+        print(strategy_name, "should_harvest:", should_harvest)
 
         harvester.harvest(strategy_name, strategy_address)
         after_claimable = harvester.get_harvestable_rewards_amount(

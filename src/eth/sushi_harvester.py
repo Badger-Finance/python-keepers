@@ -1,4 +1,5 @@
 from decimal import Decimal
+from brownie.network import web3
 from dotenv import load_dotenv
 from hexbytes import HexBytes
 import json
@@ -20,6 +21,9 @@ logging.basicConfig(level=logging.INFO)
 
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 SUSHI_ETH_CHAINLINK = "0xe572CeF69f43c2E488b33924AF04BDacE19079cf"
+WBTC_ETH_STRATEGY = "0x7A56d65254705B4Def63c68488C0182968C452ce"
+WBTC_DIGG_STRATEGY = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
+WBTC_BADGER_STRATEGY = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
 SUSHI_ADDRESS = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"
 XSUSHI_ADDRESS = "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272"
 FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
@@ -159,12 +163,14 @@ class SushiHarvester(IHarvester):
         Args:
             amount (Decimal): Integer amount of Sushi available for harvest
             price_per (Decimal): Price per Sushi in ETH
+            gas_fee (Decimal): gas fee in wei
 
         Returns:
             bool: True if we should harvest based on amount / cost, False otherwise
         """
+        gas_fee_ether = web3.fromWei(gas_fee, "ether")
         fee_percent_of_claim = (
-            1 if amount * price_per == 0 else gas_fee / (amount * price_per)
+            1 if amount * price_per == 0 else gas_fee_ether / (amount * price_per)
         )
         self.logger.info(
             f"Fee as percent of harvest: {round(fee_percent_of_claim * 100, 2)}%"

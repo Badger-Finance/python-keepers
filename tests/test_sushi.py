@@ -4,14 +4,17 @@ from decimal import Decimal
 from brownie import *
 from web3 import Web3
 import requests
+import os
 
 from src.eth.sushi_harvester import SushiHarvester
 from src.eth.sushi_tender import SushiTender
 from tests.utils import *
 
+os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")
+
 
 @pytest.mark.require_network("mainnet-fork")
-def test_almost_in_prod():
+def test_correct_network():
     pass
 
 
@@ -61,6 +64,7 @@ def test_harvest(
     and 0 after. If not then claimable rewards should be the same before and after
     calling harvest
     """
+    accounts[0].transfer(test_address, "1 ether")
 
     def run_harvest(strategy_address, strategy_name, strategy):
         before_claimable = harvester.get_harvestable_rewards_amount(
@@ -76,6 +80,8 @@ def test_harvest(
         should_harvest = harvester.is_profitable(
             before_claimable, current_price_eth, gas_fee
         )
+
+        print(strategy_name, "should_harvest:", should_harvest)
 
         harvester.harvest(strategy_name, strategy_address)
         after_claimable = harvester.get_harvestable_rewards_amount(
@@ -105,6 +111,7 @@ def test_tend(tender, badger_wbtc_strategy, digg_wbtc_strategy, eth_wbtc_strateg
     and 0 after. If not then claimable rewards should be the same before and after
     calling tend
     """
+    accounts[0].transfer(test_address, "1 ether")
 
     def run_tend(strategy_address, strategy_name, strategy):
         before_claimable = tender.get_tendable_rewards_amount(
@@ -118,6 +125,8 @@ def test_tend(tender, badger_wbtc_strategy, digg_wbtc_strategy, eth_wbtc_strateg
             )
         )
         should_tend = tender.is_profitable(before_claimable, current_price_eth, gas_fee)
+
+        print(strategy_name, "should_tend:", should_tend)
 
         tender.tend(strategy_name, strategy_address)
         after_claimable = tender.get_tendable_rewards_amount(
@@ -152,11 +161,17 @@ def test_get_current_rewards_price(harvester):
 
 
 def test_is_profitable(harvester):
-    res = harvester.is_profitable(Decimal(100), Decimal(2), Decimal(1))
+    res = harvester.is_profitable(
+        Decimal(1), Decimal(2), Decimal(web3.toWei(10000000, "gwei"))
+    )
     assert res
 
-    res = harvester.is_profitable(Decimal(100), Decimal(1), Decimal(1))
+    res = harvester.is_profitable(
+        Decimal(1), Decimal(1), Decimal(web3.toWei(10000000, "gwei"))
+    )
     assert res
 
-    res = harvester.is_profitable(Decimal(100), Decimal(1), Decimal(1.01))
+    res = harvester.is_profitable(
+        Decimal(1), Decimal(1), Decimal(web3.toWei(11000000, "gwei"))
+    )
     assert not res
