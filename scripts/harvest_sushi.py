@@ -3,7 +3,7 @@ import os
 import sys
 from time import sleep
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from sushi_harvester import SushiHarvester
 
@@ -24,7 +24,7 @@ def safe_harvest(harvester, sett_name, strategy):
 if __name__ == "__main__":
 
     logger = logging.getLogger()
-    
+
     while True:
 
         harvester = SushiHarvester()
@@ -38,4 +38,4 @@ if __name__ == "__main__":
         logger.info("+-----Harvesting ETH WBTC LP-----+")
         safe_harvest(harvester, "ETH WBTC LP", ETH_WBTC_STRATEGY)
 
-        sleep(30*60)
+        sleep(30 * 60)

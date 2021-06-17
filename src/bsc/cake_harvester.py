@@ -11,7 +11,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_transaction_to_discord
+from utils import send_error_to_discord, send_success_to_discord
 
 load_dotenv()
 
@@ -26,11 +26,16 @@ CAKE_CHEF = "0x73feaa1eE314F8c655E354234017bE2193C9E24E"
 
 
 class CakeHarvester(IHarvester):
-    def __init__(self):
+    def __init__(
+        self,
+        keeper_address=os.getenv("KEEPER_ADDRESS"),
+        keeper_key=os.getenv("KEEPER_KEY"),
+        web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
+    ):
         self.logger = logging.getLogger()
-        self.web3 = Web3(Web3.HTTPProvider(os.getenv("BSC_NODE_URL")))
-        self.keeper_key = os.getenv("KEEPER_KEY")
-        self.keeper_address = os.getenv("KEEPER_ADDRESS")
+        self.web3 = web3
+        self.keeper_key = keeper_key
+        self.keeper_address = keeper_address
         self.bnb_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(BNB_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
@@ -189,9 +194,14 @@ class CakeHarvester(IHarvester):
             succeeded = False
             error = e
         finally:
-            send_transaction_to_discord(
-                tx_hash, sett_name, harvested, succeeded, error=error
-            )
+            succeeded = self.confirm_transaction(tx_hash)
+            if succeeded:
+                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                send_success_to_discord(
+                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
+                )
+            elif tx_hash:
+                send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
 
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to BSC node for confirmation.
@@ -210,9 +220,10 @@ class CakeHarvester(IHarvester):
         try:
             tx = contract.functions.harvest().buildTransaction(
                 {
-                    "nonce": self.web3.eth.getTransactionCount(self.keeper_address),
-                    "gasPrice": self.__get_gas_price(),
-                    "gasLimit": 12000000,
+                    "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
+                    "gasPrice": self._CakeHarvester__get_gas_price(),
+                    "gas": 12000000,
+                    "from": self.keeper_address,
                 }
             )
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -245,4 +256,15 @@ class CakeHarvester(IHarvester):
         return True
 
     def __get_gas_price(self):
-        return self.web3.eth.gasPrice * GAS_MULTIPLIER
+        return int(self.web3.eth.gas_price * GAS_MULTIPLIER)
+
+    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
+        tx = self.web3.eth.get_transaction(tx_hash)
+
+        total_gas_used = Decimal(tx.get("gas", 0))
+        gas_price_bnb = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
+        bnb_usd = Decimal(
+            self.bnb_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
+        )
+
+        return total_gas_used * gas_price_bnb * bnb_usd

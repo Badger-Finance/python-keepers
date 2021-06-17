@@ -1,4 +1,5 @@
 from decimal import Decimal
+from brownie.network import web3
 from dotenv import load_dotenv
 from hexbytes import HexBytes
 import json
@@ -12,7 +13,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_harvest_error_to_discord, send_harvest_success_to_discord
+from utils import send_error_to_discord, send_success_to_discord
 
 load_dotenv()
 
@@ -29,11 +30,16 @@ FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 
 
 class SushiHarvester(IHarvester):
-    def __init__(self):
+    def __init__(
+        self,
+        keeper_address=os.getenv("KEEPER_ADDRESS"),
+        keeper_key=os.getenv("KEEPER_KEY"),
+        web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
+    ):
         self.logger = logging.getLogger()
-        self.web3 = Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL")))
-        self.keeper_key = os.getenv("KEEPER_KEY")
-        self.keeper_address = os.getenv("KEEPER_ADDRESS")
+        self.web3 = web3
+        self.keeper_key = keeper_key
+        self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
@@ -157,12 +163,14 @@ class SushiHarvester(IHarvester):
         Args:
             amount (Decimal): Integer amount of Sushi available for harvest
             price_per (Decimal): Price per Sushi in ETH
+            gas_fee (Decimal): gas fee in wei
 
         Returns:
             bool: True if we should harvest based on amount / cost, False otherwise
         """
+        gas_fee_ether = web3.fromWei(gas_fee, "ether")
         fee_percent_of_claim = (
-            1 if amount * price_per == 0 else gas_fee / (amount * price_per)
+            1 if amount * price_per == 0 else gas_fee_ether / (amount * price_per)
         )
         self.logger.info(
             f"Fee as percent of harvest: {round(fee_percent_of_claim * 100, 2)}%"
@@ -203,15 +211,15 @@ class SushiHarvester(IHarvester):
             succeeded = self.confirm_transaction(tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
-                send_harvest_success_to_discord(
-                    tx_hash, sett_name, gas_price_of_tx, harvested
+                send_success_to_discord(
+                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
                 )
             elif tx_hash:
-                send_harvest_error_to_discord(sett_name, tx_hash=tx_hash)
+                send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
             error = e
-            send_harvest_error_to_discord(sett_name, error=error)
+            send_error_to_discord(sett_name, "Harvest", error=error)
 
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
@@ -230,9 +238,10 @@ class SushiHarvester(IHarvester):
         try:
             tx = contract.functions.harvest().buildTransaction(
                 {
-                    "nonce": self.web3.eth.getTransactionCount(self.keeper_address),
+                    "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gasLimit": 12000000,
+                    "gas": 12000000,
+                    "from": self.keeper_address,
                 }
             )
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -275,7 +284,7 @@ class SushiHarvester(IHarvester):
         response = requests.get(
             "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
         )
-        return int(response.json().get("data").get("rapid") * 1.1 / 10 ** 18)
+        return int(response.json().get("data").get("rapid") * 1.1)
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
         tx = self.web3.eth.get_transaction(tx_hash)
