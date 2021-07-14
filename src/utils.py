@@ -11,6 +11,7 @@ from web3 import Web3, exceptions
 
 logger = logging.getLogger()
 
+
 def hours(num_hours: int) -> int:
     """Returns duration of num_hours in seconds
 
@@ -21,6 +22,7 @@ def hours(num_hours: int) -> int:
         int: Number of seconds num_hours represents
     """
     return 3600 * num_hours
+
 
 def send_error_to_discord(
     sett_name: str, type: str, tx_hash: HexBytes = None, error: Exception = None
@@ -42,14 +44,14 @@ def send_error_to_discord(
 
 
 def send_success_to_discord(
-    tx_hash: HexBytes, sett_name: str, gas_cost: Decimal, amt: Decimal, type: str
+    tx_hash: HexBytes, sett_name: str, gas_cost: Decimal, amt: Decimal, _type: str
 ):
     webhook = Webhook.from_url(
         os.getenv("DISCORD_WEBHOOK_URL"), adapter=RequestsWebhookAdapter()
     )
     embed = Embed(
-        title=f"**Badger {type} Report**",
-        description=f"{sett_name} Sett {type} Details",
+        title=f"**Badger {_type} Report**",
+        description=f"{sett_name} Sett {_type} Details",
         fields=[
             {
                 "name": "Etherscan Transaction",
@@ -68,7 +70,62 @@ def send_success_to_discord(
             },
         ],
     )
-    webhook.send(embed=embed, username=f"{sett_name} {type}er")
+    webhook.send(embed=embed, username=f"{sett_name} {_type}er")
+
+
+def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
+    webhook = Webhook.from_url(
+        get_secret("keepers/discord-webhook", "DISCORD_WEBHOOK_URL"),
+        adapter=RequestsWebhookAdapter(),
+    )
+    status = "Completed" if gas_cost else "Pending"
+    fields = [
+        {
+            "name": "Etherscan Transaction",
+            "value": f"https://etherscan.io/tx/${tx_hash.hex()}",
+            "inline": False,
+        }
+    ]
+    if status == "Completed":
+        fields.append(
+            {
+                "name": "Gas Cost",
+                "value": f"${round(gas_cost, 2)}",
+                "inline": True,
+            }
+        )
+    # TODO: have supply change represented
+    # {
+    #     "name": "Supply Change",
+    #     "value": amt,
+    #     "inline": True,
+    # }
+    embed = Embed(
+        title=f"**Badger Rebaser Report**",
+        description=f"{status} Rebase",
+        fields=fields,
+    )
+    webhook.send(embed=embed, username=f"Rebaser")
+
+
+def send_rebase_error_to_discord(error: Exception):
+    webhook = Webhook.from_url(
+        get_secret("keepers/discord-webhook", "DISCORD_WEBHOOK_URL"),
+        adapter=RequestsWebhookAdapter(),
+    )
+    embed = Embed(
+        title=f"**Badger Rebaser Report**",
+        description=f"Failed Rebase",
+        fields=[
+            {
+                "name": "Error sending rebase tx",
+                "value": f"{error}",
+                "inline": True,
+            }
+        ],
+    )
+    webhook.send(embed=embed, username=f"Rebaser")
+
 
 def get_secret(
     secret_name: str, secret_key: str, region_name: str = "us-west-1"
