@@ -1,5 +1,4 @@
 from decimal import Decimal
-from brownie.network import web3
 from dotenv import load_dotenv
 from hexbytes import HexBytes
 import json

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rebase-keeper
+  labels:
+    app: rebase-keeper
+    service: rebase-keeper
+spec:
+  selector:
+    app: rebase-keeper
+  ports:
+    - name: http
+      port: 9000
+---

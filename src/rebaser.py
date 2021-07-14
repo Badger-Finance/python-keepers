@@ -17,13 +17,6 @@ from src.utils import (
 )
 from web3 import Web3, contract, exceptions
 
-ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-DIGG_TOKEN_ADDRESS = "0x798D1bE841a82a273720CE31c822C61a67a601C3"
-DIGG_ORCHESTRATOR_ADDRESS = "0xbd5d9451e004fc495f105ceab40d6c955e4192ba"
-DIGG_POLICY_ADDRESS = "0x327a78D13eA74145cc0C63E6133D516ad3E974c3"
-UNIV2_DIGG_WBTC_ADDRESS = "0xe86204c4eddd2f70ee00ead6805f917671f56c52"
-SUSHI_DIGG_WBTC_ADDRESS = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
-
 
 class Rebaser:
     def __init__(
@@ -37,7 +30,7 @@ class Rebaser:
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
         self.eth_usd_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
+            address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
             abi=self.__get_abi("oracle"),
         )
         self.digg_token = self.web3.eth.contract(
@@ -45,11 +38,11 @@ class Rebaser:
             abi=self.__get_abi("digg_token"),
         )
         self.digg_orchestrator = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(DIGG_ORCHESTRATOR_ADDRESS),
+            address=self.web3.toChecksumAddress(os.getenv("DIGG_ORCHESTRATOR_ADDRESS")),
             abi=self.__get_abi("digg_orchestrator"),
         )
         self.digg_policy = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(DIGG_POLICY_ADDRESS),
+            address=self.web3.toChecksumAddress(os.getenv("DIGG_POLICY_ADDRESS")),
             abi=self.__get_abi("digg_policy"),
         )
         self.uni_pair = self.web3.eth.contract(
