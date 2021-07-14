@@ -255,24 +255,6 @@ class SushiHarvester(IHarvester):
         finally:
             return tx_hash
 
-    def confirm_transaction(self, tx_hash: HexBytes) -> bool:
-        """Waits for transaction to appear in block for 60 seconds and then times out.
-
-        Args:
-            tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
-
-        Returns:
-            bool: True if transaction was confirmed in 60 seconds, False otherwise.
-        """
-        try:
-            self.web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-        except exceptions.TimeExhausted:
-            self.logger.error(f"Transaction timed out, not included in block yet.")
-            return False
-
-        self.logger.info(f"Transaction succeeded!")
-        return True
-
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
         current_gas_price = self.__get_gas_price()
         estimated_gas_to_harvest = strategy.functions.harvest().estimateGas(
