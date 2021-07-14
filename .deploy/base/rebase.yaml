@@ -11,6 +11,7 @@ spec:
     spec:
       template:
         spec:
+          serviceAccountName: rebase-keeper
           containers:
           - name: rebase-keeper
             image: IMAGE_NAME
