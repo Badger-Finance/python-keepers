@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: rebase-keeper
@@ -9,6 +9,9 @@ spec:
   schedule: "0 16 * * *"
   jobTemplate:
     spec:
+      selector:
+        matchLabels:
+          app: rebase-keeper
       template:
         spec:
           serviceAccountName: rebase-keeper
