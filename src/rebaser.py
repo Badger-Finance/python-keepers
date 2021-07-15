@@ -171,6 +171,7 @@ class Rebaser:
         except ValueError as e:
             error_obj = json.loads(str(e).replace("'", "\""))
             self.logger.error(f"Error in sending rebase tx: {error_obj}")
+            send_rebase_error_to_discord(error=error_obj)
             if error_obj.get("data"):
                 tx_hash = list(error_obj.get("data").keys())[0]
             else:
