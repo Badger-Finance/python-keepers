@@ -75,7 +75,7 @@ def send_success_to_discord(
 
 def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
     webhook = Webhook.from_url(
-        get_secret("keepers/discord-webhook", "DISCORD_WEBHOOK_URL"),
+        get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
         adapter=RequestsWebhookAdapter(),
     )
     status = "Completed" if gas_cost else "Pending"
@@ -110,7 +110,7 @@ def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
 
 def send_rebase_error_to_discord(error: Exception):
     webhook = Webhook.from_url(
-        get_secret("keepers/discord-webhook", "DISCORD_WEBHOOK_URL"),
+        get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
         adapter=RequestsWebhookAdapter(),
     )
     embed = Embed(

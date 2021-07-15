@@ -5,7 +5,11 @@ import json
 import logging
 import os
 import requests
+import sys
 import time
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+
 from utils import (
     get_secret,
     hours,
@@ -103,8 +107,7 @@ class Rebaser:
 
             self.logger.info(f"spfAfter: {spf_after}")
             self.logger.info(f"supply after: {supply_after}")
-            self.logger.info(f"supply change: {supply_after / supply_before}")
-            self.logger.info(f"supply change other way: {supply_before / supply_after}")
+            self.logger.info(f"supply change: %{round((supply_after - supply_before) / supply_before * 100, 2)}")
             self.logger.info(f"sushi reserves after {sushi_reserves}")
             self.logger.info(f"uni reserves after: {uni_reserves}")
 
@@ -131,11 +134,12 @@ class Rebaser:
         """
         try:
             tx_hash = self.__send_rebase_tx()
+            self.logger.error(f"tx_hash before confirm: {tx_hash}")
             succeeded = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_rebase_to_discord(tx_hash=tx_hash, gas_cost=gas_price_of_tx)
-            elif tx_hash:
+            elif tx_hash != HexBytes(0):
                 send_rebase_to_discord(tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing rebase tx: {e}")
@@ -156,7 +160,7 @@ class Rebaser:
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gas": 12000000,
+                    "gas": int(os.getenv("GAS_LIMIT")),
                     "from": self.keeper_address,
                 }
             )
@@ -164,10 +168,13 @@ class Rebaser:
                 tx, private_key=self.keeper_key
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        except Exception as e:
-            self.logger.error(f"Error in sending rebase tx: {e}")
-            tx_hash = HexBytes(0)
-            raise Exception
+        except ValueError as e:
+            error_obj = json.loads(str(e).replace("'", "\""))
+            self.logger.error(f"Error in sending rebase tx: {error_obj}")
+            if error_obj.get("data"):
+                tx_hash = list(error_obj.get("data").keys())[0]
+            else:
+                tx_hash = HexBytes(0)
         finally:
             return tx_hash
 

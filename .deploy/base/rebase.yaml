@@ -32,4 +32,6 @@ spec:
                 value: '0xe86204c4eddd2f70ee00ead6805f917671f56c52'
               - name: SUSHI_DIGG_WBTC_ADDRESS
                 value: '0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3'
+              - name: GAS_LIMIT
+                value: 12000000
           restartPolicy: OnFailure
