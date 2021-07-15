@@ -2,8 +2,11 @@ import logging
 import os
 import sys
 from time import sleep
-from src.rebaser import Rebaser
-from src.utils import get_secret
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+
+from rebaser import Rebaser
+from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
