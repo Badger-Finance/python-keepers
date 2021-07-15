@@ -23,10 +23,10 @@ class Rebaser:
         self,
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
-        web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
+        web3=os.getenv("ETH_NODE_URL"),
     ):
         self.logger = logging.getLogger()
-        self.web3 = web3  # get secret here
+        self.web3 = Web3(Web3.HTTPProvider(web3))  # get secret here
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
         self.eth_usd_oracle = self.web3.eth.contract(
