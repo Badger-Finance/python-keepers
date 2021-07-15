@@ -160,7 +160,6 @@ class Rebaser:
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gas": int(os.getenv("GAS_LIMIT")),
                     "from": self.keeper_address,
                 }
             )
