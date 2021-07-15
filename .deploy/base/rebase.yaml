@@ -5,8 +5,8 @@ metadata:
   labels:
     app: rebase-keeper
 spec:
-  # cron to run at 4pm every day
-  schedule: "0 16 * * *"
+  # cron to run at 4pm every day "0 16 * * *"
+  schedule: "*/1 * * * *"
   jobTemplate:
     spec:
       template:
