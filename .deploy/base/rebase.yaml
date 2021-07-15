@@ -9,9 +9,6 @@ spec:
   schedule: "0 16 * * *"
   jobTemplate:
     spec:
-      selector:
-        matchLabels:
-          app: rebase-keeper
       template:
         spec:
           serviceAccountName: rebase-keeper
