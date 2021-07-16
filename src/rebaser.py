@@ -169,13 +169,14 @@ class Rebaser:
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            error_obj = json.loads(str(e).replace("'", '"'))
-            self.logger.error(f"Error in sending rebase tx: {error_obj}")
-            send_rebase_error_to_discord(error=error_obj)
-            if error_obj.get("data"):
+            self.logger.error(f"Error in sending rebase tx: {e}")
+            try:
+                error_obj = json.loads(str(e).replace("'", '"'))
+                send_rebase_error_to_discord(error=error_obj)
                 tx_hash = list(error_obj.get("data").keys())[0]
-            else:
+            except Exception as x:
                 tx_hash = HexBytes(0)
+                self.logger.error(f"exception when trying to get tx_hash: {x}")
         finally:
             return tx_hash
 
