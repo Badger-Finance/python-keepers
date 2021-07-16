@@ -107,7 +107,9 @@ class Rebaser:
 
             self.logger.info(f"spfAfter: {spf_after}")
             self.logger.info(f"supply after: {supply_after}")
-            self.logger.info(f"supply change: %{round((supply_after - supply_before) / supply_before * 100, 2)}")
+            self.logger.info(
+                f"supply change: %{round((supply_after - supply_before) / supply_before * 100, 2)}"
+            )
             self.logger.info(f"sushi reserves after {sushi_reserves}")
             self.logger.info(f"uni reserves after: {uni_reserves}")
 
@@ -134,7 +136,6 @@ class Rebaser:
         """
         try:
             tx_hash = self.__send_rebase_tx()
-            self.logger.error(f"tx_hash before confirm: {tx_hash}")
             succeeded = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
@@ -168,7 +169,7 @@ class Rebaser:
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            error_obj = json.loads(str(e).replace("'", "\""))
+            error_obj = json.loads(str(e).replace("'", '"'))
             self.logger.error(f"Error in sending rebase tx: {error_obj}")
             send_rebase_error_to_discord(error=error_obj)
             if error_obj.get("data"):

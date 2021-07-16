@@ -120,7 +120,7 @@ def send_rebase_error_to_discord(error: Exception):
             {
                 "name": "Error sending rebase tx",
                 "value": f"{error}",
-                "inline": True,
+                "inline": False,
             }
         ],
     )
@@ -192,9 +192,13 @@ def confirm_transaction(web3: Web3, tx_hash: HexBytes) -> bool:
         bool: True if transaction was confirmed in 60 seconds, False otherwise.
     """
     try:
+        logger.error(f"tx_hash before confirm: {tx_hash}")
         web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
     except exceptions.TimeExhausted:
         logger.error(f"Transaction {tx_hash} timed out, not included in block yet.")
+        return False
+    except Exception as e:
+        logger.error(f"Error waiting for {tx_hash}. Error: {e}.")
         return False
 
     logger.info(f"Transaction {tx_hash} succeeded!")

@@ -18,6 +18,7 @@ os.environ["UNIV2_DIGG_WBTC_ADDRESS"] = "0xe86204c4eddd2f70ee00ead6805f917671f56
 os.environ["SUSHI_DIGG_WBTC_ADDRESS"] = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
 os.environ["GAS_LIMIT"] = "1000000"
 
+
 @pytest.mark.require_network("mainnet-fork")
 def test_correct_network():
     pass
@@ -43,6 +44,7 @@ def test_rebase(rebaser):
     accounts[0].transfer(test_address, "1 ether")
 
     assert rebaser.rebase() == {}
+
 
 def test_send_rebase_tx(rebaser):
     accounts[0].transfer(test_address, "10 ether")
