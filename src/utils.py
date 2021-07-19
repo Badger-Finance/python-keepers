@@ -82,7 +82,7 @@ def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
     fields = [
         {
             "name": "Etherscan Transaction",
-            "value": f"https://etherscan.io/tx/${tx_hash.hex()}",
+            "value": f"https://etherscan.io/tx/{tx_hash.hex()}",
             "inline": False,
         }
     ]
@@ -103,8 +103,9 @@ def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
     embed = Embed(
         title=f"**Badger Rebaser Report**",
         description=f"{status} Rebase",
-        fields=fields,
     )
+    for field in fields:
+        embed.add_field(name=field.get("name"), value=field.get("value"), inline=field.get("inline"))
     webhook.send(embed=embed, username=f"Rebaser")
 
 
@@ -116,14 +117,8 @@ def send_rebase_error_to_discord(error: Exception):
     embed = Embed(
         title=f"**Badger Rebaser Report**",
         description=f"Failed Rebase",
-        fields=[
-            {
-                "name": "Error sending rebase tx",
-                "value": f"{error}",
-                "inline": False,
-            }
-        ],
     )
+    embed.add_field(name="Error sending rebase tx", value=f"{error}", inline=False)
     webhook.send(embed=embed, username=f"Rebaser")
 
 
@@ -192,14 +187,25 @@ def confirm_transaction(web3: Web3, tx_hash: HexBytes) -> bool:
         bool: True if transaction was confirmed in 60 seconds, False otherwise.
     """
     try:
-        logger.error(f"tx_hash before confirm: {tx_hash}")
+        logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
         web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
     except exceptions.TimeExhausted:
-        logger.error(f"Transaction {tx_hash} timed out, not included in block yet.")
+        logger.error(f"Transaction {tx_hash.hex()} timed out, not included in block yet.")
         return False
     except Exception as e:
-        logger.error(f"Error waiting for {tx_hash}. Error: {e}.")
+        logger.error(f"Error waiting for {tx_hash.hex()}. Error: {e}.")
         return False
 
-    logger.info(f"Transaction {tx_hash} succeeded!")
+    logger.info(f"Transaction {tx_hash.hex()} succeeded!")
     return True
+
+def get_hash_from_failed_tx_error(error: ValueError, logger: logging.Logger) -> HexBytes:
+    try:
+        error_obj = json.loads(str(error).replace("'", '"'))
+        send_rebase_error_to_discord(error=error_obj)
+        tx_hash = list(error_obj.get("data").keys())[0]
+    except Exception as x:
+        logger.error(f"exception when trying to get tx_hash: {x}")
+        tx_hash = HexBytes(0)
+    finally:
+        return tx_hash
