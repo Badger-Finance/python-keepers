@@ -1,5 +1,4 @@
 from decimal import Decimal
-from brownie.network import web3
 from dotenv import load_dotenv
 from hexbytes import HexBytes
 import json
@@ -208,7 +207,7 @@ class SushiHarvester(IHarvester):
         error = None
         try:
             tx_hash = self.__send_harvest_tx(strategy, overrides)
-            succeeded = self.confirm_transaction(tx_hash)
+            succeeded = self.confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
@@ -254,24 +253,6 @@ class SushiHarvester(IHarvester):
             raise Exception
         finally:
             return tx_hash
-
-    def confirm_transaction(self, tx_hash: HexBytes) -> bool:
-        """Waits for transaction to appear in block for 60 seconds and then times out.
-
-        Args:
-            tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
-
-        Returns:
-            bool: True if transaction was confirmed in 60 seconds, False otherwise.
-        """
-        try:
-            self.web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-        except exceptions.TimeExhausted:
-            self.logger.error(f"Transaction timed out, not included in block yet.")
-            return False
-
-        self.logger.info(f"Transaction succeeded!")
-        return True
 
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
         current_gas_price = self.__get_gas_price()

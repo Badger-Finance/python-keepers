@@ -1,0 +1,37 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: rebase-keeper
+  labels:
+    app: rebase-keeper
+spec:
+  # cron to run at 4pm every day "0 16 * * *"
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: rebase-keeper
+          containers:
+          - name: rebase-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/rebase.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+              - name: ETH_USD_CHAINLINK
+                value: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
+              - name: DIGG_TOKEN_ADDRESS
+                value: '0x798D1bE841a82a273720CE31c822C61a67a601C3'
+              - name: DIGG_ORCHESTRATOR_ADDRESS
+                value: '0xbd5d9451e004fc495f105ceab40d6c955e4192ba'
+              - name: DIGG_POLICY_ADDRESS
+                value: '0x327a78D13eA74145cc0C63E6133D516ad3E974c3'
+              - name: UNIV2_DIGG_WBTC_ADDRESS
+                value: '0xe86204c4eddd2f70ee00ead6805f917671f56c52'
+              - name: SUSHI_DIGG_WBTC_ADDRESS
+                value: '0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3'
+              - name: GAS_LIMIT
+                value: '12000000'
+          restartPolicy: OnFailure
