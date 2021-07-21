@@ -105,7 +105,9 @@ def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
         description=f"{status} Rebase",
     )
     for field in fields:
-        embed.add_field(name=field.get("name"), value=field.get("value"), inline=field.get("inline"))
+        embed.add_field(
+            name=field.get("name"), value=field.get("value"), inline=field.get("inline")
+        )
     webhook.send(embed=embed, username=f"Rebaser")
 
 
@@ -190,7 +192,9 @@ def confirm_transaction(web3: Web3, tx_hash: HexBytes) -> bool:
         logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
         web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
     except exceptions.TimeExhausted:
-        logger.error(f"Transaction {tx_hash.hex()} timed out, not included in block yet.")
+        logger.error(
+            f"Transaction {tx_hash.hex()} timed out, not included in block yet."
+        )
         return False
     except Exception as e:
         logger.error(f"Error waiting for {tx_hash.hex()}. Error: {e}.")
@@ -199,7 +203,10 @@ def confirm_transaction(web3: Web3, tx_hash: HexBytes) -> bool:
     logger.info(f"Transaction {tx_hash.hex()} succeeded!")
     return True
 
-def get_hash_from_failed_tx_error(error: ValueError, logger: logging.Logger) -> HexBytes:
+
+def get_hash_from_failed_tx_error(
+    error: ValueError, logger: logging.Logger
+) -> HexBytes:
     try:
         error_obj = json.loads(str(error).replace("'", '"'))
         send_rebase_error_to_discord(error=error_obj)
