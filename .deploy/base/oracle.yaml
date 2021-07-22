@@ -1,0 +1,35 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: oracle-keeper
+  labels:
+    app: oracle-keeper
+spec:
+  # cron to run at 4pm every day "0 16 * * *"
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: oracle-keeper
+          containers:
+          - name: oracle-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/oracle.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+              - name: ETH_USD_CHAINLINK
+                value: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
+              - name: SUSHI_SUBGRAPH
+                value: 'https://api.thegraph.com/subgraphs/name/dimitarnestorov/sushiswap-subgraph'
+              - name: UNI_SUBGRAPH
+                value: 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2'
+              - name: SUSHI_PAIR
+                value: '0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3'
+              - name: UNI_PAIR
+                value: '0xe86204c4eddd2f70ee00ead6805f917671f56c52'
+              - name: CENTRALIZED_ORACLE
+                value: '0x72dc16CFa95beB42aeebD2B10F22E55bD17Ce976'
+          restartPolicy: OnFailure
