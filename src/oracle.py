@@ -21,21 +21,39 @@ from utils import (
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 19, "minute": 0, "second": 0, "microsecond": 0}
-SUSHI_SUBGRAPH = (
-    "https://api.thegraph.com/subgraphs/name/dimitarnestorov/sushiswap-subgraph"
-)
-UNI_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2"
-SUSHI_PAIR = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
-UNI_PAIR = "0xe86204c4eddd2f70ee00ead6805f917671f56c52"
-CENTRALIZED_ORACLE = "0x72dc16CFa95beB42aeebD2B10F22E55bD17Ce976"
 
 
 class Oracle:
-    def __init__(self):
+    def __init__(
+        self,
+        keeper_address=os.getenv("KEEPER_ADDRESS"),
+        keeper_key=os.getenv("KEEPER_KEY"),
+        web3=os.getenv("ETH_NODE_URL"),
+    ):
         self.logger = logging.getLogger("oracle")
+        self.web3 = Web3(Web3.HTTPProvider(web3))  # get secret here
+        self.keeper_key = keeper_key  # get secret here
+        self.keeper_address = keeper_address  # get secret here
+        self.eth_usd_oracle = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
+            abi=self.__get_abi("oracle"),
+        )
 
-    def push_report(self):
-        digg_twap = self.get_digg_twap()
+    def __get_abi(self, contract_id: str):
+        with open(f"./abi/eth/{contract_id}.json") as f:
+            return json.load(f)
+
+    def push_report(self, oracle: str):
+        """Gets price using selected oracle and pushes report to market oracle for use
+        in rebase calculation.
+
+        Args:
+            oracle (str): name of oracle to use to push report
+        """
+        if oracle == "centralized":
+            digg_twap = self.get_digg_twap_centralized()
+        elif oracle == "uma":
+            digg_twap = self.get_digg_twap_uma()
         # centralizedMulti = GnosisSafe(digg.centralizedOracle)
 
         # tx = centralizedMulti.execute(
@@ -66,15 +84,19 @@ class Oracle:
 
         pass
 
-    def get_digg_twap(self) -> float:
+    def get_digg_twap_centralized(self) -> float:
         """Calculates 24 hour TWAP for digg based on sushi and uni wbtc / digg pools
 
         Returns:
             [float]: average of 24 hour TWAP for sushi and uni wbtc / digg pools
         """
 
-        uni_twap_data = self.send_twap_query(UNI_SUBGRAPH, UNI_PAIR)
-        sushi_twap_data = self.send_twap_query(SUSHI_SUBGRAPH, SUSHI_PAIR)
+        uni_twap_data = self.send_twap_query(
+            os.getenv("UNI_SUBGRAPH"), os.getenv("UNI_PAIR")
+        )
+        sushi_twap_data = self.send_twap_query(
+            os.getenv("SUSHI_SUBGRAPH"), os.getenv("SUSHI_PAIR")
+        )
 
         uni_prices = [
             float(x["reserve0"]) / float(x["reserve1"])
@@ -93,6 +115,18 @@ class Oracle:
         return (uni_twap + sushi_twap) / 2
 
     def send_twap_query(self, url: str, pair: str) -> dict:
+        """Builds and sends query to selected subgraph to retrieve the prices of the given
+        pair every hour over the past 24 hours.
+
+        Args:
+            url (str): subgraph api url
+            pair (str): ethereum address of LP pair for use in subgraph query
+
+        Returns:
+            [dict]: json return from subgraph api call to LP for price per hour for every
+            hour in past 24.
+        """
+
         today = self._get_today_report_timestamp()
         yesterday = today.replace(day=today.day - 1)
 
@@ -146,3 +180,6 @@ class Oracle:
             microsecond=REPORT_TIME_UTC.get("microsecond"),
         )
         return today
+
+    def get_digg_twap_uma(self) -> float:
+        return 0
