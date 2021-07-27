@@ -16,9 +16,9 @@ if __name__ == "__main__":
     logger = logging.getLogger()
     logger.info(f"INVOKED AT {time()}")
 
-    # keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
-    # keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    # node_url = get_secret("price-bots/infura-url", "INFURA_URL")
+    keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
+    keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
+    node_url = get_secret("price-bots/infura-url", "INFURA_URL")
 
     # oracle = Oracle(keeper_address=keeper_address, keeper_key=keeper_key, web3=node_url)
 

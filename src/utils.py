@@ -44,7 +44,12 @@ def send_error_to_discord(
 
 
 def send_success_to_discord(
-    tx_hash: HexBytes, sett_name: str, gas_cost: Decimal, amt: Decimal, _type: str
+    tx_hash: HexBytes,
+    sett_name: str,
+    gas_cost: Decimal,
+    amt: Decimal,
+    _type: str,
+    chain: str = "ETH",
 ):
     webhook = Webhook.from_url(
         os.getenv("DISCORD_WEBHOOK_URL"), adapter=RequestsWebhookAdapter()
@@ -52,24 +57,20 @@ def send_success_to_discord(
     embed = Embed(
         title=f"**Badger {_type} Report**",
         description=f"{sett_name} Sett {_type} Details",
-        fields=[
-            {
-                "name": "Etherscan Transaction",
-                "value": f"https://etherscan.io/tx/${tx_hash.hex()}",
-                "inline": False,
-            },
-            {
-                "name": "Gas Cost",
-                "value": f"${round(gas_cost, 2)}",
-                "inline": True,
-            },
-            {
-                "name": "Amount Harvested",
-                "value": amt,
-                "inline": True,
-            },
-        ],
     )
+    if chain == "ETH":
+        explorer_name = "Etherscan"
+        explorer_url = f"https://etherscan.io/tx/${tx_hash.hex()}"
+    elif chain == "BSC":
+        explorer_name = "Bscscan"
+        explorer_url = f"https://bscscan.io/tx/${tx_hash.hex()}"
+
+    embed.add_field(
+        name=f"{explorer_name} Transaction", value=explorer_url, inline=False
+    )
+    embed.add_field(name="Gas Cost", value=f"${round(gas_cost, 2)}", inline=True)
+    embed.add_field(name="Amount Harvested", value=amt, inline=True)
+
     webhook.send(embed=embed, username=f"{sett_name} {_type}er")
 
 

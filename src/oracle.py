@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from hexbytes import HexBytes
 import json
 import logging
 import os
@@ -21,6 +22,7 @@ from utils import (
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 19, "minute": 0, "second": 0, "microsecond": 0}
+WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 
 
 class Oracle:
@@ -127,7 +129,7 @@ class Oracle:
             hour in past 24.
         """
 
-        today = self._get_today_report_timestamp()
+        today = self._get_today_report_datetime()
         yesterday = today.replace(day=today.day - 1)
 
         today_timestamp = round(today.timestamp())
@@ -154,7 +156,7 @@ class Oracle:
         r = requests.post(url, json={"query": query})
         return json.loads(r.content)
 
-    def _get_today_report_timestamp(self):
+    def _get_today_report_datetime(self):
         """Generates the end time datetime object for the oracle report to use in its query.
         Uses the time set in REPORT_TIME_UTC constant dict. For instance if the REPORT_TIME_UTC
         dict is:
@@ -180,6 +182,24 @@ class Oracle:
             microsecond=REPORT_TIME_UTC.get("microsecond"),
         )
         return today
+
+    def request_uma_report(self):
+        price_identifier = "DIGGBTC".encode("utf-8")
+        today_timestamp = round(self._get_today_report_datetime().timestamp())
+        ancillary_data = HexBytes(0)
+        currency = WETH_ADDRESS
+        reward = 0
+
+        """
+        function requestPrice(
+            bytes32 identifier,
+            uint256 timestamp,
+            bytes memory ancillaryData,
+            IERC20 currency,
+            uint256 reward
+        ) external virtual returns (uint256 totalBond);
+        """
+        pass
 
     def get_digg_twap_uma(self) -> float:
         return 0
