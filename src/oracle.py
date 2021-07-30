@@ -79,7 +79,7 @@ class Oracle:
             tx_hash = self.__send_centralized_oracle_tx(price, function)
             succeeded = confirm_transaction(self.web3, tx_hash)
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = self._get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
                     tx_type=f"Centralized Oracle {function}",
                     tx_hash=tx_hash,
@@ -151,7 +151,7 @@ class Oracle:
         )
         return int(response.json().get("data").get("rapid") * 1.1)
 
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
+    def _get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
         """Calculates price in USD of total gas used during transaction.
 
         Args:
@@ -160,7 +160,8 @@ class Oracle:
         Returns:
             Decimal: USD cost of gas to perform transaction
         """
-        tx = self.web3.eth.get_transaction(tx_hash.hex())
+        self.logger.info(f"tx_hash {tx_hash.hex()} of type {type(tx_hash)}")
+        tx = self.web3.eth.get_transaction(tx_hash)
 
         total_gas_used = Decimal(tx.get("gas", 0))
         gas_price_eth = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
