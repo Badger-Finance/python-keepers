@@ -167,7 +167,7 @@ class SushiHarvester(IHarvester):
         Returns:
             bool: True if we should harvest based on amount / cost, False otherwise
         """
-        gas_fee_ether = web3.fromWei(gas_fee, "ether")
+        gas_fee_ether = self.web3.fromWei(gas_fee, "ether")
         fee_percent_of_claim = (
             1 if amount * price_per == 0 else gas_fee_ether / (amount * price_per)
         )
