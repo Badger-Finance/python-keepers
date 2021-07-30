@@ -45,33 +45,68 @@ def send_error_to_discord(
 
 def send_success_to_discord(
     tx_hash: HexBytes,
-    sett_name: str,
-    gas_cost: Decimal,
-    amt: Decimal,
-    _type: str,
+    tx_type: str,
+    gas_cost: Decimal = None,
+    amt: Decimal = None,
+    sett_name: str = None,
     chain: str = "ETH",
 ):
     webhook = Webhook.from_url(
         os.getenv("DISCORD_WEBHOOK_URL"), adapter=RequestsWebhookAdapter()
     )
-    embed = Embed(
-        title=f"**Badger {_type} Report**",
-        description=f"{sett_name} Sett {_type} Details",
-    )
-    if chain == "ETH":
-        explorer_name = "Etherscan"
-        explorer_url = f"https://etherscan.io/tx/${tx_hash.hex()}"
-    elif chain == "BSC":
-        explorer_name = "Bscscan"
-        explorer_url = f"https://bscscan.io/tx/${tx_hash.hex()}"
 
-    embed.add_field(
-        name=f"{explorer_name} Transaction", value=explorer_url, inline=False
-    )
-    embed.add_field(name="Gas Cost", value=f"${round(gas_cost, 2)}", inline=True)
-    embed.add_field(name="Amount Harvested", value=amt, inline=True)
+    status = "Completed" if gas_cost else "Pending"
 
-    webhook.send(embed=embed, username=f"{sett_name} {_type}er")
+    (explorer_name, explorer_url) = get_explorer(chain, tx_hash)
+
+    # init embed object
+    if tx_type in ["Harvest", "Tend"]:
+        embed = Embed(
+            title=f"**Badger {tx_type} Report**",
+            description=f"{sett_name} Sett {tx_type} Details",
+        )
+    else:
+        embed = Embed(
+            title=f"**Badger {tx_type} Report**",
+            description=f"{status} {tx_type}",
+        )
+
+    fields = []
+    # append link to tx scan website
+    fields.append(
+        {
+            "name": f"{explorer_name} Transaction",
+            "value": explorer_url,
+            "inline": False,
+        }
+    )
+    # append gas cost
+    fields.append(
+        {
+            "name": "Gas Cost",
+            "value": f"${round(gas_cost, 2)}",
+            "inline": True,
+        }
+    )
+    # add amount harvested / tended
+    if tx_type in ["Harvest", "Tend"]:
+        fields.append(
+            {
+                "name": f"Amount {tx_type}ed",
+                "value": amt,
+                "inline": True,
+            }
+        )
+
+    for field in fields:
+        embed.add_field(
+            name=field.get("name"), value=field.get("value"), inline=field.get("inline")
+        )
+
+    if tx_type in ["Harvest", "Tend"]:
+        webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
+    else:
+        webhook.send(embed=embed, username=f"{tx_type}")
 
 
 def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
@@ -123,6 +158,19 @@ def send_rebase_error_to_discord(error: Exception):
     )
     embed.add_field(name="Error sending rebase tx", value=f"{error}", inline=False)
     webhook.send(embed=embed, username=f"Rebaser")
+
+
+def send_oracle_error_to_discord(tx_type: str, error: Exception):
+    webhook = Webhook.from_url(
+        get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
+        adapter=RequestsWebhookAdapter(),
+    )
+    embed = Embed(
+        title=f"**Badger {tx_type} Report**",
+        description=f"Failed {tx_type}",
+    )
+    embed.add_field(name=f"Error sending {tx_type} tx", value=f"{error}", inline=False)
+    webhook.send(embed=embed, username=f"{tx_type}")
 
 
 def get_secret(
@@ -217,3 +265,14 @@ def get_hash_from_failed_tx_error(
         tx_hash = HexBytes(0)
     finally:
         return tx_hash
+
+
+def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
+    if chain == "ETH":
+        explorer_name = "Etherscan"
+        explorer_url = f"https://etherscan.io/tx/${tx_hash.hex()}"
+    elif chain == "BSC":
+        explorer_name = "Bscscan"
+        explorer_url = f"https://bscscan.io/tx/${tx_hash.hex()}"
+
+    return (explorer_name, explorer_url)

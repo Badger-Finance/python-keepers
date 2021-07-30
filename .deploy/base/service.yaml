@@ -15,13 +15,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: oracle-keeper
+  name: propose-centralized-oracle-keeper
   labels:
-    app: oracle-keeper
-    service: oracle-keeper
+    app: propose-centralized-oracle-keeper
+    service: propose-centralized-oracle-keeper
 spec:
   selector:
-    app: oracle-keeper
+    app: propose-centralized-oracle-keeper
   ports:
     - name: http
       port: 9000
