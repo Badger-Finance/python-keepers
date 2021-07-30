@@ -160,7 +160,8 @@ class Oracle:
         Returns:
             Decimal: USD cost of gas to perform transaction
         """
-        tx = self.web3.eth.get_transaction(tx_hash)
+        self.logger.info(f"tx_hash {tx_hash} is type {type(tx_hash)}")
+        tx = self.web3.eth.get_transaction(str(tx_hash))
 
         total_gas_used = Decimal(tx.get("gas", 0))
         gas_price_eth = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
