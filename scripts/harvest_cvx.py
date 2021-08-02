@@ -5,7 +5,7 @@ from time import sleep
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from crv_harvester import CrvHarvester
+from cvx_harvester import CvxHarvester
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     while True:
 
-        harvester = CrvHarvester()
+        harvester = CvxHarvester()
 
         logger.info("+-----Harvesting CVX Helper-----+")
         safe_harvest(harvester, "CVX Helper", CVX_HELPER_STRATEGY)

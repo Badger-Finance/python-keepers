@@ -30,7 +30,7 @@ CVX_ADDRESS = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
 
 FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 
-class CRVHarvester(IHarvester):
+class CvxHarvester(IHarvester):
     def __init__(
         self,
         keeper_address=os.getenv("KEEPER_ADDRESS"),
@@ -66,7 +66,7 @@ class CRVHarvester(IHarvester):
         sett_name: str,
         strategy_address: str,
     ):
-        """Orchestration function that harvests outstanding CRV awards.
+        """Orchestration function that harvests outstanding CVX awards.
 
         Args:
             sett_name (str)
@@ -153,8 +153,8 @@ class CRVHarvester(IHarvester):
         """Checks if harvesting is profitable based on amount of awards and cost to harvest.
 
         Args:
-            amount (Decimal): Integer amount of CRV available for harvest
-            price_per (Decimal): Price per CRV in ETH
+            amount (Decimal): Integer amount of CVX available for harvest
+            price_per (Decimal): Price per CVX in ETH
             gas_fee (Decimal): gas fee in wei
 
         Returns:
@@ -195,7 +195,7 @@ class CRVHarvester(IHarvester):
             strategy (contract, optional): Defaults to None.
             sett_name (str, optional): Defaults to None.
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
-            harvested (Decimal, optional): Amount of CRV harvested. Defaults to None.
+            harvested (Decimal, optional): Amount of CVX harvested. Defaults to None.
         """
         error = None
         try:
@@ -213,7 +213,7 @@ class CRVHarvester(IHarvester):
             error = e
             send_error_to_discord(sett_name, "Harvest", error=error)
 
-    def __send_harvest_tx(self, contract: contract, flashbots=False, overrides: dict) -> HexBytes:
+    def __send_harvest_tx(self, contract: contract, overrides: dict, use_flashbots=False) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -233,7 +233,7 @@ class CRVHarvester(IHarvester):
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gas": 12000000,
+                    "gas": 12000000, # TODO: Why is this hardcoded?
                     "from": self.keeper_address,
                 }
             )
@@ -243,7 +243,7 @@ class CRVHarvester(IHarvester):
             tx_hash = signed_tx.hash
             target_block = None
 
-            if not flashbots:
+            if not use_flashbots:
                 self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
             else:
                 bundle = [
