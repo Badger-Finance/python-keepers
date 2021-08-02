@@ -232,7 +232,7 @@ def get_secret(
     return None
 
 
-def confirm_transaction(web3: Web3, tx_hash: HexBytes) -> bool:
+def confirm_transaction(web3: Web3, tx_hash: HexBytes, target_block: int=None) -> bool:
     """Waits for transaction to appear in block for 60 seconds and then times out.
 
     Args:
@@ -241,17 +241,24 @@ def confirm_transaction(web3: Web3, tx_hash: HexBytes) -> bool:
     Returns:
         bool: True if transaction was confirmed in 60 seconds, False otherwise.
     """
-    try:
-        logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
-        web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-    except exceptions.TimeExhausted:
-        logger.error(
-            f"Transaction {tx_hash.hex()} timed out, not included in block yet."
-        )
-        return False
-    except Exception as e:
-        logger.error(f"Error waiting for {tx_hash.hex()}. Error: {e}.")
-        return False
+    logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
+
+    while True:
+        try:
+            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
+            break
+        except exceptions.TimeExhausted:
+            if target_block is None:
+                logger.error(
+                    f"Transaction {tx_hash.hex()} timed out, not included in block yet."
+                )
+                return False
+            elif web3.eth.block_number > target_block:
+                logger.error(f"Transaction was not included in the block.")
+                return False
+        except Exception as e:
+            logger.error(f"Error waiting for {tx_hash.hex()}. Error: {e}.")
+            return False
 
     logger.info(f"Transaction {tx_hash.hex()} succeeded!")
     return True

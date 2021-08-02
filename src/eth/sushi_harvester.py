@@ -12,7 +12,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_error_to_discord, send_success_to_discord
+from utils import confirm_transaction, send_error_to_discord, send_success_to_discord
 
 load_dotenv()
 
@@ -207,7 +207,7 @@ class SushiHarvester(IHarvester):
         error = None
         try:
             tx_hash = self.__send_harvest_tx(strategy, overrides)
-            succeeded = self.confirm_transaction(tx_hash)
+            succeeded = confirm_transaction(tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
@@ -253,24 +253,6 @@ class SushiHarvester(IHarvester):
             raise Exception
         finally:
             return tx_hash
-
-    def confirm_transaction(self, tx_hash: HexBytes) -> bool:
-        """Waits for transaction to appear in block for 60 seconds and then times out.
-
-        Args:
-            tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
-
-        Returns:
-            bool: True if transaction was confirmed in 60 seconds, False otherwise.
-        """
-        try:
-            self.web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-        except exceptions.TimeExhausted:
-            self.logger.error(f"Transaction timed out, not included in block yet.")
-            return False
-
-        self.logger.info(f"Transaction succeeded!")
-        return True
 
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
         current_gas_price = self.__get_gas_price()

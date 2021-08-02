@@ -19,7 +19,7 @@ from flashbots import flashbot
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import get_coingecko_price, send_error_to_discord, send_success_to_discord
+from utils import confirm_transaction, get_coingecko_price, send_error_to_discord, send_success_to_discord
 
 load_dotenv()
 
@@ -197,10 +197,10 @@ class CvxHarvester(IHarvester):
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
             harvested (Decimal, optional): Amount of CVX harvested. Defaults to None.
         """
-        error = None
+        tx_hash = HexBytes(0)
         try:
             tx_hash, target_block = self.__send_harvest_tx(strategy, overrides)
-            succeeded = self.confirm_transaction(self.web3, tx_hash)
+            succeeded = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
@@ -210,8 +210,9 @@ class CvxHarvester(IHarvester):
                 send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
+            tx_hash = "invalid" if tx_hash == HexBytes(0) else tx_hash
             error = e
-            send_error_to_discord(sett_name, "Harvest", error=error)
+            send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash, error=error)
 
     def __send_harvest_tx(self, contract: contract, overrides: dict, use_flashbots=False) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
@@ -233,7 +234,6 @@ class CvxHarvester(IHarvester):
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
-                    "gas": 12000000, # TODO: Why is this hardcoded?
                     "from": self.keeper_address,
                 }
             )
@@ -268,34 +268,6 @@ class CvxHarvester(IHarvester):
             raise Exception
         finally:
             return tx_hash, target_block
-
-    def confirm_transaction(self, tx_hash: HexBytes, target_block: int=None) -> bool:
-        """Waits for transaction to appear in block for 60 seconds and then times out.
-
-        Args:
-            tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
-            target_block (int): Target block number to wait for transaction to appear in.
-
-        Returns:
-            bool: True if transaction was confirmed in 60 seconds, False otherwise.
-        """
-        # wait for the transaction to get mined
-        while True:
-            try:
-                self.web3.eth.wait_for_transaction_receipt(
-                    tx_hash, timeout=60
-                )
-                break
-            except exceptions.TimeExhausted:
-                if target_block is None:
-                    self.logger.error(f"Transaction timed out, not included in block yet.")
-                    return False
-                elif self.web3.eth.block_number > target_block:
-                    self.logger.error(f"Transaction was not included in the block.")
-                    return False
-
-        self.logger.info(f"Transaction succeeded!")
-        return True
 
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
         current_gas_price = self.__get_gas_price()
