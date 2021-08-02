@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from web3 import Web3, exceptions
+import requests
 
 logger = logging.getLogger()
 
@@ -278,3 +279,34 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
         explorer_name = "Bscscan"
         explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
     return (explorer_name, explorer_url)
+
+
+def get_coingecko_price(token_address: str, base="usd") -> float:
+    """Fetches the price of token in USD/ETH from CoinGecko API.
+
+    Args:
+        token_address (str): Contract address of the ERC-20 token to get price for.
+
+    Returns:
+        float: Price of token in base currency.
+    """
+    endpoint = "https://api.coingecko.com/api/v3/"
+    try:
+        params = "/simple/supported_vs_currencies"
+        r = requests.get(endpoint + params)
+
+        supported_bases = r.json()
+        if base not in supported_bases:
+            raise ValueError("Unsupported base currency")
+
+        params = (
+            "simple/token_price/ethereum?contract_addresses="
+            + token_address
+            + "&vs_currencies=eth%2Cusd&include_last_updated_at=true"
+        )
+        r = requests.get(endpoint + params)
+        data = r.json()
+        return data[token_address][base]
+
+    except (KeyError, requests.HTTPError):
+        raise ValueError("Price could not be fetched")
