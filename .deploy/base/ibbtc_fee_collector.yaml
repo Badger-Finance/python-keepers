@@ -16,7 +16,7 @@ spec:
           - name: ibbtc-fee-collector-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/harvest_cake.py"]
+            command: ["python", "scripts/ibbtc_fees.py"]
             env:
               - name: LOG_LEVEL
                 value: 'info'
