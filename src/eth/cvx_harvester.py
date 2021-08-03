@@ -90,19 +90,22 @@ class CvxHarvester(IHarvester):
         if not self.__is_keeper_whitelisted(strategy):
             raise ValueError(f"Keeper is not whitelisted for {sett_name}")
 
-        harvestable_amount = self.get_harvestable_rewards_amount(
-            strategy_address=strategy_address
-        )
-        self.logger.info(f"harvestable amount: {harvestable_amount}")
+        # TODO: Harvest call requires some ERC20 token approvals to prevent reverts
+        #       Add those call()s to get_harvestable_rewards_amount
+        # harvestable_amount = self.get_harvestable_rewards_amount(
+        #     strategy_address=strategy_address
+        # )
+        # self.logger.info(f"harvestable amount: {harvestable_amount}")
 
-        current_price_eth = self.get_current_rewards_price()
-        self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
+        # current_price_eth = self.get_current_rewards_price()
+        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
-        gas_fee = self.estimate_gas_fee(strategy)
+        # gas_fee = self.estimate_gas_fee(strategy)
 
-        should_harvest = self.is_profitable(
-            harvestable_amount, current_price_eth, gas_fee
-        )
+        # should_harvest = self.is_profitable(
+        #     harvestable_amount, current_price_eth, gas_fee
+        # )
+        should_harvest = True
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
@@ -206,7 +209,7 @@ class CvxHarvester(IHarvester):
         tx_hash = HexBytes(0)
         try:
             tx_hash, target_block = self.__send_harvest_tx(strategy, overrides)
-            succeeded = confirm_transaction(self.web3, tx_hash)
+            succeeded = confirm_transaction(self.web3, tx_hash, target_block)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
