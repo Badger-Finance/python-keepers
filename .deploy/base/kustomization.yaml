@@ -5,5 +5,7 @@ resources:
   - ibbtc_fee_collector.yaml
   - propose_centralized_oracle.yaml
   - rebase.yaml
+  - propose_centralized_oracle.yaml
+  - cake_harvester.yaml
   - service.yaml
   - service_account.yaml
