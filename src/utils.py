@@ -58,6 +58,7 @@ def send_success_to_discord(
     status = "Completed" if gas_cost else "Pending"
 
     (explorer_name, explorer_url) = get_explorer(chain, tx_hash)
+    logger.info(f"got explorer info: {explorer_name}, {explorer_url}")
 
     # init embed object
     if tx_type in ["Harvest", "Tend"]:
@@ -70,6 +71,7 @@ def send_success_to_discord(
             title=f"**Badger {tx_type} Report**",
             description=f"{status} {tx_type}",
         )
+    logger.info("init embed")
 
     fields = []
     # append link to tx scan website
@@ -97,11 +99,13 @@ def send_success_to_discord(
                 "inline": True,
             }
         )
+    logger.info("appended fields")
 
     for field in fields:
         embed.add_field(
             name=field.get("name"), value=field.get("value"), inline=field.get("inline")
         )
+    logger.info("added fields")
 
     if tx_type in ["Harvest", "Tend"]:
         webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
@@ -270,9 +274,8 @@ def get_hash_from_failed_tx_error(
 def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     if chain == "ETH":
         explorer_name = "Etherscan"
-        explorer_url = f"https://etherscan.io/tx/${tx_hash.hex()}"
+        explorer_url = f"https://etherscan.io/tx/{tx_hash.hex()}"
     elif chain == "BSC":
         explorer_name = "Bscscan"
-        explorer_url = f"https://bscscan.io/tx/${tx_hash.hex()}"
-
+        explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
     return (explorer_name, explorer_url)
