@@ -40,3 +40,17 @@ spec:
     - name: http
       port: 9000
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibbtc-fee-collector-keeper
+  labels:
+    app: ibbtc-fee-collector-keeper
+    service: ibbtc-fee-collector-keeper
+spec:
+  selector:
+    app: ibbtc-fee-collector-keeper
+  ports:
+    - name: http
+      port: 9000
+---
