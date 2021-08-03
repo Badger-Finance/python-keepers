@@ -28,7 +28,8 @@ def send_error_to_discord(
     sett_name: str, type: str, tx_hash: HexBytes = None, error: Exception = None
 ):
     webhook = Webhook.from_url(
-        os.getenv("DISCORD_WEBHOOK_URL"), adapter=RequestsWebhookAdapter()
+        get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
+        adapter=RequestsWebhookAdapter(),
     )
 
     embed = Embed(
@@ -52,13 +53,13 @@ def send_success_to_discord(
     chain: str = "ETH",
 ):
     webhook = Webhook.from_url(
-        os.getenv("DISCORD_WEBHOOK_URL"), adapter=RequestsWebhookAdapter()
+        get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
+        adapter=RequestsWebhookAdapter(),
     )
 
     status = "Completed" if gas_cost else "Pending"
 
     (explorer_name, explorer_url) = get_explorer(chain, tx_hash)
-    logger.info(f"got explorer info: {explorer_name}, {explorer_url}")
 
     # init embed object
     if tx_type in ["Harvest", "Tend"]:
@@ -71,7 +72,6 @@ def send_success_to_discord(
             title=f"**Badger {tx_type} Report**",
             description=f"{status} {tx_type}",
         )
-    logger.info("init embed")
 
     fields = []
     # append link to tx scan website
@@ -99,13 +99,11 @@ def send_success_to_discord(
                 "inline": True,
             }
         )
-    logger.info("appended fields")
 
     for field in fields:
         embed.add_field(
             name=field.get("name"), value=field.get("value"), inline=field.get("inline")
         )
-    logger.info("added fields")
 
     if tx_type in ["Harvest", "Tend"]:
         webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
