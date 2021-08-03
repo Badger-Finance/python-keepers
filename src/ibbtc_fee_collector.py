@@ -16,9 +16,7 @@ from utils import (
     confirm_transaction,
     get_hash_from_failed_tx_error,
     send_success_to_discord,
-    send_error_to_discord,
-    send_rebase_to_discord,
-    send_rebase_error_to_discord,
+    send_oracle_error_to_discord,
 )
 from web3 import Web3, contract, exceptions
 
@@ -105,12 +103,12 @@ class ibBTCFeeCollector:
             succeeded = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
-                send_rebase_to_discord(tx_hash=tx_hash, gas_cost=gas_price_of_tx)
+                send_success_to_discord(tx_hash=tx_hash, tx_type="ibBTC Fee Collection", gas_cost=gas_price_of_tx)
             elif tx_hash != HexBytes(0):
-                send_rebase_to_discord(tx_hash=tx_hash)
+                send_success_to_discord(tx_hash=tx_hash, tx_type="ibBTC Fee Collection")
         except Exception as e:
             self.logger.error(f"Error processing collection tx: {e}")
-            send_rebase_error_to_discord(error=e)
+            send_oracle_error_to_discord(tx_type="ibBTC Fee Collection", error=e)
 
     def __send_collection_tx(self) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
