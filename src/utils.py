@@ -82,14 +82,15 @@ def send_success_to_discord(
             "inline": False,
         }
     )
-    # append gas cost
-    fields.append(
-        {
-            "name": "Gas Cost",
-            "value": f"${round(gas_cost, 2)}",
-            "inline": True,
-        }
-    )
+    # append gas cost if tx finished
+    if status == "Completed":
+        fields.append(
+            {
+                "name": "Gas Cost",
+                "value": f"${round(gas_cost, 2)}",
+                "inline": True,
+            }
+        )
     # add amount harvested / tended
     if tx_type in ["Harvest", "Tend"]:
         fields.append(
