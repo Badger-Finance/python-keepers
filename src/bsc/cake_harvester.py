@@ -11,7 +11,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_error_to_discord, send_success_to_discord
+from utils import send_error_to_discord, send_success_to_discord, confirm_transaction
 
 load_dotenv()
 
@@ -33,7 +33,7 @@ class CakeHarvester(IHarvester):
         web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
     ):
         self.logger = logging.getLogger()
-        self.web3 = web3
+        self.web3 = Web3(Web3.HTTPProvider(web3))
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
         self.bnb_usd_oracle = self.web3.eth.contract(
@@ -184,24 +184,22 @@ class CakeHarvester(IHarvester):
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
             harvested (Decimal, optional): Amount of Cake harvested. Defaults to None.
         """
-        error = None
+        tx_hash = HexBytes(0)
         try:
             tx_hash = self.__send_harvest_tx(strategy, overrides)
-            succeeded = self.confirm_transaction(tx_hash)
-        except Exception as e:
-            self.logger.error(f"Error processing harvest tx: {e}")
-            tx_hash = "invalid" if tx_hash == HexBytes(0) else tx_hash
-            succeeded = False
-            error = e
-        finally:
-            succeeded = self.confirm_transaction(tx_hash)
+            succeeded = confirm_transaction(tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
-                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
+                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest", "BSC"
                 )
             elif tx_hash:
                 send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
+        except Exception as e:
+            self.logger.error(f"Error processing harvest tx: {e}")
+            tx_hash = "invalid" if tx_hash == HexBytes(0) else tx_hash
+            error = e
+            send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash, error=error)
 
     def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to BSC node for confirmation.
@@ -222,7 +220,6 @@ class CakeHarvester(IHarvester):
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self._CakeHarvester__get_gas_price(),
-                    "gas": 12000000,
                     "from": self.keeper_address,
                 }
             )
@@ -236,24 +233,6 @@ class CakeHarvester(IHarvester):
             raise Exception
         finally:
             return tx_hash
-
-    def confirm_transaction(self, tx_hash: HexBytes) -> bool:
-        """Waits for transaction to appear in block for 60 seconds and then times out.
-
-        Args:
-            tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
-
-        Returns:
-            bool: True if transaction was confirmed in 60 seconds, False otherwise.
-        """
-        try:
-            self.web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-        except exceptions.TimeExhausted:
-            self.logger.error(f"Transaction timed out, not included in block yet.")
-            return False
-
-        self.logger.info(f"Transaction succeeded!")
-        return True
 
     def __get_gas_price(self):
         return int(self.web3.eth.gas_price * GAS_MULTIPLIER)

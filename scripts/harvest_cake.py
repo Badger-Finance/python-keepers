@@ -1,13 +1,13 @@
 import logging
 import os
 import sys
-from time import sleep
 
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/bsc"))
 )
 
 from cake_harvester import CakeHarvester
+from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,17 +27,19 @@ if __name__ == "__main__":
 
     logger = logging.getLogger()
 
-    while True:
+    keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
+    keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
+    node_url = get_secret("quiknode/bsc-node-url", "BSC_NODE_URL")
 
-        harvester = CakeHarvester()
+    harvester = CakeHarvester(
+        keeper_address=keeper_address, keeper_key=keeper_key, web3=node_url
+    )
 
-        logger.info("+-----Harvesting BBADGER BTCB LP-----+")
-        safe_harvest(harvester, "BBADGER BTCB LP", BBADGER_BTCB_STRATEGY)
+    logger.info("+-----Harvesting BBADGER BTCB LP-----+")
+    safe_harvest(harvester, "BBADGER BTCB LP", BBADGER_BTCB_STRATEGY)
 
-        logger.info("+-----Harvesting BDIGG BTCB LP-----+")
-        safe_harvest(harvester, "BDIGG BTCB LP", BDIGG_BTCB_STRATEGY)
+    # logger.info("+-----Harvesting BDIGG BTCB LP-----+")
+    # safe_harvest(harvester, "BDIGG BTCB LP", BDIGG_BTCB_STRATEGY)
 
-        logger.info("+-----Harvesting BNB BTCB LP-----+")
-        safe_harvest(harvester, "BNB BTCB LP", BNB_BTCB_STRATEGY)
-
-        sleep(30 * 60)
+    logger.info("+-----Harvesting BNB BTCB LP-----+")
+    safe_harvest(harvester, "BNB BTCB LP", BNB_BTCB_STRATEGY)

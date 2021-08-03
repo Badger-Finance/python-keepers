@@ -1,0 +1,23 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cake-harvester-keeper
+  labels:
+    app: cake-harvester-keeper
+spec:
+  # cron to run every 30 min every day "*/30 * * * *"
+  schedule: "*/30 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cake-harvester-keeper
+          containers:
+          - name: cake-harvester-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/harvest_cake.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure
