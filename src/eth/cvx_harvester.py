@@ -1,6 +1,6 @@
-'''
+"""
 Why not use brownie?
-'''
+"""
 
 from decimal import Decimal
 from dotenv import load_dotenv
@@ -19,7 +19,12 @@ from flashbots import flashbot
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import confirm_transaction, get_coingecko_price, send_error_to_discord, send_success_to_discord
+from utils import (
+    confirm_transaction,
+    get_coingecko_price,
+    send_error_to_discord,
+    send_success_to_discord,
+)
 
 load_dotenv()
 
@@ -28,7 +33,8 @@ logging.basicConfig(level=logging.INFO)
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 CVX_ADDRESS = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
 
-FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
+FEE_THRESHOLD = 1  # ratio of gas cost to harvest amount we're ok with
+
 
 class CvxHarvester(IHarvester):
     def __init__(
@@ -53,9 +59,10 @@ class CvxHarvester(IHarvester):
 
         # TODO: Maybe move outside class
         # Account which signifies your identify to flashbots network
-        FLASHBOTS_SIGNER: LocalAccount = Account.from_key(os.getenv("FLASHBOTS_SIGNER_KEY"))
+        FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
+            os.getenv("FLASHBOTS_SIGNER_KEY")
+        )
         flashbot(web3, FLASHBOTS_SIGNER)
-
 
     def __get_abi(self, contract_id: str):
         with open(f"./abi/eth/{contract_id}.json") as f:
@@ -77,7 +84,7 @@ class CvxHarvester(IHarvester):
         """
         strategy = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(strategy_address),
-            abi=self.__get_abi("strategy"),
+            abi=self.__get_abi("cvx_helper_strategy"),
         )
 
         if not self.__is_keeper_whitelisted(strategy):
@@ -128,11 +135,11 @@ class CvxHarvester(IHarvester):
         """
         strategy = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(strategy_address),
-            abi=self.__get_abi("strategy"),
+            abi=self.__get_abi("cvx_helper_strategy"),
         )
-        
+
         harvestable_amt = (
-            strategy.functions.harvest().call()
+            strategy.functions.harvest().call({"from": self.keeper_address})
             / 10 ** self.cvx_decimals
         )
         return Decimal(harvestable_amt)
@@ -144,8 +151,7 @@ class CvxHarvester(IHarvester):
             Decimal: Price per CVX denominated in ETH
         """
         # TODO: Find a reliable oracle or off-chain API to get current price
-        return get_coingecko_price(CVX_ADDRESS, base="eth")
-
+        return Decimal(get_coingecko_price(CVX_ADDRESS, base="eth"))
 
     def is_profitable(
         self, amount: Decimal, price_per: Decimal, gas_fee: Decimal
@@ -214,7 +220,9 @@ class CvxHarvester(IHarvester):
             error = e
             send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash, error=error)
 
-    def __send_harvest_tx(self, contract: contract, overrides: dict, use_flashbots=False) -> HexBytes:
+    def __send_harvest_tx(
+        self, contract: contract, overrides: dict, use_flashbots=False
+    ) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -254,7 +262,9 @@ class CvxHarvester(IHarvester):
                 block_offset = 1
                 target_block = block_number + block_offset
 
-                self.web3.flashbots.send_bundle(bundle, target_block_number=target_block)
+                self.web3.flashbots.send_bundle(
+                    bundle, target_block_number=target_block
+                )
                 self.logger(f"Bundle broadcasted at {target_block}")
 
                 # num_bundles = 1
@@ -292,4 +302,3 @@ class CvxHarvester(IHarvester):
         )
 
         return total_gas_used * gas_price_eth * eth_usd
-

@@ -313,7 +313,7 @@ def get_coingecko_price(token_address: str, base="usd") -> float:
         )
         r = requests.get(endpoint + params)
         data = r.json()
-        return data[token_address][base]
+        return data[token_address.lower()][base]
 
     except (KeyError, requests.HTTPError):
         raise ValueError("Price could not be fetched")
