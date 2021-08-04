@@ -54,3 +54,17 @@ spec:
     - name: http
       port: 9000
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flashbots-harvester-keeper
+  labels:
+    app: flashbots-harvester-keeper
+    service: flashbots-harvester-keeper
+spec:
+  selector:
+    app: flashbots-harvester-keeper
+  ports:
+    - name: http
+      port: 9000
+---
