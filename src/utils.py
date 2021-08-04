@@ -28,7 +28,8 @@ def send_error_to_discord(
     sett_name: str, type: str, tx_hash: HexBytes = None, error: Exception = None
 ):
     webhook = Webhook.from_url(
-        os.getenv("DISCORD_WEBHOOK_URL"), adapter=RequestsWebhookAdapter()
+        get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
+        adapter=RequestsWebhookAdapter(),
     )
 
     embed = Embed(
@@ -52,7 +53,8 @@ def send_success_to_discord(
     chain: str = "ETH",
 ):
     webhook = Webhook.from_url(
-        os.getenv("DISCORD_WEBHOOK_URL"), adapter=RequestsWebhookAdapter()
+        get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
+        adapter=RequestsWebhookAdapter(),
     )
 
     status = "Completed" if gas_cost else "Pending"
@@ -80,14 +82,15 @@ def send_success_to_discord(
             "inline": False,
         }
     )
-    # append gas cost
-    fields.append(
-        {
-            "name": "Gas Cost",
-            "value": f"${round(gas_cost, 2)}",
-            "inline": True,
-        }
-    )
+    # append gas cost if tx finished
+    if status == "Completed":
+        fields.append(
+            {
+                "name": "Gas Cost",
+                "value": f"${round(gas_cost, 2)}",
+                "inline": True,
+            }
+        )
     # add amount harvested / tended
     if tx_type in ["Harvest", "Tend"]:
         fields.append(
@@ -270,9 +273,8 @@ def get_hash_from_failed_tx_error(
 def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     if chain == "ETH":
         explorer_name = "Etherscan"
-        explorer_url = f"https://etherscan.io/tx/${tx_hash.hex()}"
+        explorer_url = f"https://etherscan.io/tx/{tx_hash.hex()}"
     elif chain == "BSC":
         explorer_name = "Bscscan"
-        explorer_url = f"https://bscscan.io/tx/${tx_hash.hex()}"
-
+        explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
     return (explorer_name, explorer_url)

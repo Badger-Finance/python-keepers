@@ -80,6 +80,7 @@ class Oracle:
             succeeded = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self._get_gas_price_of_tx(tx_hash)
+                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Centralized Oracle {function}",
                     tx_hash=tx_hash,
