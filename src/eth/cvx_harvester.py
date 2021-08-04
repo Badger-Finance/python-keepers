@@ -114,7 +114,6 @@ class CvxHarvester(IHarvester):
         should_harvest = self.is_profitable(
             harvestable_amount, current_price_eth, gas_fee
         )
-        should_harvest = True
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:

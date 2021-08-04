@@ -232,7 +232,9 @@ def get_secret(
     return None
 
 
-def confirm_transaction(web3: Web3, tx_hash: HexBytes, target_block: int=None) -> bool:
+def confirm_transaction(
+    web3: Web3, tx_hash: HexBytes, target_block: int = None
+) -> bool:
     """Waits for transaction to appear in block for 60 seconds and then times out.
 
     Args:
