@@ -39,12 +39,12 @@ FEE_THRESHOLD = 1  # ratio of gas cost to harvest amount we're ok with
 class CvxHarvester(IHarvester):
     def __init__(
         self,
-        keeper_address=os.getenv("KEEPER_ADDRESS"),
-        keeper_key=os.getenv("KEEPER_KEY"),
-        web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
+        keeper_address,
+        keeper_key,
+        node_url,
     ):
         self.logger = logging.getLogger()
-        self.web3 = Web3(Web3.HTTPProvider(web3))
+        self.web3 = Web3(Web3.HTTPProvider(node_url))
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
@@ -62,7 +62,7 @@ class CvxHarvester(IHarvester):
         FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
             os.getenv("FLASHBOTS_SIGNER_KEY")
         )
-        flashbot(web3, FLASHBOTS_SIGNER)
+        flashbot(self.web3, FLASHBOTS_SIGNER)
 
     def __get_abi(self, contract_id: str):
         with open(f"./abi/eth/{contract_id}.json") as f:
@@ -90,21 +90,21 @@ class CvxHarvester(IHarvester):
         if not self.__is_keeper_whitelisted(strategy):
             raise ValueError(f"Keeper is not whitelisted for {sett_name}")
 
-        # TODO: Harvest call requires some ERC20 token approvals to prevent reverts
-        #       Add those call()s to get_harvestable_rewards_amount
-        # harvestable_amount = self.get_harvestable_rewards_amount(
-        #     strategy_address=strategy_address
-        # )
-        # self.logger.info(f"harvestable amount: {harvestable_amount}")
+        # TODO: Harvest call might require some ERC20 token approvals to prevent reverts
+        #       Maybe use mainnet fork and add those call()s to get_harvestable_rewards_amount
+        harvestable_amount = self.get_harvestable_rewards_amount(
+            strategy_address=strategy_address
+        )
+        self.logger.info(f"harvestable amount: {harvestable_amount}")
 
-        # current_price_eth = self.get_current_rewards_price()
-        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
+        current_price_eth = self.get_current_rewards_price()
+        self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
-        # gas_fee = self.estimate_gas_fee(strategy)
+        gas_fee = self.estimate_gas_fee(strategy)
 
-        # should_harvest = self.is_profitable(
-        #     harvestable_amount, current_price_eth, gas_fee
-        # )
+        should_harvest = self.is_profitable(
+            harvestable_amount, current_price_eth, gas_fee
+        )
         should_harvest = True
         self.logger.info(f"Should we harvest: {should_harvest}")
 

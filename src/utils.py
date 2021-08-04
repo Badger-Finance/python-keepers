@@ -285,6 +285,7 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     elif chain == "BSC":
         explorer_name = "Bscscan"
         explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
+
     return (explorer_name, explorer_url)
 
 

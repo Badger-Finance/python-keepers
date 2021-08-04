@@ -30,7 +30,7 @@ if __name__ == "__main__":
     node_url = get_secret("quiknode/eth-node-url", "ETH_NODE_URL")
 
     harvester = CvxHarvester(
-        keeper_address=keeper_address, keeper_key=keeper_key, web3=node_url
+        keeper_address=keeper_address, keeper_key=keeper_key, node_url=node_url
     )
 
     logger.info("+-----Harvesting CVX Helper-----+")
