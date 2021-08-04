@@ -67,9 +67,10 @@ class CvxHarvester(IHarvester):
         if use_flashbots:
             # TODO: Maybe move outside class
             # Account which signifies your identify to flashbots network
-            FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
-                get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
-            )
+            FLASHBOTS_SIGNER: LocalAccount = Account.create()
+            # FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
+            #     get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
+            # )
             flashbot(self.web3, FLASHBOTS_SIGNER)
 
     def __get_abi(self, contract_id: str):
