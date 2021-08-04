@@ -127,7 +127,6 @@ class CvxHarvester(IHarvester):
                 sett_name=sett_name,
                 overrides={
                     "from": self.keeper_address,
-                    "gas_limit": 12000000,
                     "allow_revert": True,
                 },
                 harvested=harvestable_amount * current_price_eth * eth_usd_price,
