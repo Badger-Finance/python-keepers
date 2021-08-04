@@ -44,7 +44,7 @@ class CvxHarvester(IHarvester):
         web3=Web3(Web3.HTTPProvider(os.getenv("ETH_NODE_URL"))),
     ):
         self.logger = logging.getLogger()
-        self.web3 = web3
+        self.web3 = Web3(Web3.HTTPProvider(web3))
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(

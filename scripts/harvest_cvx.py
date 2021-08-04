@@ -1,11 +1,13 @@
 import logging
 import os
 import sys
-from time import sleep
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
+)
 
 from cvx_harvester import CvxHarvester
+from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,12 +25,13 @@ if __name__ == "__main__":
 
     logger = logging.getLogger()
 
-    while True:
+    keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
+    keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
+    node_url = get_secret("quiknode/eth-node-url", "ETH_NODE_URL")
 
-        harvester = CvxHarvester()
+    harvester = CvxHarvester(
+        keeper_address=keeper_address, keeper_key=keeper_key, web3=node_url
+    )
 
-        logger.info("+-----Harvesting CVX Helper-----+")
-        safe_harvest(harvester, "CVX Helper", CVX_HELPER_STRATEGY)
-
-        sleep(30 * 60)
-
+    logger.info("+-----Harvesting CVX Helper-----+")
+    safe_harvest(harvester, "CVX Helper", CVX_HELPER_STRATEGY)
