@@ -35,6 +35,8 @@ def harvester() -> CvxHarvester:
         keeper_address=test_address,
         keeper_key=test_key,
         node_url="http://127.0.0.1:8545",
+        use_flashbots=False,
+        send_to_discord=False,
     )
 
 

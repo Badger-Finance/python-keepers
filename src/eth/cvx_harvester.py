@@ -37,16 +37,22 @@ FEE_THRESHOLD = 1  # ratio of gas cost to harvest amount we're ok with
 
 
 class CvxHarvester(IHarvester):
+    # TODO: Remove send_to_discord. Instead send_message shouldn't raise exception
     def __init__(
         self,
         keeper_address,
         keeper_key,
         node_url,
+        use_flashbots=True,
+        send_to_discord=True,
     ):
         self.logger = logging.getLogger()
         self.web3 = Web3(Web3.HTTPProvider(node_url))
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
+        self.use_flashbots = use_flashbots
+        self.send_to_discord = send_to_discord
+
         self.eth_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
@@ -212,20 +218,23 @@ class CvxHarvester(IHarvester):
             succeeded = confirm_transaction(self.web3, tx_hash, target_block)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
-                send_success_to_discord(
-                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
-                )
+                if self.send_to_discord:
+                    send_success_to_discord(
+                        tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
+                    )
             elif tx_hash:
-                send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
+                if self.send_to_discord:
+                    send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
             tx_hash = "invalid" if tx_hash == HexBytes(0) else tx_hash
             error = e
-            send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash, error=error)
+            if self.send_to_discord:
+                send_error_to_discord(
+                    sett_name, "Harvest", tx_hash=tx_hash, error=error
+                )
 
-    def __send_harvest_tx(
-        self, contract: contract, overrides: dict, use_flashbots=False
-    ) -> HexBytes:
+    def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -254,7 +263,7 @@ class CvxHarvester(IHarvester):
             tx_hash = signed_tx.hash
             target_block = None
 
-            if not use_flashbots:
+            if not self.use_flashbots:
                 self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
             else:
                 bundle = [
