@@ -22,6 +22,7 @@ from harvester import IHarvester
 from utils import (
     confirm_transaction,
     get_coingecko_price,
+    get_secret,
     send_error_to_discord,
     send_success_to_discord,
 )
@@ -63,12 +64,13 @@ class CvxHarvester(IHarvester):
         )
         self.cvx_decimals = self.cvx.functions.decimals().call()
 
-        # TODO: Maybe move outside class
-        # Account which signifies your identify to flashbots network
-        FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
-            os.getenv("FLASHBOTS_SIGNER_KEY")
-        )
-        flashbot(self.web3, FLASHBOTS_SIGNER)
+        if use_flashbots:
+            # TODO: Maybe move outside class
+            # Account which signifies your identify to flashbots network
+            FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
+                get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
+            )
+            flashbot(self.web3, FLASHBOTS_SIGNER)
 
     def __get_abi(self, contract_id: str):
         with open(f"./abi/eth/{contract_id}.json") as f:
