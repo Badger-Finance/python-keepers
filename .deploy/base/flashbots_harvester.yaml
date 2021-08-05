@@ -6,7 +6,7 @@ metadata:
     app: flashbots-harvester-keeper
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "45 16 * * *"
+  schedule: "20 17 * * *"
   jobTemplate:
     spec:
       template:
