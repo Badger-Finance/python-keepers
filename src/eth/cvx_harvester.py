@@ -291,7 +291,7 @@ class CvxHarvester(IHarvester):
                 self.web3.flashbots.send_bundle(
                     bundle, target_block_number=target_block
                 )
-                self.logger(f"Bundle broadcasted at {target_block}")
+                self.logger.info(f"Bundle broadcasted at {target_block}")
 
                 # num_bundles = 1
                 # for i in range(1, num_bundles + 1):
