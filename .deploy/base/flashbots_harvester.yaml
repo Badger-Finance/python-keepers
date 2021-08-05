@@ -6,18 +6,18 @@ metadata:
     app: flashbots-harvester-keeper
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "22 18 * * *"
+  schedule: "10 20 * * *"
   jobTemplate:
     spec:
       template:
         spec:
           serviceAccountName: flashbots-harvester-keeper
           containers:
-          - name: flashbots-harvester-keeper
-            image: IMAGE_NAME
-            imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/harvest_cvx.py"]
-            env:
-              - name: LOG_LEVEL
-                value: 'info'
+            - name: flashbots-harvester-keeper
+              image: IMAGE_NAME
+              imagePullPolicy: IfNotPresent
+              command: ["python", "scripts/harvest_cvx.py"]
+              env:
+                - name: LOG_LEVEL
+                  value: "info"
           restartPolicy: OnFailure

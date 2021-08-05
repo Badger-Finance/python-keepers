@@ -65,7 +65,7 @@ class CvxHarvester(IHarvester):
         self.cvx_decimals = self.cvx.functions.decimals().call()
 
         if self.use_flashbots:
-            # TODO: Maybe move outside class
+            # TODO: import from AWS, maybe move outside class,
             # Account which signifies your identify to flashbots network
             FLASHBOTS_SIGNER: LocalAccount = Account.create()
             # FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
@@ -295,7 +295,7 @@ class CvxHarvester(IHarvester):
                 # self.web3.flashbots.send_bundle(
                 #     bundle, target_block_number=max_target_block
                 # )
-                num_bundles = 3
+                num_bundles = 10
                 for i in range(1, num_bundles + 1):
                     self.web3.flashbots.send_bundle(
                         bundle, target_block_number=block_number + i
@@ -322,7 +322,7 @@ class CvxHarvester(IHarvester):
         response = requests.get(
             "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
         )
-        return int(response.json().get("data").get("rapid") * 1.1)
+        return int(response.json().get("data").get("rapid") * 1.5)
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
         tx = self.web3.eth.get_transaction(tx_hash)
