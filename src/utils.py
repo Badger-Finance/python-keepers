@@ -26,7 +26,11 @@ def hours(num_hours: int) -> int:
 
 
 def send_error_to_discord(
-    sett_name: str, tx_type: str, tx_hash: HexBytes = None, error: Exception = None
+    sett_name: str,
+    tx_type: str,
+    tx_hash: HexBytes = None,
+    error: Exception = None,
+    message="Transaction timed out.",
 ):
     webhook = Webhook.from_url(
         get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
@@ -37,7 +41,6 @@ def send_error_to_discord(
         title=f"**{tx_type} Failed for {sett_name}**",
         description=f"{sett_name} Sett {tx_type} Details",
     )
-    message = "Transaction timed out."
     if error:
         message = str(error)
     embed.add_field(name="Failure information", value=message, inline=True)
@@ -264,6 +267,46 @@ def confirm_transaction(
 
     logger.info(f"Transaction {tx_hash.hex()} succeeded!")
     return True
+
+
+# TODO: Fix this and merge with above function
+def confirm_transaction_with_msg(
+    web3: Web3, tx_hash: HexBytes, max_target_block: int = None
+) -> bool:
+    """Waits for transaction to appear in block for 60 seconds and then times out.
+
+    Args:
+        tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
+
+    Returns:
+        bool: True if transaction was confirmed in 60 seconds, False otherwise.
+        msg: Error message if transaction was not confirmed.
+    """
+    logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
+
+    while True:
+        try:
+            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
+            break
+        except exceptions.TimeExhausted:
+            if max_target_block is None:
+                msg = (
+                    f"Transaction {tx_hash.hex()} timed out, not included in block yet."
+                )
+                logger.error(msg)
+                return False, msg
+            elif web3.eth.block_number > max_target_block:
+                msg = f"Transaction was not included in the block."
+                logger.error(msg)
+                return False, msg
+        except Exception as e:
+            msg = f"Error waiting for {tx_hash.hex()}. Error: {e}."
+            logger.error(msg)
+            return False, msg
+
+    msg = f"Transaction {tx_hash.hex()} succeeded!"
+    logger.info(msg)
+    return True, msg
 
 
 def get_hash_from_failed_tx_error(

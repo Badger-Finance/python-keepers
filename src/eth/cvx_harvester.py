@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"
 
 from harvester import IHarvester
 from utils import (
-    confirm_transaction,
+    confirm_transaction_with_msg,
     get_coingecko_price,
     get_secret,
     send_error_to_discord,
@@ -64,7 +64,7 @@ class CvxHarvester(IHarvester):
         )
         self.cvx_decimals = self.cvx.functions.decimals().call()
 
-        if use_flashbots:
+        if self.use_flashbots:
             # TODO: Maybe move outside class
             # Account which signifies your identify to flashbots network
             FLASHBOTS_SIGNER: LocalAccount = Account.create()
@@ -224,10 +224,12 @@ class CvxHarvester(IHarvester):
         """
         tx_hash = HexBytes(0)
         try:
-            tx_hash, target_block = self.__send_harvest_tx(
+            tx_hash, max_target_block = self.__send_harvest_tx(
                 keeper_acl, strategy_address, overrides
             )
-            succeeded = confirm_transaction(self.web3, tx_hash, target_block)
+            succeeded, msg = confirm_transaction_with_msg(
+                self.web3, tx_hash, max_target_block
+            )
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 if self.send_to_discord:
@@ -236,7 +238,9 @@ class CvxHarvester(IHarvester):
                     )
             elif tx_hash:
                 if self.send_to_discord:
-                    send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
+                    send_error_to_discord(
+                        sett_name, "Harvest", tx_hash=tx_hash, message=msg
+                    )
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
             tx_hash = "invalid" if tx_hash == HexBytes(0) else tx_hash
@@ -275,7 +279,7 @@ class CvxHarvester(IHarvester):
                 tx, private_key=self.keeper_key
             )
             tx_hash = signed_tx.hash
-            target_block = None
+            max_target_block = None
 
             if not self.use_flashbots:
                 self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
@@ -285,25 +289,27 @@ class CvxHarvester(IHarvester):
                 ]
 
                 block_number = self.web3.eth.block_number
-                block_offset = 1
-                target_block = block_number + block_offset
+                # block_offset = 1
+                # max_target_block = block_number + block_offset
 
-                self.web3.flashbots.send_bundle(
-                    bundle, target_block_number=target_block
-                )
-                self.logger.info(f"Bundle broadcasted at {target_block}")
-
-                # num_bundles = 1
-                # for i in range(1, num_bundles + 1):
-                #     self.web3.flashbots.send_bundle(bundle, target_block_number=block_number + i)
+                # self.web3.flashbots.send_bundle(
+                #     bundle, target_block_number=max_target_block
+                # )
+                num_bundles = 3
+                for i in range(1, num_bundles + 1):
+                    self.web3.flashbots.send_bundle(
+                        bundle, target_block_number=block_number + i
+                    )
+                max_target_block = block_number + num_bundles
+                self.logger.info(f"Bundle broadcasted at {max_target_block}")
 
         except Exception as e:
             self.logger.error(f"Error in sending harvest tx: {e}")
             tx_hash = HexBytes(0)
-            target_block = None
+            max_target_block = None
             raise Exception
         finally:
-            return tx_hash, target_block
+            return tx_hash, max_target_block
 
     def estimate_gas_fee(self, keeper_acl: contract, strategy_address: str) -> Decimal:
         current_gas_price = self.__get_gas_price()
