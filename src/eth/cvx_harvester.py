@@ -108,6 +108,11 @@ class CvxHarvester(IHarvester):
         # )
         self.logger.info(f"harvestable amount: {harvestable_amount}")
 
+        # Call harvest() to make sure it's not reverting
+        keeper_acl.functions.harvest(strategy_address).call(
+            {"from": self.keeper_address}
+        )
+
         current_price_eth = self.get_current_rewards_price()
         self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
