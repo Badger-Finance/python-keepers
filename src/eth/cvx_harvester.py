@@ -80,6 +80,7 @@ class CvxHarvester(IHarvester):
     def harvest(
         self,
         sett_name: str,
+        keeper_acl_address: str,
         strategy_address: str,
     ):
         """Orchestration function that harvests outstanding CVX awards.
@@ -91,29 +92,32 @@ class CvxHarvester(IHarvester):
         Raises:
             ValueError: If the keeper isn't whitelisted, throw an error and alert user.
         """
-        strategy = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(strategy_address),
-            abi=self.__get_abi("cvx_helper_strategy"),
+        keeper_acl = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(keeper_acl_address),
+            abi=self.__get_abi("keeper_acl"),
         )
 
-        if not self.__is_keeper_whitelisted(strategy):
+        if not self.__is_keeper_whitelisted(keeper_acl):
             raise ValueError(f"Keeper is not whitelisted for {sett_name}")
 
         # TODO: Harvest call might require some ERC20 token approvals to prevent reverts
         #       Maybe use mainnet fork and add those call()s to get_harvestable_rewards_amount
-        harvestable_amount = self.get_harvestable_rewards_amount(
-            strategy_address=strategy_address
-        )
+        harvestable_amount = 0
+        # harvestable_amount = self.get_harvestable_rewards_amount(
+        #     strategy_address=strategy_address
+        # )
         self.logger.info(f"harvestable amount: {harvestable_amount}")
 
         current_price_eth = self.get_current_rewards_price()
         self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
-        gas_fee = self.estimate_gas_fee(strategy)
+        # TODO: Use Keeper ACL for gas estimation
+        # gas_fee = self.estimate_gas_fee(keeper_acl, strategy_address)
 
-        should_harvest = self.is_profitable(
-            harvestable_amount, current_price_eth, gas_fee
-        )
+        # should_harvest = self.is_profitable(
+        #     harvestable_amount, current_price_eth, gas_fee
+        # )
+        should_harvest = True
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
@@ -122,7 +126,8 @@ class CvxHarvester(IHarvester):
             )
 
             self.__process_harvest(
-                strategy=strategy,
+                keeper_acl=keeper_acl,
+                strategy_address=strategy_address,
                 sett_name=sett_name,
                 overrides={
                     "from": self.keeper_address,
@@ -185,21 +190,24 @@ class CvxHarvester(IHarvester):
         )
         return fee_percent_of_claim <= FEE_THRESHOLD
 
-    def __is_keeper_whitelisted(self, strategy: contract) -> bool:
+    def __is_keeper_whitelisted(self, keeper_acl: contract) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
 
         Args:
-            strategy (contract)
+            keeper_acl (contract)
+            strategy_address (str)
 
         Returns:
             bool: True if our bot is whitelisted to make function calls to strategy,
             False otherwise.
         """
-        return strategy.functions.keeper().call() == self.keeper_address
+        harvester_key = keeper_acl.functions.HARVESTER_ROLE().call()
+        return keeper_acl.functions.hasRole(harvester_key, self.keeper_address).call()
 
     def __process_harvest(
         self,
-        strategy: contract = None,
+        keeper_acl: contract = None,
+        strategy_address: str = None,
         sett_name: str = None,
         overrides: dict = None,
         harvested: Decimal = None,
@@ -208,14 +216,17 @@ class CvxHarvester(IHarvester):
         transaction to Discord for monitoring
 
         Args:
-            strategy (contract, optional): Defaults to None.
+            keeper_acl (contract, optional): Defaults to None.
+            strategy_address (str, optional): Defaults to None.
             sett_name (str, optional): Defaults to None.
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
             harvested (Decimal, optional): Amount of CVX harvested. Defaults to None.
         """
         tx_hash = HexBytes(0)
         try:
-            tx_hash, target_block = self.__send_harvest_tx(strategy, overrides)
+            tx_hash, target_block = self.__send_harvest_tx(
+                keeper_acl, strategy_address, overrides
+            )
             succeeded = confirm_transaction(self.web3, tx_hash, target_block)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
@@ -235,7 +246,9 @@ class CvxHarvester(IHarvester):
                     sett_name, "Harvest", tx_hash=tx_hash, error=error
                 )
 
-    def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
+    def __send_harvest_tx(
+        self, contract: contract, strategy_address: str, overrides: dict
+    ) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -251,7 +264,7 @@ class CvxHarvester(IHarvester):
             int: Target block for transaction that was sent.
         """
         try:
-            tx = contract.functions.harvest().buildTransaction(
+            tx = contract.functions.harvest(strategy_address).buildTransaction(
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                     "gasPrice": self.__get_gas_price(),
@@ -292,11 +305,11 @@ class CvxHarvester(IHarvester):
         finally:
             return tx_hash, target_block
 
-    def estimate_gas_fee(self, strategy: contract) -> Decimal:
+    def estimate_gas_fee(self, keeper_acl: contract, strategy_address: str) -> Decimal:
         current_gas_price = self.__get_gas_price()
-        estimated_gas_to_harvest = strategy.functions.harvest().estimateGas(
-            {"from": strategy.functions.keeper().call()}
-        )
+        estimated_gas_to_harvest = keeper_acl.functions.harvest(
+            strategy_address
+        ).estimateGas({"from": self.keeper_address})
         return Decimal(current_gas_price * estimated_gas_to_harvest)
 
     def __get_gas_price(self) -> int:

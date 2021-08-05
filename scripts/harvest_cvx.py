@@ -11,12 +11,13 @@ from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
+KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 
 
-def safe_harvest(harvester, sett_name, strategy):
+def safe_harvest(harvester, sett_name, keeper_acl, strategy):
     try:
-        harvester.harvest(sett_name, strategy)
+        harvester.harvest(sett_name, keeper_acl, strategy)
     except Exception as e:
         logging.error(f"Error running {sett_name} harvest: {e}")
 
@@ -34,4 +35,4 @@ if __name__ == "__main__":
     )
 
     logger.info("+-----Harvesting CVX Helper-----+")
-    safe_harvest(harvester, "CVX Helper", CVX_HELPER_STRATEGY)
+    safe_harvest(harvester, "CVX Helper", KEEPER_ACL, CVX_HELPER_STRATEGY)
