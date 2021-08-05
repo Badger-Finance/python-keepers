@@ -11,7 +11,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./interfaces")))
 
 from harvester import IHarvester
-from utils import send_error_to_discord, send_success_to_discord
+from utils import send_error_to_discord, send_success_to_discord, get_abi
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,12 +40,8 @@ class GeneralHarvester(IHarvester):
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
-            abi=self.__get_abi(self.chain, "oracle"),
+            abi=get_abi(self.chain, "oracle"),
         )
-
-    def __get_abi(self, chain: str, contract_id: str):
-        with open(f"./abi/{chain}/{contract_id}.json") as f:
-            return json.load(f)
 
     def harvest(
         self,
@@ -63,7 +59,7 @@ class GeneralHarvester(IHarvester):
         """
         strategy = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(strategy_address),
-            abi=self.__get_abi("strategy"),
+            abi=get_abi(self.chain, "strategy"),
         )
 
         if not self.__is_keeper_whitelisted(strategy):
