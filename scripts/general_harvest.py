@@ -8,6 +8,7 @@ from web3 import Web3, contract
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from harvester import GeneralHarvester
+from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,6 +26,17 @@ def safe_harvest(harvester, sett_name, strategy):
 def get_abi(chain: str, contract_id: str):
         with open(f"./abi/{chain}/{contract_id}.json") as f:
             return json.load(f)
+
+def get_strategies(node: Web3, chain: str) -> list:
+    strategies = []
+    poly_vault_owner = node.toChecksumAddress(os.getenv("POLY_VAULT_OWNER"))
+
+    for vault_address in poly_registry.functions.fromAuthor(poly_vault_owner).call():
+        strategy = get_strategy_from_vault(node, vault_address)
+        strategies.append(strategy)
+    
+    return strategies
+
 
 def get_strategy_from_vault(node: Web3, vault_address: str) -> contract:
     # TODO: make chain agnostic
@@ -61,23 +73,22 @@ if __name__ == "__main__":
         abi=get_abi("poly", "registry"),
     )
 
-    poly_vault_owner = node.toChecksumAddress(os.getenv("POLY_VAULT_OWNER"))
-    for vault_address in poly_registry.functions.fromAuthor(poly_vault_owner).call():
-        strategy = get_strategy_from_vault(node, vault_address)
+    strategies = get_strategies(node, "poly")
 
-        estimated_harvest = strategy.functions.harvest().call()
+    logger = logging.getLogger("script")  
 
-    # eth_registry = get_abi("eth", "registry")
+    keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
+    keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
 
-    logger = logging.getLogger()  
+    harvester = GeneralHarvester(
+        chain="poly",
+        keeper_address=keeper_address,
+        keeper_key=keeper_key,
+        web3=os.getenv("POLY_NODE_URL"),
+    )
 
-    harvester = GeneralHarvester()
+    for strategy in strategies:
+        strat_name = strategy.functions.getName().call()
 
-    logger.info("+-----Harvesting BADGER WBTC LP-----+")
-    safe_harvest(harvester, "BADGER WBTC LP", BADGER_WBTC_STRATEGY)
-
-    logger.info("+-----Harvesting DIGG WBTC LP-----+")
-    safe_harvest(harvester, "DIGG WBTC LP", DIGG_WBTC_STRATEGY)
-
-    logger.info("+-----Harvesting ETH WBTC LP-----+")
-    safe_harvest(harvester, "ETH WBTC LP", ETH_WBTC_STRATEGY)
+        logger.info(f"+-----Harvesting {strat_name}-----+")
+        safe_harvest(harvester, strat_name, strategy)
