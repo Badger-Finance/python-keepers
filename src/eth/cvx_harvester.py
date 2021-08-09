@@ -35,6 +35,7 @@ ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 CVX_ADDRESS = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
 
 FEE_THRESHOLD = 1  # ratio of gas cost to harvest amount we're ok with
+MAX_PRIORITY_FEE = 10000000000 # 10 gwei
 
 
 class CvxHarvester(IHarvester):
@@ -276,7 +277,8 @@ class CvxHarvester(IHarvester):
             tx = contract.functions.harvest(strategy_address).buildTransaction(
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-                    "maxPriorityFeePerGas": 10,
+                    "maxPriorityFeePerGas": MAX_PRIORITY_FEE,
+                    "maxFeePerGas": self.__get_max_fee(),
                     # "gasPrice": self.__get_gas_price(),
                     "from": self.keeper_address,
                 }
@@ -340,3 +342,10 @@ class CvxHarvester(IHarvester):
         )
 
         return total_gas_used * gas_price_eth * eth_usd
+    
+    def __get_max_fee(self) -> int:
+        latest = self.web3.eth.get_block("latest")
+        raw_base_fee = latest.get("baseFeePerGas")
+        base_fee = int(raw_base_fee, 0)
+
+        return int(2 * base_fee + MAX_PRIORITY_FEE)
