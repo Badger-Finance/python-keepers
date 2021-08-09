@@ -103,7 +103,11 @@ class ibBTCFeeCollector:
             succeeded = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
-                send_success_to_discord(tx_hash=tx_hash, tx_type="ibBTC Fee Collection", gas_cost=gas_price_of_tx)
+                send_success_to_discord(
+                    tx_hash=tx_hash,
+                    tx_type="ibBTC Fee Collection",
+                    gas_cost=gas_price_of_tx,
+                )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(tx_hash=tx_hash, tx_type="ibBTC Fee Collection")
         except Exception as e:

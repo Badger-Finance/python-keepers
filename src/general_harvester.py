@@ -11,7 +11,12 @@ from web3 import Web3, contract, exceptions
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
 
 from harvester import IHarvester
-from utils import send_error_to_discord, send_success_to_discord, get_abi
+from utils import (
+    send_error_to_discord,
+    send_success_to_discord,
+    get_abi,
+    get_hash_from_failed_tx_error,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,6 +36,7 @@ class GeneralHarvester(IHarvester):
         chain: str = "eth",
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
+        base_oracle_address: str = ETH_USD_CHAINLINK,
         web3: str = os.getenv("ETH_NODE_URL"),
     ):
         self.logger = logging.getLogger("harvester")
@@ -38,8 +44,8 @@ class GeneralHarvester(IHarvester):
         self.web3 = Web3(Web3.HTTPProvider(web3))
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
-        self.eth_usd_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
+        self.base_usd_oracle = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
         )
 
@@ -80,7 +86,7 @@ class GeneralHarvester(IHarvester):
         # gas_fee = self.estimate_gas_fee(strategy)
 
         # TODO: should_harvest check reworked
-        # harvest if ideal want change is > 0.05% of total vault assets 
+        # harvest if ideal want change is > 0.05% of total vault assets
         should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
         self.logger.info(f"Should we harvest: {should_harvest}")
 
@@ -88,10 +94,6 @@ class GeneralHarvester(IHarvester):
             self.__process_harvest(
                 strategy=strategy,
                 sett_name=sett_name,
-                overrides={
-                    "from": self.keeper_address,
-                    "allow_revert": True,
-                },
                 harvested=want_to_harvest / want.functions.decimals().call(),
             )
 
@@ -111,7 +113,6 @@ class GeneralHarvester(IHarvester):
         self,
         strategy: contract = None,
         sett_name: str = None,
-        overrides: dict = None,
         harvested: Decimal = None,
     ):
         """Private function to create, broadcast, confirm tx on eth and then send
@@ -123,23 +124,24 @@ class GeneralHarvester(IHarvester):
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
             harvested (Decimal, optional): Amount of Sushi harvested. Defaults to None.
         """
-        error = None
         try:
-            tx_hash = self.__send_harvest_tx(strategy, overrides)
+            tx_hash = self.__send_harvest_tx(strategy)
             succeeded = self.confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
-                    tx_hash, sett_name, gas_price_of_tx, harvested, "Harvest"
+                    tx_type=f"Harvest {sett_name}",
+                    tx_hash=tx_hash,
+                    gas_cost=gas_price_of_tx,
                 )
-            elif tx_hash:
-                send_error_to_discord(sett_name, "Harvest", tx_hash=tx_hash)
+            elif tx_hash != HexBytes(0):
+                send_success_to_discord(tx_type=f"Harvest {sett_name}", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
-            error = e
-            send_error_to_discord(sett_name, "Harvest", error=error)
+            send_error_to_discord(sett_name, "Harvest", error=e)
 
-    def __send_harvest_tx(self, contract: contract, overrides: dict) -> HexBytes:
+    def __send_harvest_tx(self, contract: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -154,21 +156,14 @@ class GeneralHarvester(IHarvester):
             HexBytes: Transaction hash for transaction that was sent.
         """
         try:
-            tx = contract.functions.harvest().buildTransaction(
-                {
-                    "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-                    "gasPrice": self.__get_gas_price(),
-                    "from": self.keeper_address,
-                }
-            )
+            tx = self.__build_transaction(contract)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        except Exception as e:
+        except ValueError as e:
             self.logger.error(f"Error in sending harvest tx: {e}")
-            tx_hash = HexBytes(0)
-            raise Exception
+            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
         finally:
             return tx_hash
 
@@ -180,18 +175,53 @@ class GeneralHarvester(IHarvester):
         return Decimal(current_gas_price * estimated_gas_to_harvest)
 
     def __get_gas_price(self) -> int:
-        response = requests.get(
-            "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
-        )
-        return int(response.json().get("data").get("rapid") * 1.1)
+        if self.chain == "poly":
+            response = requests.get("https://gasstation-mainnet.matic.network").json()
+            gas_price = int(response.get("fastest") * 1.1)
+        elif self.chain == "eth":
+            response = requests.get(
+                "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
+            ).json()
+            gas_price = int(response.get("data").get("rapid") * 1.1)
+
+        return gas_price
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
+        """Gets the actual amount of gas used by the transaction and converts
+        it from gwei to USD value for monitoring.
+
+        Args:
+            tx_hash (HexBytes): tx id of target transaction
+
+        Returns:
+            Decimal: USD value of gas used in tx
+        """
         tx = self.web3.eth.get_transaction(tx_hash)
 
         total_gas_used = Decimal(tx.get("gas", 0))
-        gas_price_eth = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-        eth_usd = Decimal(
-            self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
+        gas_price_base = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
+        base_usd = Decimal(
+            self.base_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
         )
 
-        return total_gas_used * gas_price_eth * eth_usd
+        return total_gas_used * gas_price_base * base_usd
+
+    def __build_transaction(self, contract: contract) -> dict:
+        """Builds transaction depending on which chain we're harvesting. EIP-1559
+        requires different handling for ETH txs than the other EVM chains.
+
+        Args:
+            contract (contract): contract to use to build harvest tx
+
+        Returns:
+            dict: tx dictionary
+        """
+        options = {
+            "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
+            "from": self.keeper_address,
+        }
+        if self.chain == "eth":
+            options["maxPriorityFeePerGas"] = 10
+        else:
+            options["gasPrice"] = self.__get_gas_price()
+        return contract.functions.harvest().buildTransaction(options)

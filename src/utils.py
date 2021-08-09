@@ -11,9 +11,11 @@ from web3 import Web3, exceptions
 
 logger = logging.getLogger()
 
+
 def get_abi(chain: str, contract_id: str):
     with open(f"./abi/{chain}/{contract_id}.json") as f:
         return json.load(f)
+
 
 def hours(num_hours: int) -> int:
     """Returns duration of num_hours in seconds
