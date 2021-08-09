@@ -8,4 +8,3 @@ requests==2.26.0
 web3>=5.19.0,<6
 pytest==6.2.4
 git+https://github.com/flashbots/web3-flashbots.git@master
-eth-brownie==1.15.0
