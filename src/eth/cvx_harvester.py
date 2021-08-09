@@ -345,7 +345,9 @@ class CvxHarvester(IHarvester):
     
     def __get_max_fee(self) -> int:
         latest = self.web3.eth.get_block("latest")
-        raw_base_fee = latest.get("baseFeePerGas")
+        raw_base_fee = latest.get("baseFeePerGas", "0x174876e800") # default to 100 gwei
+        self.logger.info(f"raw base fee: {raw_base_fee}")
         base_fee = int(raw_base_fee, 0)
+        self.logger.info(f"base fee gwei: {base_fee}")
 
         return int(2 * base_fee + MAX_PRIORITY_FEE)
