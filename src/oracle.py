@@ -180,30 +180,30 @@ class Oracle:
             [int]: average of 24 hour TWAP for sushi and uni wbtc / digg pools time 10^18 (digg decimal places)
         """
 
-        # uni_twap_data = self.send_twap_query(
-        #     "uni", os.getenv("UNI_SUBGRAPH"), os.getenv("UNI_PAIR")
-        # )
+        uni_twap_data = self.send_twap_query(
+            "uni", os.getenv("UNI_SUBGRAPH"), os.getenv("UNI_PAIR")
+        )
         sushi_twap_data = self.send_twap_query(
             "sushi", os.getenv("SUSHI_SUBGRAPH"), os.getenv("SUSHI_PAIR")
         )
 
-        # uni_prices = [
-        #     float(x["reserve0"]) / float(x["reserve1"])
-        #     for x in uni_twap_data["data"]["pairHourDatas"]
-        # ]
+        uni_prices = [
+            float(x["reserve0"]) / float(x["reserve1"])
+            for x in uni_twap_data["data"]["pairHourDatas"]
+        ]
         sushi_prices = [
             float(x["reserve0"]) / float(x["reserve1"])
             for x in sushi_twap_data["data"]["pairHourDatas"]
         ]
 
-        # uni_twap = sum(uni_prices) / len(uni_prices)
+        uni_twap = sum(uni_prices) / len(uni_prices)
         sushi_twap = sum(sushi_prices) / len(sushi_prices)
-        # avg_twap = (uni_twap + sushi_twap) / 2
-        # self.logger.info(f"24 Hour Uniswap TWAP: {uni_twap}")
+        avg_twap = (uni_twap + sushi_twap) / 2
+        self.logger.info(f"24 Hour Uniswap TWAP: {uni_twap}")
         self.logger.info(f"24 Hour Sushiswap TWAP: {sushi_twap}")
-        # self.logger.info(f"Average TWAP: {avg_twap}")
+        self.logger.info(f"Average TWAP: {avg_twap}")
 
-        return int(sushi_twap * 10 ** 18)
+        return int(avg_twap * 10 ** 18)
 
     def send_twap_query(self, exchange: str, url: str, pair: str) -> dict:
         """Builds and sends query to selected subgraph to retrieve the prices of the given
