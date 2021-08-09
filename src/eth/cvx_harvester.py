@@ -276,7 +276,8 @@ class CvxHarvester(IHarvester):
             tx = contract.functions.harvest(strategy_address).buildTransaction(
                 {
                     "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-                    "gasPrice": self.__get_gas_price(),
+                    "maxPriorityFeePerGas": 10,
+                    # "gasPrice": self.__get_gas_price(),
                     "from": self.keeper_address,
                 }
             )
