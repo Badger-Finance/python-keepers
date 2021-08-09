@@ -32,33 +32,36 @@ def get_abi(chain: str, contract_id: str):
 
 def get_strategies(node: Web3, chain: str) -> list:
     strategies = []
-    poly_vault_owner = node.toChecksumAddress(os.getenv("POLY_VAULT_OWNER"))
+    vault_owner = node.toChecksumAddress(os.getenv(f"{chain.upper()}_VAULT_OWNER"))
+    registry = node.eth.contract(
+        address=node.toChecksumAddress(os.getenv(f"{chain.upper()}_REGISTRY")),
+        abi=get_abi(chain, "registry"),
+    )
 
-    for vault_address in poly_registry.functions.fromAuthor(poly_vault_owner).call():
-        strategy = get_strategy_from_vault(node, vault_address)
+    for vault_address in registry.functions.fromAuthor(vault_owner).call():
+        strategy = get_strategy_from_vault(node, chain, vault_address)
         strategies.append(strategy)
 
     return strategies
 
 
-def get_strategy_from_vault(node: Web3, vault_address: str) -> contract:
-    # TODO: make chain agnostic
+def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contract:
     vault_contract = node.eth.contract(
-        address=vault_address, abi=get_abi("poly", "vault")
+        address=vault_address, abi=get_abi(chain, "vault")
     )
 
     token_address = vault_contract.functions.token().call()
     controller_address = vault_contract.functions.controller().call()
 
     controller_contract = node.eth.contract(
-        address=controller_address, abi=get_abi("poly", "controller")
+        address=controller_address, abi=get_abi(chain, "controller")
     )
 
     strategy_address = controller_contract.functions.strategies(token_address).call()
 
     # TODO: handle v1 vs v2 strategy abi
     strategy_contract = node.eth.contract(
-        address=strategy_address, abi=get_abi("poly", "strategy")
+        address=strategy_address, abi=get_abi(chain, "strategy")
     )
 
     return strategy_contract
@@ -66,11 +69,6 @@ def get_strategy_from_vault(node: Web3, vault_address: str) -> contract:
 
 if __name__ == "__main__":
     node = Web3(Web3.HTTPProvider(os.getenv("NODE_URL")))
-    # get strategy addresses
-    poly_registry = node.eth.contract(
-        address=node.toChecksumAddress(os.getenv("POLY_REGISTRY")),
-        abi=get_abi("poly", "registry"),
-    )
 
     strategies = get_strategies(node, "poly")
 
