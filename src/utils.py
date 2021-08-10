@@ -271,42 +271,43 @@ def confirm_transaction(
 
 # TODO: Fix this and merge with above function
 def confirm_transaction_with_msg(
-    web3: Web3, tx_hash: HexBytes, max_target_block: int = None
-) -> bool:
-    """Waits for transaction to appear in block for 60 seconds and then times out.
+    web3: Web3, tx_hash: HexBytes, timeout=60, max_block: int = None
+) -> tuple[bool, str]:
+    """Waits for transaction to appear within a given timeframe or max block (if specified), and then times out.
 
     Args:
+        web3 (Web3): Web3 instance
         tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
+        timeout (int, optional): Timeout in seconds. Defaults to 60.
+        max_block (int, optional): Max block number to wait until. Defaults to None.
 
     Returns:
-        bool: True if transaction was confirmed in 60 seconds, False otherwise.
-        msg: Error message if transaction was not confirmed.
+        bool: True if transaction was confirmed, False otherwise.
+        msg: Log message.
     """
     logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
 
     while True:
         try:
-            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-            break
+            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
+            msg = f"Transaction {tx_hash.hex()} succeeded!"
+            logger.info(msg)
+            return True, msg
         except exceptions.TimeExhausted:
-            if max_target_block is None:
+            if max_block is not None and web3.eth.block_number <= max_block:
+                continue
+            elif max_block is None:
                 msg = (
                     f"Transaction {tx_hash.hex()} timed out, not included in block yet."
                 )
-                logger.error(msg)
-                return False, msg
-            elif web3.eth.block_number > max_target_block:
+            else:
                 msg = f"Transaction was not included in the block."
-                logger.error(msg)
-                return False, msg
+            logger.error(msg)
+            return False, msg
         except Exception as e:
             msg = f"Error waiting for {tx_hash.hex()}. Error: {e}."
             logger.error(msg)
             return False, msg
-
-    msg = f"Transaction {tx_hash.hex()} succeeded!"
-    logger.info(msg)
-    return True, msg
 
 
 def get_hash_from_failed_tx_error(
@@ -363,3 +364,13 @@ def get_coingecko_price(token_address: str, base="usd") -> float:
 
     except (KeyError, requests.HTTPError):
         raise ValueError("Price could not be fetched")
+
+
+def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
+    latest = web3.eth.get_block("latest")
+    raw_base_fee = latest.get("baseFeePerGas", hex(default))
+    if type(raw_base_fee) == str and raw_base_fee.startswith("0x"):
+        base_fee = int(raw_base_fee, 0)
+    else:
+        base_fee = int(raw_base_fee)
+    return base_fee

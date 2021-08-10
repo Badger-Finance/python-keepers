@@ -1,7 +1,3 @@
-"""
-Why not use brownie?
-"""
-
 from decimal import Decimal
 from dotenv import load_dotenv
 from hexbytes import HexBytes
@@ -23,6 +19,7 @@ from utils import (
     confirm_transaction_with_msg,
     get_coingecko_price,
     get_secret,
+    get_latest_base_fee,
     send_error_to_discord,
     send_success_to_discord,
 )
@@ -35,7 +32,7 @@ ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 CVX_ADDRESS = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
 
 FEE_THRESHOLD = 1  # ratio of gas cost to harvest amount we're ok with
-MAX_PRIORITY_FEE = 10000000000 # 10 gwei
+MAX_PRIORITY_FEE = int(10e9)  # 10 gwei
 
 
 class CvxHarvester(IHarvester):
@@ -66,12 +63,10 @@ class CvxHarvester(IHarvester):
         self.cvx_decimals = self.cvx.functions.decimals().call()
 
         if self.use_flashbots:
-            # TODO: import from AWS, maybe move outside class,
             # Account which signifies your identify to flashbots network
-            FLASHBOTS_SIGNER: LocalAccount = Account.create()
-            # FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
-            #     get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
-            # )
+            FLASHBOTS_SIGNER: LocalAccount = Account.from_key(
+                get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
+            )
             flashbot(self.web3, FLASHBOTS_SIGNER)
 
     def __get_abi(self, contract_id: str):
@@ -103,27 +98,21 @@ class CvxHarvester(IHarvester):
 
         # TODO: Harvest call might require some ERC20 token approvals to prevent reverts
         #       Maybe use mainnet fork and add those call()s to get_harvestable_rewards_amount
-        # Call harvest() to make sure it's not reverting
-        harvestable_amount = keeper_acl.functions.harvest(strategy_address).call(
-            {"from": self.keeper_address}
+        harvestable_amount = self.get_harvestable_rewards_amount(
+            keeper_acl, strategy_address
         )
-        if harvestable_amount == []:
-            harvestable_amount = 0
-        # harvestable_amount = self.get_harvestable_rewards_amount(
-        #     strategy_address=strategy_address
-        # )
+
         self.logger.info(f"harvestable amount: {harvestable_amount}")
 
         current_price_eth = self.get_current_rewards_price()
         self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
-        # TODO: Use Keeper ACL for gas estimation
-        # gas_fee = self.estimate_gas_fee(keeper_acl, strategy_address)
+        gas_fee = self.estimate_gas_fee(keeper_acl, strategy_address)
 
-        # should_harvest = self.is_profitable(
-        #     harvestable_amount, current_price_eth, gas_fee
-        # )
-        should_harvest = True
+        should_harvest = self.is_profitable(
+            harvestable_amount, current_price_eth, gas_fee
+        )
+        # should_harvest = True
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
@@ -144,26 +133,26 @@ class CvxHarvester(IHarvester):
 
     def get_harvestable_rewards_amount(
         self,
-        strategy_address: str = None,
+        keeper_acl: contract,
+        strategy_address: str,
     ) -> Decimal:
         """Get integer amount of outstanding awards waiting to be harvested.
 
         Args:
-            strategy_address (str, optional): Defaults to None.
+            keeper_acl (contract)
+            strategy_address (str)
 
         Returns:
             Decimal: Integer amount of outstanding awards available for harvest.
         """
-        strategy = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(strategy_address),
-            abi=self.__get_abi("cvx_helper_strategy"),
-        )
-
-        harvestable_amt = (
-            strategy.functions.harvest().call({"from": self.keeper_address})
+        harvestable_amount = (
+            keeper_acl.functions.harvest(strategy_address).call(
+                {"from": self.keeper_address}
+            )
             / 10 ** self.cvx_decimals
         )
-        return Decimal(harvestable_amt)
+
+        return Decimal(harvestable_amount)
 
     def get_current_rewards_price(self) -> Decimal:
         """Get price of CVX in ETH.
@@ -303,7 +292,7 @@ class CvxHarvester(IHarvester):
                 # self.web3.flashbots.send_bundle(
                 #     bundle, target_block_number=max_target_block
                 # )
-                num_bundles = 10
+                num_bundles = 6
                 for i in range(1, num_bundles + 1):
                     self.web3.flashbots.send_bundle(
                         bundle, target_block_number=block_number + i
@@ -320,11 +309,19 @@ class CvxHarvester(IHarvester):
             return tx_hash, max_target_block
 
     def estimate_gas_fee(self, keeper_acl: contract, strategy_address: str) -> Decimal:
-        current_gas_price = self.__get_gas_price()
+        # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority.
+        # current_gas_price = self.__get_gas_price()
+        current_gas_price = self.__get_max_fee()
         estimated_gas_to_harvest = keeper_acl.functions.harvest(
             strategy_address
         ).estimateGas({"from": self.keeper_address})
         return Decimal(current_gas_price * estimated_gas_to_harvest)
+
+    def __get_max_fee(self) -> int:
+        base_fee = get_latest_base_fee(self.web3)
+        self.logger.info(f"base fee gwei: {base_fee}")
+
+        return int(2 * base_fee + MAX_PRIORITY_FEE)
 
     def __get_gas_price(self) -> int:
         response = requests.get(
@@ -342,14 +339,3 @@ class CvxHarvester(IHarvester):
         )
 
         return total_gas_used * gas_price_eth * eth_usd
-    
-    def __get_max_fee(self) -> int:
-        latest = self.web3.eth.get_block("latest")
-        raw_base_fee = latest.get("baseFeePerGas", "0x174876e800") # default to 100 gwei
-        if type(raw_base_fee) == str and raw_base_fee.startswith("0x"):
-            base_fee = int(raw_base_fee, 0)
-        else:
-            base_fee = int(raw_base_fee)
-        self.logger.info(f"base fee gwei: {base_fee}")
-
-        return int(2 * base_fee + MAX_PRIORITY_FEE)

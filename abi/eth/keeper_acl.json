@@ -163,6 +163,15 @@
       { "internalType": "address", "name": "strategy", "type": "address" }
     ],
     "name": "harvest",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "strategy", "type": "address" }
+    ],
+    "name": "harvestNoReturn",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
