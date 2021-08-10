@@ -20,13 +20,6 @@ from utils import (
 
 logging.basicConfig(level=logging.INFO)
 
-ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-SUSHI_ETH_CHAINLINK = "0xe572CeF69f43c2E488b33924AF04BDacE19079cf"
-WBTC_ETH_STRATEGY = "0x7A56d65254705B4Def63c68488C0182968C452ce"
-WBTC_DIGG_STRATEGY = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
-WBTC_BADGER_STRATEGY = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
-SUSHI_ADDRESS = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2"
-XSUSHI_ADDRESS = "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272"
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 
@@ -36,7 +29,7 @@ class GeneralHarvester(IHarvester):
         chain: str = "eth",
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
-        base_oracle_address: str = ETH_USD_CHAINLINK,
+        base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         web3: str = os.getenv("ETH_NODE_URL"),
     ):
         self.logger = logging.getLogger("harvester")
@@ -82,8 +75,8 @@ class GeneralHarvester(IHarvester):
         # current_price_eth = self.get_current_rewards_price()
         # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
-        # TODO: estimate gas fee for different chains
-        # gas_fee = self.estimate_gas_fee(strategy)
+        gas_fee = self.estimate_gas_fee(strategy)
+        self.logger.info(f"estimated gas cost: {gas_fee}")
 
         # harvest if ideal want change is > 0.05% of total vault assets
         # should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
@@ -179,7 +172,7 @@ class GeneralHarvester(IHarvester):
     def __get_gas_price(self) -> int:
         if self.chain == "poly":
             response = requests.get("https://gasstation-mainnet.matic.network").json()
-            gas_price = int(response.get("fastest") * 1.1)
+            gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "eth":
             response = requests.get(
                 "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
