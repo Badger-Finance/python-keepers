@@ -108,7 +108,9 @@ class GeneralHarvester(IHarvester):
             False otherwise.
         """
         harvester_key = self.keeper_acl.functions.HARVESTER_ROLE().call()
-        return self.keeper_acl.functions.hasRole(harvester_key, self.keeper_address).call()
+        return self.keeper_acl.functions.hasRole(
+            harvester_key, self.keeper_address
+        ).call()
 
     def __process_harvest(
         self,

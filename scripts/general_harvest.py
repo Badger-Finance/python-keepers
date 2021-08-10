@@ -18,7 +18,7 @@ CONFIG = {
         "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
         # TODO: may need to make vault owner a list eventually
         "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
-        "registry": "0x22765948A3d5048F3644b81792e4E1aA7ea3da4a"
+        "registry": "0x22765948A3d5048F3644b81792e4E1aA7ea3da4a",
     },
     # "eth": {
     #     "gas_oracle": "eth",
