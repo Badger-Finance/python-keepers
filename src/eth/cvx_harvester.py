@@ -35,7 +35,7 @@ ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 CVX_ADDRESS = "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B"
 
 FEE_THRESHOLD = 1  # ratio of gas cost to harvest amount we're ok with
-MAX_PRIORITY_FEE = 10000000000 # 10 gwei
+MAX_PRIORITY_FEE = 30000000000 # 10 gwei
 
 
 class CvxHarvester(IHarvester):
