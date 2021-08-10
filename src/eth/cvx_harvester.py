@@ -107,6 +107,8 @@ class CvxHarvester(IHarvester):
         harvestable_amount = keeper_acl.functions.harvest(strategy_address).call(
             {"from": self.keeper_address}
         )
+        if harvestable_amount == []:
+            harvestable_amount = 0
         # harvestable_amount = self.get_harvestable_rewards_amount(
         #     strategy_address=strategy_address
         # )
