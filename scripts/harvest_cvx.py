@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret("quiknode/eth-node-url", "ETH_NODE_URL")
+    node_url = get_secret("quiknode/eth-node-url", "NODE_URL")
 
     harvester = CvxHarvester(
         keeper_address=keeper_address, keeper_key=keeper_key, node_url=node_url
