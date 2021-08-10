@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
+CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
 
 
 def safe_harvest(harvester, sett_name, keeper_acl, strategy):
@@ -34,5 +35,8 @@ if __name__ == "__main__":
         keeper_address=keeper_address, keeper_key=keeper_key, node_url=node_url
     )
 
-    logger.info("+-----Harvesting CVX Helper-----+")
-    safe_harvest(harvester, "CVX Helper", KEEPER_ACL, CVX_HELPER_STRATEGY)
+    # logger.info("+-----Harvesting CVX Helper-----+")
+    # safe_harvest(harvester, "CVX Helper", KEEPER_ACL, CVX_HELPER_STRATEGY)
+
+    logger.info("+-----Harvesting CVX CRV Helper-----+")
+    safe_harvest(harvester, "CVX CRV Helper", KEEPER_ACL, CVX_CRV_HELPER_STRATEGY)

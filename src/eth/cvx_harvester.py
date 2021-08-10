@@ -103,16 +103,14 @@ class CvxHarvester(IHarvester):
 
         # TODO: Harvest call might require some ERC20 token approvals to prevent reverts
         #       Maybe use mainnet fork and add those call()s to get_harvestable_rewards_amount
-        harvestable_amount = 0
+        # Call harvest() to make sure it's not reverting
+        harvestable_amount = keeper_acl.functions.harvest(strategy_address).call(
+            {"from": self.keeper_address}
+        )
         # harvestable_amount = self.get_harvestable_rewards_amount(
         #     strategy_address=strategy_address
         # )
         self.logger.info(f"harvestable amount: {harvestable_amount}")
-
-        # Call harvest() to make sure it's not reverting
-        keeper_acl.functions.harvest(strategy_address).call(
-            {"from": self.keeper_address}
-        )
 
         current_price_eth = self.get_current_rewards_price()
         self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
