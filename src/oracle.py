@@ -77,7 +77,7 @@ class Oracle:
         """
         try:
             tx_hash = self.__send_centralized_oracle_tx(price, function)
-            succeeded = confirm_transaction(self.web3, tx_hash)
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self._get_gas_price_of_tx(tx_hash)
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")

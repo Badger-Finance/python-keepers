@@ -236,44 +236,9 @@ def get_secret(
 
 
 def confirm_transaction(
-    web3: Web3, tx_hash: HexBytes, target_block: int = None
-) -> bool:
-    """Waits for transaction to appear in block for 60 seconds and then times out.
-
-    Args:
-        tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
-
-    Returns:
-        bool: True if transaction was confirmed in 60 seconds, False otherwise.
-    """
-    logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
-
-    while True:
-        try:
-            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-            break
-        except exceptions.TimeExhausted:
-            if target_block is None:
-                logger.error(
-                    f"Transaction {tx_hash.hex()} timed out, not included in block yet."
-                )
-                return False
-            elif web3.eth.block_number > target_block:
-                logger.error(f"Transaction was not included in the block.")
-                return False
-        except Exception as e:
-            logger.error(f"Error waiting for {tx_hash.hex()}. Error: {e}.")
-            return False
-
-    logger.info(f"Transaction {tx_hash.hex()} succeeded!")
-    return True
-
-
-# TODO: Fix this and merge with above function
-def confirm_transaction_with_msg(
     web3: Web3, tx_hash: HexBytes, timeout: int = 60, max_block: int = None
 ) -> tuple[bool, str]:
-    """Waits for transaction to appear within a given timeframe or max block (if specified), and then times out.
+    """Waits for transaction to appear within a given timeframe or before a given block (if specified), and then times out.
 
     Args:
         web3 (Web3): Web3 instance
@@ -294,16 +259,15 @@ def confirm_transaction_with_msg(
             logger.info(msg)
             return True, msg
         except exceptions.TimeExhausted:
-            if max_block is not None and web3.eth.block_number <= max_block:
-                continue
-            elif max_block is None:
-                msg = (
-                    f"Transaction {tx_hash.hex()} timed out, not included in block yet."
-                )
+            if max_block is None or web3.eth.block_number > max_block:
+                if max_block is None:
+                    msg = f"Transaction {tx_hash.hex()} timed out, not included in block yet."
+                else:
+                    msg = f"Transaction {tx_hash.hex()} was not included in the block."
+                logger.error(msg)
+                return False, msg
             else:
-                msg = f"Transaction was not included in the block."
-            logger.error(msg)
-            return False, msg
+                continue
         except Exception as e:
             msg = f"Error waiting for {tx_hash.hex()}. Error: {e}."
             logger.error(msg)
