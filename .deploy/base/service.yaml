@@ -54,3 +54,17 @@ spec:
     - name: http
       port: 9000
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: general-harvester-keeper
+  labels:
+    app: general-harvester-keeper
+    service: general-harvester-keeper
+spec:
+  selector:
+    app: general-harvester-keeper
+  ports:
+    - name: http
+      port: 9000
+---

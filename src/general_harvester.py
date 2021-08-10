@@ -27,6 +27,7 @@ class GeneralHarvester(IHarvester):
     def __init__(
         self,
         chain: str = "eth",
+        keeper_acl: str = os.getenv("KEEPER_ACL"),
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
@@ -37,6 +38,10 @@ class GeneralHarvester(IHarvester):
         self.web3 = Web3(Web3.HTTPProvider(web3))
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
+        self.keeper_acl = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(keeper_acl),
+            abi=get_abi(self.chain, "keeper_acl"),
+        )
         self.base_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
@@ -102,7 +107,8 @@ class GeneralHarvester(IHarvester):
             bool: True if our bot is whitelisted to make function calls to strategy,
             False otherwise.
         """
-        return strategy.functions.keeper().call() == self.keeper_address
+        harvester_key = self.keeper_acl.functions.HARVESTER_ROLE().call()
+        return self.keeper_acl.functions.hasRole(harvester_key, self.keeper_address).call()
 
     def __process_harvest(
         self,

@@ -16,15 +16,16 @@ CONFIG = {
     "poly": {
         "gas_oracle": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
         "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
-        "vault_owner": "poly",
-        "registry": "poly"
+        # TODO: may need to make vault owner a list eventually
+        "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
+        "registry": "0x22765948A3d5048F3644b81792e4E1aA7ea3da4a"
     },
-    "eth": {
-        "gas_oracle": "eth",
-        "keeper_acl": "eth",
-        "vault_owner": "eth",
-        "registry": "eth"
-    }
+    # "eth": {
+    #     "gas_oracle": "eth",
+    #     "keeper_acl": "eth",
+    #     "vault_owner": "eth",
+    #     "registry": "eth"
+    # }
 }
 
 
@@ -91,6 +92,7 @@ if __name__ == "__main__":
 
         harvester = GeneralHarvester(
             chain=chain,
+            keeper_acl=CONFIG.get(chain).get("keeper_acl"),
             keeper_address=keeper_address,
             keeper_key=keeper_key,
             web3=node_url,
