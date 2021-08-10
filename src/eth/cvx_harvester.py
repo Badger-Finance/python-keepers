@@ -112,7 +112,6 @@ class CvxHarvester(IHarvester):
         should_harvest = self.is_profitable(
             harvestable_amount, current_price_eth, gas_fee
         )
-        # should_harvest = True
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
@@ -176,6 +175,8 @@ class CvxHarvester(IHarvester):
         Returns:
             bool: True if we should harvest based on amount / cost, False otherwise
         """
+        # TODO: Remove this
+        return True
         gas_fee_ether = self.web3.fromWei(gas_fee, "ether")
         fee_percent_of_claim = (
             1 if amount * price_per == 0 else gas_fee_ether / (amount * price_per)
@@ -223,7 +224,7 @@ class CvxHarvester(IHarvester):
                 keeper_acl, strategy_address, overrides
             )
             succeeded, msg = confirm_transaction_with_msg(
-                self.web3, tx_hash, max_target_block
+                self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
@@ -302,6 +303,7 @@ class CvxHarvester(IHarvester):
 
         except Exception as e:
             self.logger.error(f"Error in sending harvest tx: {e}")
+            print(e)
             tx_hash = HexBytes(0)
             max_target_block = None
             raise Exception
@@ -320,7 +322,6 @@ class CvxHarvester(IHarvester):
     def __get_max_fee(self) -> int:
         base_fee = get_latest_base_fee(self.web3)
         self.logger.info(f"base fee gwei: {base_fee}")
-
         return int(2 * base_fee + MAX_PRIORITY_FEE)
 
     def __get_gas_price(self) -> int:

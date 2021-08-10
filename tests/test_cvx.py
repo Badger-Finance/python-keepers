@@ -22,6 +22,7 @@ def test_correct_network():
 @pytest.fixture
 def cvx_helper_strategy() -> Tuple[str, str, Contract]:
     strategy_address = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
+    # strategy_address = "0x826048381d65a65DAa51342C51d464428d301896"
     return (
         strategy_address,
         "CVX Helper",
@@ -72,6 +73,12 @@ def test_harvest(harvester, keeper_acl_address, cvx_helper_strategy):
     keeper_acl = harvester.web3.eth.contract(
         address=keeper_acl_address,
         abi=get_abi("keeper_acl", "eth"),
+    )
+
+    # Hack: For some reason, harvest call() fails without first calling estimateGas()
+    harvester.estimate_gas_fee(
+        keeper_acl,
+        strategy_address,
     )
 
     before_claimable = harvester.get_harvestable_rewards_amount(

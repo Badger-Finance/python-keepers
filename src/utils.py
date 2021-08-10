@@ -271,7 +271,7 @@ def confirm_transaction(
 
 # TODO: Fix this and merge with above function
 def confirm_transaction_with_msg(
-    web3: Web3, tx_hash: HexBytes, timeout=60, max_block: int = None
+    web3: Web3, tx_hash: HexBytes, timeout: int = 60, max_block: int = None
 ) -> tuple[bool, str]:
     """Waits for transaction to appear within a given timeframe or max block (if specified), and then times out.
 
