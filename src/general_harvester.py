@@ -73,10 +73,10 @@ class GeneralHarvester(IHarvester):
             abi=get_abi(self.chain, "erc20"),
         )
         vault_balance = want.functions.balanceOf(strategy.address)
-        self.logger.info(f"claimable rewards: {vault_balance}")
+        self.logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = strategy.functions.harvest().call()
-        self.logger.info(f"claimable rewards: {want_to_harvest}")
+        self.logger.info(f"estimated want change: {want_to_harvest}")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
@@ -85,9 +85,11 @@ class GeneralHarvester(IHarvester):
         # TODO: estimate gas fee for different chains
         # gas_fee = self.estimate_gas_fee(strategy)
 
-        # TODO: should_harvest check reworked
         # harvest if ideal want change is > 0.05% of total vault assets
-        should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
+        # should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
+
+        # for now we'll just harvest every hour
+        should_harvest = True
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:

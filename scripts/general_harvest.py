@@ -12,7 +12,20 @@ from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
-MATIC_USD_ORACLE = "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0"
+CONFIG = {
+    "poly": {
+        "gas_oracle": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
+        "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
+        "vault_owner": "poly",
+        "registry": "poly"
+    },
+    "eth": {
+        "gas_oracle": "eth",
+        "keeper_acl": "eth",
+        "vault_owner": "eth",
+        "registry": "eth"
+    }
+}
 
 
 def safe_harvest(harvester, sett_name, strategy):
@@ -29,9 +42,9 @@ def get_abi(chain: str, contract_id: str):
 
 def get_strategies(node: Web3, chain: str) -> list:
     strategies = []
-    vault_owner = node.toChecksumAddress(os.getenv(f"{chain.upper()}_VAULT_OWNER"))
+    vault_owner = node.toChecksumAddress(CONFIG.get("chain").get("vault_owner"))
     registry = node.eth.contract(
-        address=node.toChecksumAddress(os.getenv(f"{chain.upper()}_REGISTRY")),
+        address=node.toChecksumAddress(CONFIG.get("chain").get("registry")),
         abi=get_abi(chain, "registry"),
     )
 
@@ -65,25 +78,27 @@ def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contr
 
 
 if __name__ == "__main__":
-    node = Web3(Web3.HTTPProvider(os.getenv("NODE_URL")))
+    for chain in CONFIG.keys():
+        node_url = get_secret(f"quiknode/{chain}-node-url", "NODE_URL")
+        node = Web3(Web3.HTTPProvider(node_url))
 
-    strategies = get_strategies(node, "poly")
+        strategies = get_strategies(node, chain)
 
-    logger = logging.getLogger("script")
+        logger = logging.getLogger("script")
 
-    keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
-    keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
+        keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
+        keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
 
-    harvester = GeneralHarvester(
-        chain="poly",
-        keeper_address=keeper_address,
-        keeper_key=keeper_key,
-        web3=os.getenv("POLY_NODE_URL"),
-        base_oracle_address=MATIC_USD_ORACLE,
-    )
+        harvester = GeneralHarvester(
+            chain=chain,
+            keeper_address=keeper_address,
+            keeper_key=keeper_key,
+            web3=node_url,
+            base_oracle_address=CONFIG.get(chain).get("gas_oracle"),
+        )
 
-    for strategy in strategies:
-        strat_name = strategy.functions.getName().call()
+        for strategy in strategies:
+            strat_name = strategy.functions.getName().call()
 
-        logger.info(f"+-----Harvesting {strat_name}-----+")
-        safe_harvest(harvester, strat_name, strategy)
+            logger.info(f"+-----Harvesting {strat_name}-----+")
+            safe_harvest(harvester, strat_name, strategy)
