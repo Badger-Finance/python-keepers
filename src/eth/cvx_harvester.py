@@ -56,6 +56,8 @@ class CvxHarvester(IHarvester):
             address=self.web3.toChecksumAddress(ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
         )
+        self.eth_usd_decimals = self.eth_usd_oracle.functions.decimals().call()
+
         self.cvx = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(CVX_ADDRESS),
             abi=self.__get_abi("cvx"),
@@ -116,7 +118,8 @@ class CvxHarvester(IHarvester):
 
         if should_harvest:
             eth_usd_price = Decimal(
-                self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
+                self.eth_usd_oracle.functions.latestAnswer().call()
+                / 10 ** self.eth_usd_decimals
             )
 
             self.__process_harvest(
@@ -324,19 +327,20 @@ class CvxHarvester(IHarvester):
         self.logger.info(f"base fee gwei: {base_fee}")
         return int(2 * base_fee + MAX_PRIORITY_FEE)
 
+    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
+        tx = self.web3.eth.get_transaction_receipt(tx_hash)
+
+        total_gas_used = Decimal(tx.get("gasUsed", 0))
+        gas_price_eth = Decimal(tx.get("effectiveGasPrice", 0) / 10 ** 18)
+        eth_usd = Decimal(
+            self.eth_usd_oracle.functions.latestAnswer().call()
+            / 10 ** self.eth_usd_decimals
+        )
+
+        return total_gas_used * gas_price_eth * eth_usd
+
     def __get_gas_price(self) -> int:
         response = requests.get(
             "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
         )
         return int(response.json().get("data").get("rapid") * 1.5)
-
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        tx = self.web3.eth.get_transaction(tx_hash)
-
-        total_gas_used = Decimal(tx.get("gas", 0))
-        gas_price_eth = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-        eth_usd = Decimal(
-            self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
-        )
-
-        return total_gas_used * gas_price_eth * eth_usd
