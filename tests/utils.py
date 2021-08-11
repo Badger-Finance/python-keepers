@@ -12,11 +12,13 @@ def get_abi(contract_id: str, network: str) -> dict:
         return json.load(f)
 
 
-def get_strategy(strategy_address: str, network: str) -> Contract:
+def get_strategy(
+    strategy_address: str, network: str, abi_file: str = "strategy"
+) -> Contract:
     strategy = Contract.from_abi(
         "Strategy",
         strategy_address,
-        get_abi("strategy", network),
+        get_abi(abi_file, network),
     )
     gov = strategy.governance()
     strategy.setKeeper(test_address, {"from": gov})

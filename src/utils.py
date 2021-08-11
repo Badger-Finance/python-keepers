@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from web3 import Web3, exceptions
+import requests
 
 logger = logging.getLogger("utils")
 
@@ -30,7 +31,11 @@ def hours(num_hours: int) -> int:
 
 
 def send_error_to_discord(
-    sett_name: str, type: str, tx_hash: HexBytes = None, error: Exception = None
+    sett_name: str,
+    tx_type: str,
+    tx_hash: HexBytes = None,
+    error: Exception = None,
+    message="Transaction timed out.",
 ):
     webhook = Webhook.from_url(
         get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
@@ -38,15 +43,14 @@ def send_error_to_discord(
     )
 
     embed = Embed(
-        title=f"**{type} Failed for {sett_name}**",
-        description=f"{sett_name} Sett {type} Details",
+        title=f"**{tx_type} Failed for {sett_name}**",
+        description=f"{sett_name} Sett {tx_type} Details",
     )
-    message = "Transaction timed out."
     if error:
         message = str(error)
     embed.add_field(name="Failure information", value=message, inline=True)
 
-    webhook.send(embed=embed, username=f"{sett_name} {type}er")
+    webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
 
 
 def send_success_to_discord(
@@ -236,37 +240,51 @@ def get_secret(
     return None
 
 
-def confirm_transaction(web3: Web3, tx_hash: HexBytes) -> bool:
-    """Waits for transaction to appear in block for 60 seconds and then times out.
+def confirm_transaction(
+    web3: Web3, tx_hash: HexBytes, timeout: int = 60, max_block: int = None
+) -> tuple[bool, str]:
+    """Waits for transaction to appear within a given timeframe or before a given block (if specified), and then times out.
 
     Args:
+        web3 (Web3): Web3 instance
         tx_hash (HexBytes): Transaction hash to identify transaction to wait on.
+        timeout (int, optional): Timeout in seconds. Defaults to 60.
+        max_block (int, optional): Max block number to wait until. Defaults to None.
 
     Returns:
-        bool: True if transaction was confirmed in 60 seconds, False otherwise.
+        bool: True if transaction was confirmed, False otherwise.
+        msg: Log message.
     """
-    try:
-        logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
-        web3.eth.wait_for_transaction_receipt(tx_hash, timeout=60)
-    except exceptions.TimeExhausted:
-        logger.error(
-            f"Transaction {tx_hash.hex()} timed out, not included in block yet."
-        )
-        return False
-    except Exception as e:
-        logger.error(f"Error waiting for {tx_hash.hex()}. Error: {e}.")
-        return False
+    logger.info(f"tx_hash before confirm: {tx_hash.hex()}")
 
-    logger.info(f"Transaction {tx_hash.hex()} succeeded!")
-    return True
+    while True:
+        try:
+            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
+            msg = f"Transaction {tx_hash.hex()} succeeded!"
+            logger.info(msg)
+            return True, msg
+        except exceptions.TimeExhausted:
+            if max_block is None or web3.eth.block_number > max_block:
+                if max_block is None:
+                    msg = f"Transaction {tx_hash.hex()} timed out, not included in block yet."
+                else:
+                    msg = f"Transaction {tx_hash.hex()} was not included in the block."
+                logger.error(msg)
+                return False, msg
+            else:
+                continue
+        except Exception as e:
+            msg = f"Error waiting for {tx_hash.hex()}. Error: {e}."
+            logger.error(msg)
+            return False, msg
 
 
 def get_hash_from_failed_tx_error(
-    error: ValueError, logger: logging.Logger
+    error: ValueError, tx_type: str, sett_name: str = None
 ) -> HexBytes:
     try:
         error_obj = json.loads(str(error).replace("'", '"'))
-        send_rebase_error_to_discord(error=error_obj)
+        send_error_to_discord(tx_type=tx_type, sett_name=sett_name, error=error_obj)
         tx_hash = list(error_obj.get("data").keys())[0]
     except Exception as x:
         logger.error(f"exception when trying to get tx_hash: {x}")
@@ -282,4 +300,46 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     elif chain == "BSC":
         explorer_name = "Bscscan"
         explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
+
     return (explorer_name, explorer_url)
+
+
+def get_coingecko_price(token_address: str, base="usd") -> float:
+    """Fetches the price of token in USD/ETH from CoinGecko API.
+
+    Args:
+        token_address (str): Contract address of the ERC-20 token to get price for.
+
+    Returns:
+        float: Price of token in base currency.
+    """
+    endpoint = "https://api.coingecko.com/api/v3/"
+    try:
+        params = "/simple/supported_vs_currencies"
+        r = requests.get(endpoint + params)
+
+        supported_bases = r.json()
+        if base not in supported_bases:
+            raise ValueError("Unsupported base currency")
+
+        params = (
+            "simple/token_price/ethereum?contract_addresses="
+            + token_address
+            + "&vs_currencies=eth%2Cusd&include_last_updated_at=true"
+        )
+        r = requests.get(endpoint + params)
+        data = r.json()
+        return data[token_address.lower()][base]
+
+    except (KeyError, requests.HTTPError):
+        raise ValueError("Price could not be fetched")
+
+
+def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
+    latest = web3.eth.get_block("latest")
+    raw_base_fee = latest.get("baseFeePerGas", hex(default))
+    if type(raw_base_fee) == str and raw_base_fee.startswith("0x"):
+        base_fee = int(raw_base_fee, 0)
+    else:
+        base_fee = int(raw_base_fee)
+    return base_fee

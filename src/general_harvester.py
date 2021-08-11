@@ -12,6 +12,7 @@ from web3 import Web3, contract, exceptions
 
 from harvester import IHarvester
 from utils import (
+    confirm_transaction,
     send_error_to_discord,
     send_success_to_discord,
     get_abi,
@@ -131,7 +132,7 @@ class GeneralHarvester(IHarvester):
         """
         try:
             tx_hash = self.__send_harvest_tx(strategy)
-            succeeded = self.confirm_transaction(self.web3, tx_hash)
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
@@ -168,7 +169,7 @@ class GeneralHarvester(IHarvester):
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending harvest tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(e, "Harvest")
         finally:
             return tx_hash
 
