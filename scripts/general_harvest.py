@@ -7,7 +7,7 @@ from web3 import Web3, contract
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from harvester import GeneralHarvester
+from general_harvester import GeneralHarvester
 from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
