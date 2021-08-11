@@ -137,7 +137,7 @@ class Rebaser:
         """
         try:
             tx_hash = self.__send_rebase_tx()
-            succeeded = confirm_transaction(self.web3, tx_hash)
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_rebase_to_discord(tx_hash=tx_hash, gas_cost=gas_price_of_tx)

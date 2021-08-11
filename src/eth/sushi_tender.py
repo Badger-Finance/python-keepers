@@ -107,14 +107,14 @@ class SushiTender(SushiHarvester):
         error = None
         try:
             tx_hash = self.__send_tend_tx(strategy, overrides)
-            succeeded = self.confirm_transaction(tx_hash)
+            succeeded, _ = self.confirm_transaction(self.web3, tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing tend tx: {e}")
             tx_hash = "invalid" if tx_hash == HexBytes(0) else tx_hash
             succeeded = False
             error = e
         finally:
-            succeeded = self.confirm_transaction(tx_hash)
+            succeeded, _ = self.confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self._SushiHarvester__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(

@@ -187,7 +187,7 @@ class CakeHarvester(IHarvester):
         tx_hash = HexBytes(0)
         try:
             tx_hash = self.__send_harvest_tx(strategy, overrides)
-            succeeded = confirm_transaction(tx_hash)
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(
