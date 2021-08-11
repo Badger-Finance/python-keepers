@@ -70,7 +70,7 @@ class GeneralHarvester(IHarvester):
             address=want_address,
             abi=get_abi(self.chain, "erc20"),
         )
-        vault_balance = want.functions.balanceOf(strategy.address)
+        vault_balance = want.functions.balanceOf(strategy.address).call()
         self.logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = self.keeper_acl.functions.harvest(strategy.address).call(
