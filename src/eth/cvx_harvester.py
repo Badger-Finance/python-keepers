@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"
 
 from harvester import IHarvester
 from utils import (
-    confirm_transaction_with_msg,
+    confirm_transaction,
     get_coingecko_price,
     get_secret,
     get_latest_base_fee,
@@ -223,7 +223,7 @@ class CvxHarvester(IHarvester):
             tx_hash, max_target_block = self.__send_harvest_tx(
                 keeper_acl, strategy_address, overrides
             )
-            succeeded, msg = confirm_transaction_with_msg(
+            succeeded, msg = confirm_transaction(
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
