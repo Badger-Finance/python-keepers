@@ -32,7 +32,7 @@ CONFIG = {
 
 def safe_harvest(harvester, sett_name, strategy):
     try:
-        harvester.harvest(sett_name, strategy)
+        harvester.harvest(strategy)
     except Exception as e:
         logger.error(f"Error running {sett_name} harvest: {e}")
 
@@ -91,10 +91,10 @@ if __name__ == "__main__":
 
         harvester = GeneralHarvester(
             chain=chain,
+            web3=node,
             keeper_acl=CONFIG.get(chain).get("keeper_acl"),
             keeper_address=keeper_address,
             keeper_key=keeper_key,
-            web3=node_url,
             base_oracle_address=CONFIG.get(chain).get("gas_oracle"),
         )
 
