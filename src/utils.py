@@ -294,12 +294,15 @@ def get_hash_from_failed_tx_error(
 
 
 def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
-    if chain == "ETH":
+    if chain.lower() == "eth":
         explorer_name = "Etherscan"
         explorer_url = f"https://etherscan.io/tx/{tx_hash.hex()}"
-    elif chain == "BSC":
+    elif chain.lower() == "bsc":
         explorer_name = "Bscscan"
         explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
+    elif chain.lower() == "poly":
+        explorer_name = "Polygonscan"
+        explorer_url = f"https://polygonscan.com/tx/{tx_hash.hex()}"
 
     return (explorer_name, explorer_url)
 
