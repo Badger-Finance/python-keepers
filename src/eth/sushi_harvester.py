@@ -12,7 +12,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from harvester import IHarvester
-from utils import send_error_to_discord, send_success_to_discord
+from utils import confirm_transaction, send_error_to_discord, send_success_to_discord
 
 load_dotenv()
 
@@ -167,7 +167,7 @@ class SushiHarvester(IHarvester):
         Returns:
             bool: True if we should harvest based on amount / cost, False otherwise
         """
-        gas_fee_ether = web3.fromWei(gas_fee, "ether")
+        gas_fee_ether = self.web3.fromWei(gas_fee, "ether")
         fee_percent_of_claim = (
             1 if amount * price_per == 0 else gas_fee_ether / (amount * price_per)
         )
@@ -207,7 +207,7 @@ class SushiHarvester(IHarvester):
         error = None
         try:
             tx_hash = self.__send_harvest_tx(strategy, overrides)
-            succeeded = self.confirm_transaction(self.web3, tx_hash)
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 send_success_to_discord(

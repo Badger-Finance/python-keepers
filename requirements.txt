@@ -1,8 +1,10 @@
 boto3==1.17.112
 botocore==1.20.112
 discord.py==1.7.2
+eth-account>=0.5.5,<0.6.0
 hexbytes==0.2.1
-python-dotenv==0.17.1
-requests==2.25.1
-web3==5.19.0
+python-dotenv==0.16.0
+requests==2.26.0
+web3>=5.19.0,<6
 pytest==6.2.4
+git+https://github.com/flashbots/web3-flashbots.git@master
