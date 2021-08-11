@@ -9,7 +9,7 @@ import logging
 import os
 from web3 import Web3, exceptions
 
-logger = logging.getLogger()
+logger = logging.getLogger("utils")
 
 
 def get_abi(chain: str, contract_id: str):

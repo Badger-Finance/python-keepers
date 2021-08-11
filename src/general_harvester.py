@@ -73,14 +73,16 @@ class GeneralHarvester(IHarvester):
         vault_balance = want.functions.balanceOf(strategy.address)
         self.logger.info(f"vault balance: {vault_balance}")
 
-        want_to_harvest = strategy.functions.harvest().call()
+        want_to_harvest = self.keeper_acl.functions.harvest(strategy.address).call(
+            {"from": self.keeper_address}
+        )
         self.logger.info(f"estimated want change: {want_to_harvest}")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
         # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
-        gas_fee = self.estimate_gas_fee(strategy)
+        gas_fee = self.estimate_gas_fee(strategy.address)
         self.logger.info(f"estimated gas cost: {gas_fee}")
 
         # harvest if ideal want change is > 0.05% of total vault assets
@@ -144,11 +146,11 @@ class GeneralHarvester(IHarvester):
             self.logger.error(f"Error processing harvest tx: {e}")
             send_error_to_discord(sett_name, "Harvest", error=e)
 
-    def __send_harvest_tx(self, contract: contract) -> HexBytes:
+    def __send_harvest_tx(self, strategy: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
-            contract (contract)
+            strategy (contract)
             overrides (dict)
 
         Raises:
@@ -159,7 +161,7 @@ class GeneralHarvester(IHarvester):
             HexBytes: Transaction hash for transaction that was sent.
         """
         try:
-            tx = self.__build_transaction(contract)
+            tx = self.__build_transaction(strategy.address)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
@@ -170,11 +172,11 @@ class GeneralHarvester(IHarvester):
         finally:
             return tx_hash
 
-    def estimate_gas_fee(self, strategy: contract) -> Decimal:
+    def estimate_gas_fee(self, strategy_address: str) -> Decimal:
         current_gas_price = self.__get_gas_price()
-        estimated_gas_to_harvest = strategy.functions.harvest().estimateGas(
-            {"from": strategy.functions.keeper().call()}
-        )
+        estimated_gas_to_harvest = self.keeper_acl.functions.harvest(
+            strategy_address
+        ).estimateGas({"from": self.keeper_address})
         return Decimal(current_gas_price * estimated_gas_to_harvest)
 
     def __get_gas_price(self) -> int:
@@ -209,7 +211,7 @@ class GeneralHarvester(IHarvester):
 
         return total_gas_used * gas_price_base * base_usd
 
-    def __build_transaction(self, harvest_contract: contract) -> dict:
+    def __build_transaction(self, strategy_address: str) -> dict:
         """Builds transaction depending on which chain we're harvesting. EIP-1559
         requires different handling for ETH txs than the other EVM chains.
 
@@ -227,4 +229,6 @@ class GeneralHarvester(IHarvester):
             options["maxPriorityFeePerGas"] = 10
         else:
             options["gasPrice"] = self.__get_gas_price()
-        return self.keeper_acl.functions.harvest(harvest_contract.address).buildTransaction(options)
+        return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
+            options
+        )

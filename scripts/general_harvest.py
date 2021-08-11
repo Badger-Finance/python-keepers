@@ -11,6 +11,7 @@ from general_harvester import GeneralHarvester
 from utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("script")
 
 CONFIG = {
     "poly": {
@@ -33,7 +34,7 @@ def safe_harvest(harvester, sett_name, strategy):
     try:
         harvester.harvest(sett_name, strategy)
     except Exception as e:
-        logging.error(f"Error running {sett_name} harvest: {e}")
+        logger.error(f"Error running {sett_name} harvest: {e}")
 
 
 def get_abi(chain: str, contract_id: str):
@@ -84,8 +85,6 @@ if __name__ == "__main__":
         node = Web3(Web3.HTTPProvider(node_url))
 
         strategies = get_strategies(node, chain)
-
-        logger = logging.getLogger("script")
 
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
         keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
