@@ -43,9 +43,9 @@ def get_abi(chain: str, contract_id: str):
 
 def get_strategies(node: Web3, chain: str) -> list:
     strategies = []
-    vault_owner = node.toChecksumAddress(CONFIG.get("chain").get("vault_owner"))
+    vault_owner = node.toChecksumAddress(CONFIG.get(chain).get("vault_owner"))
     registry = node.eth.contract(
-        address=node.toChecksumAddress(CONFIG.get("chain").get("registry")),
+        address=node.toChecksumAddress(CONFIG.get(chain).get("registry")),
         abi=get_abi(chain, "registry"),
     )
 
