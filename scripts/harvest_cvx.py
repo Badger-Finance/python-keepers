@@ -35,8 +35,8 @@ if __name__ == "__main__":
         keeper_address=keeper_address, keeper_key=keeper_key, node_url=node_url
     )
 
-    logger.info("+-----Harvesting CVX Helper-----+")
-    safe_harvest(harvester, "CVX Helper", KEEPER_ACL, CVX_HELPER_STRATEGY)
+    # logger.info("+-----Harvesting CVX Helper-----+")
+    # safe_harvest(harvester, "CVX Helper", KEEPER_ACL, CVX_HELPER_STRATEGY)
 
     logger.info("+-----Harvesting CVX CRV Helper-----+")
     safe_harvest(harvester, "CVX CRV Helper", KEEPER_ACL, CVX_CRV_HELPER_STRATEGY)
