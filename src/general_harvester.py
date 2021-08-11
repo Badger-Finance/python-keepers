@@ -209,7 +209,7 @@ class GeneralHarvester(IHarvester):
 
         return total_gas_used * gas_price_base * base_usd
 
-    def __build_transaction(self, contract: contract) -> dict:
+    def __build_transaction(self, harvest_contract: contract) -> dict:
         """Builds transaction depending on which chain we're harvesting. EIP-1559
         requires different handling for ETH txs than the other EVM chains.
 
@@ -227,4 +227,4 @@ class GeneralHarvester(IHarvester):
             options["maxPriorityFeePerGas"] = 10
         else:
             options["gasPrice"] = self.__get_gas_price()
-        return contract.functions.harvest().buildTransaction(options)
+        return self.keeper_acl.functions.harvest(harvest_contract.address).buildTransaction(options)
