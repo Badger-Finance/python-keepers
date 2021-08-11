@@ -13,11 +13,11 @@ spec:
         spec:
           serviceAccountName: flashbots-harvester-keeper
           containers:
-            - name: flashbots-harvester-keeper
-              image: IMAGE_NAME
-              imagePullPolicy: IfNotPresent
-              command: ["python", "scripts/harvest_cvx.py"]
-              env:
-                - name: LOG_LEVEL
-                  value: "info"
+          - name: flashbots-harvester-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/harvest_cvx.py"]
+            env:
+              - name: LOG_LEVEL
+                value: "info"
           restartPolicy: OnFailure
