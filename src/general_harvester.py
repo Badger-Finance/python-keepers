@@ -160,9 +160,14 @@ class GeneralHarvester(IHarvester):
                     gas_cost=gas_price_of_tx,
                 )
             elif tx_hash != HexBytes(0):
-                send_error_to_discord(
-                    strategy_name, "Harvest", tx_hash=tx_hash, message=msg
-                )
+                if not self.use_flashbots:
+                    send_success_to_discord(
+                        tx_type=f"Harvest {strategy_name}", tx_hash=tx_hash
+                    )
+                else:
+                    send_error_to_discord(
+                        strategy_name, "Harvest", tx_hash=tx_hash, message=msg
+                    )
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
             send_error_to_discord(strategy_name, "Harvest", error=e)
