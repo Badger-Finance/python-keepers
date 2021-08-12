@@ -1,13 +1,10 @@
-from typing import Tuple
 import pytest
-from decimal import Decimal
-from brownie import *
-from web3 import Web3, contract
-import os
+from brownie import accounts, Contract, web3
+from web3 import contract
 
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
-from tests.utils import *
+from tests.utils import test_address, test_key
 
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
@@ -21,7 +18,17 @@ def test_correct_network():
 
 
 @pytest.fixture
-def keeper_acl():
+def keeper_key() -> str:
+    return test_key
+
+
+@pytest.fixture
+def keeper_address() -> str:
+    return test_address
+
+
+@pytest.fixture(autouse=True)
+def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
         KEEPER_ACL,
@@ -30,7 +37,7 @@ def keeper_acl():
     harvester_key = keeper_acl.HARVESTER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(harvester_key)
     admin = keeper_acl.getRoleMember(admin_role, 0)
-    keeper_acl.grantRole(harvester_key, test_address, {"from": admin})
+    keeper_acl.grantRole(harvester_key, keeper_address, {"from": admin})
     return keeper_acl
 
 
@@ -42,19 +49,19 @@ def strategy() -> contract:
 
 
 @pytest.fixture
-def harvester() -> GeneralHarvester:
+def harvester(keeper_address, keeper_key) -> GeneralHarvester:
     return GeneralHarvester(
         web3=web3,
         keeper_acl=KEEPER_ACL,
-        keeper_address=test_address,
-        keeper_key=test_key,
+        keeper_address=keeper_address,
+        keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
         use_flashbots=False,
         use_legacy_tx=True,
     )
 
 
-def test_harvest(harvester, keeper_acl, strategy):
+def test_harvest(keeper_address, harvester, strategy):
     """
     Check if the contract should be harvestable, then call the harvest function
 
@@ -62,7 +69,7 @@ def test_harvest(harvester, keeper_acl, strategy):
     and 0 after. If not then claimable rewards should be the same before and after
     calling harvest
     """
-    accounts[0].transfer(test_address, "1 ether")
+    accounts[0].transfer(keeper_address, "1 ether")
 
     strategy_name = strategy.functions.getName().call()
 
