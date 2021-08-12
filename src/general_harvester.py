@@ -82,7 +82,7 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = (
-            self.pending_harvest(strategy.address)
+            self.estimate_harvest_amount(strategy.address)
             / 10 ** want.functions.decimals().call()
         )
         self.logger.info(f"estimated want change: {want_to_harvest}")
@@ -105,7 +105,7 @@ class GeneralHarvester(IHarvester):
                 harvested=want_to_harvest,
             )
 
-    def pending_harvest(self, strategy_address: str) -> Decimal:
+    def estimate_harvest_amount(self, strategy_address: str) -> Decimal:
         return self.keeper_acl.functions.harvest(strategy_address).call(
             {"from": self.keeper_address}
         )

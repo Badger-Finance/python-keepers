@@ -69,7 +69,7 @@ def test_harvest(harvester, keeper_acl, strategy):
     # Hack: For some reason, harvest call() fails without first calling estimateGas()
     harvester.estimate_gas_fee(strategy.address)
 
-    before_claimable = harvester.pending_harvest(strategy.address)
+    before_claimable = harvester.estimate_harvest_amount(strategy.address)
     print(f"{strategy_name} before_claimable: {before_claimable}")
 
     # current_price_eth = harvester.get_current_rewards_price()
@@ -80,7 +80,7 @@ def test_harvest(harvester, keeper_acl, strategy):
 
     harvester.harvest(strategy)
 
-    after_claimable = harvester.pending_harvest(strategy.address)
+    after_claimable = harvester.estimate_harvest_amount(strategy.address)
     print(f"{strategy_name} after_claimable: {after_claimable}")
 
     assert (should_harvest and before_claimable != 0 and after_claimable == 0) or (
