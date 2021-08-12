@@ -3,6 +3,7 @@ import os
 import sys
 from eth_account.account import Account
 from flashbots import flashbot
+from pathlib import Path
 from web3 import Web3
 
 sys.path.insert(
@@ -13,6 +14,7 @@ from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(Path(__file__).name)
 
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
@@ -24,13 +26,10 @@ def safe_harvest(harvester, strategy_name, strategy):
     try:
         harvester.harvest(strategy)
     except Exception as e:
-        logging.error(f"Error running {strategy_name} harvest: {e}")
+        logger.error(f"Error running {strategy_name} harvest: {e}")
 
 
 if __name__ == "__main__":
-
-    logger = logging.getLogger()
-
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
