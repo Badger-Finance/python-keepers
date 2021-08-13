@@ -21,8 +21,8 @@ from utils import (
 logging.basicConfig(level=logging.INFO)
 
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
-MAX_PRIORITY_FEE = int(15e9)  # 15 gwei
-NUM_FLASHBOTS_BUNDLES = 6
+MAX_PRIORITY_FEE = int(10e9)  # 10 gwei
+NUM_FLASHBOTS_BUNDLES = 3
 
 
 class GeneralHarvester(IHarvester):
