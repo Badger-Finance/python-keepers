@@ -1,11 +1,9 @@
-from decimal import Decimal
-from hexbytes import HexBytes
-import json
 import logging
 import os
 import requests
 import sys
-from time import sleep
+from decimal import Decimal
+from hexbytes import HexBytes
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
@@ -269,7 +267,10 @@ class GeneralHarvester(IHarvester):
         Returns:
             Decimal: USD value of gas used in tx
         """
-        tx_receipt = self.web3.eth.get_transaction_receipt(tx_hash)
+        try:
+            tx_receipt = self.web3.eth.get_transaction_receipt(tx_hash)
+        except exceptions.TransactionNotFound:
+            tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
 
         total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
         if self.chain == "eth" and not self.use_legacy_tx:
