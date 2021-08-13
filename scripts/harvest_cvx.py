@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import time
 from eth_account.account import Account
 from flashbots import flashbot
 from pathlib import Path
@@ -60,3 +61,6 @@ if __name__ == "__main__":
 
         logger.info(f"+-----Harvesting {strategy_name}-----+")
         safe_harvest(harvester, strategy_name, strategy)
+
+        # Sleep for a minute in between harvests
+        time.sleep(60)
