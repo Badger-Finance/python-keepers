@@ -1,15 +1,9 @@
-import json
-from brownie import *
+from brownie import Contract
+
+from src.utils import get_abi
 
 test_address = "0xD88a9aF149366d57aEbc32D2eABAdf93EdA41A84"
 test_key = "0f0bdc830bde4be43c3a54c369c6f6a94ac9071911dc3913e35ce5ed8fe955b9"
-
-
-def get_abi(contract_id: str, network: str) -> dict:
-    if network not in ["bsc", "eth"]:
-        raise ValueError(f"Network: '{network}' not found")
-    with open(f"./abi/{network}/{contract_id}.json") as f:
-        return json.load(f)
 
 
 def get_strategy(
@@ -18,7 +12,7 @@ def get_strategy(
     strategy = Contract.from_abi(
         "Strategy",
         strategy_address,
-        get_abi(abi_file, network),
+        get_abi(network, abi_file),
     )
     gov = strategy.governance()
     strategy.setKeeper(test_address, {"from": gov})

@@ -8,7 +8,7 @@ from web3 import Web3, contract
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from general_harvester import GeneralHarvester
-from utils import get_secret
+from utils import get_abi, get_secret
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
@@ -30,16 +30,11 @@ CONFIG = {
 }
 
 
-def safe_harvest(harvester, sett_name, strategy):
+def safe_harvest(harvester, strategy_name, strategy):
     try:
-        harvester.harvest(sett_name, strategy)
+        harvester.harvest(strategy)
     except Exception as e:
-        logger.error(f"Error running {sett_name} harvest: {e}")
-
-
-def get_abi(chain: str, contract_id: str):
-    with open(f"./abi/{chain}/{contract_id}.json") as f:
-        return json.load(f)
+        logger.error(f"Error running {strategy_name} harvest: {e}")
 
 
 def get_strategies(node: Web3, chain: str) -> list:
@@ -91,10 +86,10 @@ if __name__ == "__main__":
 
         harvester = GeneralHarvester(
             chain=chain,
+            web3=node,
             keeper_acl=CONFIG.get(chain).get("keeper_acl"),
             keeper_address=keeper_address,
             keeper_key=keeper_key,
-            web3=node_url,
             base_oracle_address=CONFIG.get(chain).get("gas_oracle"),
         )
 

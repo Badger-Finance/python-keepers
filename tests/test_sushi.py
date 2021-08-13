@@ -8,6 +8,7 @@ import os
 
 from src.eth.sushi_harvester import SushiHarvester
 from src.eth.sushi_tender import SushiTender
+from src.utils import get_abi
 from tests.utils import *
 
 os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")
@@ -74,7 +75,7 @@ def test_harvest(
         gas_fee = harvester.estimate_gas_fee(
             harvester.web3.eth.contract(
                 address=strategy_address,
-                abi=get_abi("strategy", "eth"),
+                abi=get_abi("eth", "strategy"),
             )
         )
         should_harvest = harvester.is_profitable(
@@ -121,7 +122,7 @@ def test_tend(tender, badger_wbtc_strategy, digg_wbtc_strategy, eth_wbtc_strateg
         gas_fee = tender.estimate_gas_fee(
             tender.web3.eth.contract(
                 address=strategy_address,
-                abi=get_abi("strategy", "eth"),
+                abi=get_abi("eth", "strategy"),
             )
         )
         should_tend = tender.is_profitable(before_claimable, current_price_eth, gas_fee)
