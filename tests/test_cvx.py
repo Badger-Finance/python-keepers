@@ -12,7 +12,8 @@ CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
 
 
-@pytest.mark.require_network("mainnet-fork")
+# Uses EIP-1559 txs which ganache-cli doesn't support
+@pytest.mark.require_network("hardhat-fork")
 def test_correct_network():
     pass
 
@@ -57,7 +58,6 @@ def harvester(keeper_address, keeper_key) -> GeneralHarvester:
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
         use_flashbots=False,
-        use_legacy_tx=True,
     )
 
 

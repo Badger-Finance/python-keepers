@@ -35,7 +35,6 @@ class GeneralHarvester(IHarvester):
         keeper_key: str = os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         use_flashbots=False,
-        use_legacy_tx=False,
     ):
         self.logger = logging.getLogger("harvester")
         self.chain = chain
@@ -52,7 +51,6 @@ class GeneralHarvester(IHarvester):
         )
 
         self.use_flashbots = use_flashbots
-        self.use_legacy_tx = use_legacy_tx
 
     def harvest(
         self,
@@ -226,8 +224,10 @@ class GeneralHarvester(IHarvester):
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,
         }
-        if self.chain == "eth" and not self.use_legacy_tx:
+        if self.chain == "eth":
+            base_fee = get_latest_base_fee(self.web3)
             options["maxPriorityFeePerGas"] = MAX_PRIORITY_FEE
+            options["maxFeePerGas"] = 2 * base_fee + MAX_PRIORITY_FEE
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
         return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
@@ -246,15 +246,9 @@ class GeneralHarvester(IHarvester):
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "eth":
-            if self.use_legacy_tx:
-                response = requests.get(
-                    "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
-                ).json()
-                gas_price = int(response.get("data").get("rapid") * 1.1)
-            else:
-                # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority.
-                base_fee = get_latest_base_fee(self.web3)
-                gas_price = 2 * base_fee + MAX_PRIORITY_FEE
+            # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority.
+            base_fee = get_latest_base_fee(self.web3)
+            gas_price = 2 * base_fee + MAX_PRIORITY_FEE
         return gas_price
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
@@ -273,7 +267,7 @@ class GeneralHarvester(IHarvester):
             tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
 
         total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
-        if self.chain == "eth" and not self.use_legacy_tx:
+        if self.chain == "eth":
             gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 10 ** 18)
         else:
             tx = self.web3.eth.get_transaction(tx_hash)
