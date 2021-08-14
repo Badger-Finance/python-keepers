@@ -7,9 +7,7 @@ from flashbots import flashbot
 from pathlib import Path
 from web3 import Web3
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret
