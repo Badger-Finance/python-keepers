@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-import time
 
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
@@ -38,9 +37,6 @@ if __name__ == "__main__":
 
     logger.info("+-----Harvesting CVX Helper-----+")
     safe_harvest(harvester, "CVX Helper", KEEPER_ACL, CVX_HELPER_STRATEGY)
-
-    # Sleep for 1 minute
-    time.sleep(60)
 
     logger.info("+-----Harvesting CVX CRV Helper-----+")
     safe_harvest(harvester, "CVX CRV Helper", KEEPER_ACL, CVX_CRV_HELPER_STRATEGY)
