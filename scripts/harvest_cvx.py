@@ -67,12 +67,12 @@ if __name__ == "__main__":
         TRICRYPTO_CRV_STRATEGY,
     ]:
         strategy = web3.eth.contract(
-            address=strategy_address, abi=get_abi("eth", "strategy")
+            address=web3.toChecksumAddress(strategy_address), abi=get_abi("eth", "strategy")
         )
         strategy_name = strategy.functions.getName().call()
 
         logger.info(f"+-----Harvesting {strategy_name}-----+")
         safe_harvest(harvester, strategy_name, strategy)
 
-        # Sleep for a minute in between harvests
-        time.sleep(60)
+        # Sleep for a block in between harvests
+        time.sleep(15)
