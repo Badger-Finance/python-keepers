@@ -31,6 +31,11 @@ def safe_harvest(harvester, strategy_name, strategy):
         harvester.harvest(strategy)
     except Exception as e:
         logger.error(f"Error running {strategy_name} harvest: {e}")
+        logger.info("Trying to run harvestNoReturn")
+        try:
+            harvester.harvest_no_return(strategy)
+        except Exception as e:
+            logger.error(f"Error running {strategy_name} harvestNoReturn: {e}")
 
 
 if __name__ == "__main__":
@@ -64,7 +69,7 @@ if __name__ == "__main__":
         PBTC_CRV_STRATEGY,
         OBTC_CRV_STRATEGY,
         BBTC_CRV_STRATEGY,
-        TRICRYPTO_CRV_STRATEGY,
+        # TRICRYPTO_CRV_STRATEGY,
     ]:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address), abi=get_abi("eth", "strategy")

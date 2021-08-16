@@ -103,6 +103,40 @@ class GeneralHarvester(IHarvester):
                 strategy_name=strategy_name,
                 harvested=want_to_harvest,
             )
+    
+    def harvest_no_return(
+        self, 
+        strategy: contract,
+    ):
+        strategy_name = strategy.functions.getName().call()
+        # TODO: update for ACL
+        if not self.__is_keeper_whitelisted(strategy):
+            raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
+
+        want_address = strategy.functions.want().call()
+        want = self.web3.eth.contract(
+            address=want_address,
+            abi=get_abi(self.chain, "erc20"),
+        )
+        vault_balance = want.functions.balanceOf(strategy.address).call()
+        self.logger.info(f"vault balance: {vault_balance}")
+
+        # TODO: figure out how to handle profit estimation
+        # current_price_eth = self.get_current_rewards_price()
+        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
+
+        gas_fee = self.estimate_gas_fee(strategy.address, returns=False)
+        self.logger.info(f"estimated gas cost: {gas_fee}")
+
+        # for now we'll just harvest every hour
+        should_harvest = self.is_profitable()
+        self.logger.info(f"Should we harvest: {should_harvest}")
+
+        if should_harvest:
+            self.__process_harvest(
+                strategy=strategy,
+                strategy_name=strategy_name,
+            )
 
     def estimate_harvest_amount(self, strategy_address: str) -> Decimal:
         return self.keeper_acl.functions.harvest(strategy_address).call(
@@ -136,6 +170,7 @@ class GeneralHarvester(IHarvester):
         strategy: contract = None,
         strategy_name: str = None,
         harvested: Decimal = None,
+        returns: bool = True
     ):
         """Private function to create, broadcast, confirm tx on eth and then send
         transaction to Discord for monitoring
@@ -146,7 +181,7 @@ class GeneralHarvester(IHarvester):
             harvested (Decimal, optional): Amount of Sushi harvested. Defaults to None.
         """
         try:
-            tx_hash, max_target_block = self.__send_harvest_tx(strategy)
+            tx_hash, max_target_block = self.__send_harvest_tx(strategy, returns=returns)
             succeeded, msg = confirm_transaction(
                 self.web3, tx_hash, max_block=max_target_block
             )
@@ -174,7 +209,7 @@ class GeneralHarvester(IHarvester):
             self.logger.error(f"Error processing harvest tx: {e}")
             send_error_to_discord(strategy_name, "Harvest", error=e)
 
-    def __send_harvest_tx(self, strategy: contract) -> HexBytes:
+    def __send_harvest_tx(self, strategy: contract, returns: bool = True) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -189,7 +224,7 @@ class GeneralHarvester(IHarvester):
         """
         max_target_block = None
         try:
-            tx = self.__build_transaction(strategy.address)
+            tx = self.__build_transaction(strategy.address, returns=returns)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
@@ -216,7 +251,7 @@ class GeneralHarvester(IHarvester):
         finally:
             return tx_hash, max_target_block
 
-    def __build_transaction(self, strategy_address: str) -> dict:
+    def __build_transaction(self, strategy_address: str, returns: bool = True) -> dict:
         """Builds transaction depending on which chain we're harvesting. EIP-1559
         requires different handling for ETH txs than the other EVM chains.
 
@@ -231,7 +266,6 @@ class GeneralHarvester(IHarvester):
             "from": self.keeper_address,
         }
         if self.chain == "eth":
-            base_fee = get_latest_base_fee(self.web3)
             # Use x times recommended priority fee as miner tip
             self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
             priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
@@ -241,15 +275,26 @@ class GeneralHarvester(IHarvester):
             options["maxFeePerGas"] = MAX_GAS_PRICE
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
-        return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
-            options
-        )
+        
+        if returns:
+            return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
+                options
+            )
+        else:
+            return self.keeper_acl.functions.harvestNoReturn(strategy_address).buildTransaction(
+                options
+            )
 
-    def estimate_gas_fee(self, strategy_address: str) -> Decimal:
+    def estimate_gas_fee(self, strategy_address: str, returns: bool = True) -> Decimal:
         current_gas_price = self.__get_effective_gas_price()
-        estimated_gas_to_harvest = self.keeper_acl.functions.harvest(
-            strategy_address
-        ).estimateGas({"from": self.keeper_address})
+        if returns:
+            estimated_gas_to_harvest = self.keeper_acl.functions.harvest(
+                strategy_address
+            ).estimateGas({"from": self.keeper_address})
+        else:
+            estimated_gas_to_harvest = self.keeper_acl.functions.harvestNoReturn(
+                strategy_address
+            ).estimateGas({"from": self.keeper_address})
         return Decimal(current_gas_price * estimated_gas_to_harvest)
 
     def __get_effective_gas_price(self) -> int:
