@@ -58,8 +58,8 @@ if __name__ == "__main__":
     )
 
     for strategy_address in [
-        CVX_CRV_HELPER_STRATEGY,
-        CVX_HELPER_STRATEGY,
+        #CVX_CRV_HELPER_STRATEGY,
+        #CVX_HELPER_STRATEGY,
         HBTC_CRV_STRATEGY,
         PBTC_CRV_STRATEGY,
         OBTC_CRV_STRATEGY,
