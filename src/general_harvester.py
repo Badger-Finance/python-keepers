@@ -21,8 +21,8 @@ from utils import (
 logging.basicConfig(level=logging.INFO)
 
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
-MAX_PRIORITY_FEE = int(10e9)  # 10 gwei
-NUM_FLASHBOTS_BUNDLES = 3
+MAX_GAS_PRICE = int(200e9)  # 200 gwei
+NUM_FLASHBOTS_BUNDLES = 6
 
 
 class GeneralHarvester(IHarvester):
@@ -226,8 +226,12 @@ class GeneralHarvester(IHarvester):
         }
         if self.chain == "eth":
             base_fee = get_latest_base_fee(self.web3)
-            options["maxPriorityFeePerGas"] = MAX_PRIORITY_FEE
-            options["maxFeePerGas"] = 2 * base_fee + MAX_PRIORITY_FEE
+            # Use double the recommended priority fee as miner tip
+            priority_fee = 2 * self.web3.eth.max_priority_fee
+            options["maxPriorityFeePerGas"] = priority_fee
+            # Hard limit of 200gwei on the gas price
+            # TODO: Maybe don't submit tx at all if gas price > MAX_GAS_PRICE
+            options["maxFeePerGas"] = min(MAX_GAS_PRICE, 2 * base_fee + priority_fee)
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
         return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
@@ -246,9 +250,11 @@ class GeneralHarvester(IHarvester):
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "eth":
-            # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority.
+            # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
             base_fee = get_latest_base_fee(self.web3)
-            gas_price = 2 * base_fee + MAX_PRIORITY_FEE
+            # Use double the recommended priority fee as miner tip
+            priority_fee = 2 * self.web3.eth.max_priority_fee
+            gas_price = min(MAX_GAS_PRICE, 2 * base_fee + priority_fee)
         return gas_price
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
