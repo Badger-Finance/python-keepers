@@ -20,8 +20,8 @@ from utils import (
 
 logging.basicConfig(level=logging.INFO)
 
-HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
-
+EARN_PCT_THRESHOLD = 0.01
+EARN_OVERRIDE_THRESHOLD = 2
 
 class Earner():
     def __init__(
@@ -31,11 +31,11 @@ class Earner():
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
-        web3: str = os.getenv("ETH_NODE_URL"),
+        web3: Web3 = None,
     ):
-        self.logger = logging.getLogger("harvester")
+        self.logger = logging.getLogger("earner")
         self.chain = chain
-        self.web3 = Web3(Web3.HTTPProvider(web3))
+        self.web3 = web3
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
         self.keeper_acl = self.web3.eth.contract(
@@ -52,6 +52,8 @@ class Earner():
         vault: contract,
         strategy: contract
     ):
+        override_threshold = EARN_EXCEPTIONS.get(strategy.address, self.web3.fromWei(EARN_OVERRIDE_THRESHOLD, "ether"))
+            
         # handle skipping outside of earn call, only call this on setts we want to harvest
         controller = self.web3.eth.contract(
             address=vault.functions.controller().call(),
@@ -68,77 +70,40 @@ class Earner():
         assert vault.functions.controller().call() == controller.address
         assert controller.functions.strategies(want.address).call() == strategy.address
 
-        vaultBefore = want.functions.balanceOf(vault.address).call()
-        strategyBefore = strategy.balanceOf()
+        vault_before = want.functions.balanceOf(vault.address).call()
+        strategy_before = strategy.functions.balanceOf().call()
 
-        toEarn = False
-        if earn_preconditions(key, vaultBefore, strategyBefore):
-            print("Earn: " + key, vault, strategy)
-            toEarn = True
-
-            snap = SnapshotManager(badger, key)
-            before = snap.snap()
-
-            keeper = accounts.at(vault.keeper())
-            snap.settEarn(
-                {"from": keeper, "gas_limit": 2000000, "allow_revert": True},
-                confirm=False,
+        if self.should_earn(vault_before, strategy_before):
+            self.__process_harvest(strategy)
+    
+    def should_earn(self, vault_balance: int, strategy_balance: int) -> bool:
+         # Always allow earn on first run
+        if strategy_balance == 0:
+            self.logger.info("No strategy balance, earn()")
+            return True
+        # Earn if deposits have accumulated over a static threshold
+        if vault_balance >= self.override_threshold:
+            self.logger.info(
+                f"Vault balance of {vault_balance} over earn threshold override of {self.override_threshold}"
+            )
+            return True
+        # Earn if deposits have accumulated over % threshold
+        if vault_balance / strategy_balance > EARN_PCT_THRESHOLD:
+            self.logger.info(
+                f"Vault balance of {vault_balance} and strategy balance of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
             )
 
-            after = snap.snap()
-            snap.printCompare(before, after)
-
-    def harvest(
-        self,
-        sett_name: str,
-        strategy: contract,
-    ):
-        """Orchestration function that harvests outstanding rewards.
-
-        Args:
-            sett_name (str)
-            strategy_address (str)
-
-        Raises:
-            ValueError: If the keeper isn't whitelisted, throw an error and alert user.
-        """
-        # TODO: update for ACL
-        if not self.__is_keeper_whitelisted(strategy):
-            raise ValueError(f"Keeper is not whitelisted for {sett_name}")
-
-        want_address = strategy.functions.want().call()
-        want = self.web3.eth.contract(
-            address=want_address,
-            abi=get_abi(self.chain, "erc20"),
-        )
-        vault_balance = want.functions.balanceOf(strategy.address).call()
-        self.logger.info(f"vault balance: {vault_balance}")
-
-        want_to_harvest = self.keeper_acl.functions.harvest(strategy.address).call(
-            {"from": self.keeper_address}
-        )
-        self.logger.info(f"estimated want change: {want_to_harvest}")
-
-        # TODO: figure out how to handle profit estimation
-        # current_price_eth = self.get_current_rewards_price()
-        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
-
-        gas_fee = self.estimate_gas_fee(strategy.address)
-        self.logger.info(f"estimated gas cost: {gas_fee}")
-
-        # harvest if ideal want change is > 0.05% of total vault assets
-        # should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
-
-        # for now we'll just harvest every hour
-        should_harvest = True
-        self.logger.info(f"Should we harvest: {should_harvest}")
-
-        if should_harvest:
-            self.__process_harvest(
-                strategy=strategy,
-                sett_name=sett_name,
-                harvested=want_to_harvest / want.functions.decimals().call(),
+            return True
+        else:
+            self.logger.info(
+                {
+                    "vault_balance": vault_balance,
+                    "strategy_balance": strategy_balance,
+                    "override_threshold": self.override_threshold,
+                    "vault_to_strategy_ratio": vault_balance / strategy_balance,
+                }
             )
+            return False
 
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
@@ -150,12 +115,12 @@ class Earner():
             bool: True if our bot is whitelisted to make function calls to strategy,
             False otherwise.
         """
-        harvester_key = self.keeper_acl.functions.HARVESTER_ROLE().call()
+        earner_key = self.keeper_acl.functions.EARNER_ROLE().call()
         return self.keeper_acl.functions.hasRole(
-            harvester_key, self.keeper_address
+            earner_key, self.keeper_address
         ).call()
 
-    def __process_harvest(
+    def __process_earn(
         self,
         strategy: contract = None,
         sett_name: str = None,
@@ -171,23 +136,23 @@ class Earner():
             harvested (Decimal, optional): Amount of Sushi harvested. Defaults to None.
         """
         try:
-            tx_hash = self.__send_harvest_tx(strategy)
+            tx_hash = self.__send_earn_tx(strategy)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
-                    tx_type=f"Harvest {sett_name}",
+                    tx_type=f"Earn {sett_name}",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                 )
             elif tx_hash != HexBytes(0):
-                send_success_to_discord(tx_type=f"Harvest {sett_name}", tx_hash=tx_hash)
+                send_success_to_discord(tx_type=f"Earn {sett_name}", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
-            send_error_to_discord(sett_name, "Harvest", error=e)
+            send_error_to_discord(sett_name, "Earn", error=e)
 
-    def __send_harvest_tx(self, strategy: contract) -> HexBytes:
+    def __send_earn_tx(self, strategy: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -208,8 +173,8 @@ class Earner():
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending harvest tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, "Harvest")
+            self.logger.error(f"Error in sending earn tx: {e}")
+            tx_hash = get_hash_from_failed_tx_error(e, "Earn")
         finally:
             return tx_hash
 
@@ -270,6 +235,6 @@ class Earner():
             options["maxPriorityFeePerGas"] = 10
         else:
             options["gasPrice"] = self.__get_gas_price()
-        return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
+        return self.keeper_acl.functions.earn(strategy_address).buildTransaction(
             options
         )
