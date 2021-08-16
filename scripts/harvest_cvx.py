@@ -43,7 +43,7 @@ if __name__ == "__main__":
     flashbot(web3, flashbots_signer)
 
     harvester = GeneralHarvester(
-        web3,
+        web3=web3,
         keeper_acl=KEEPER_ACL,
         keeper_address=keeper_address,
         keeper_key=keeper_key,
