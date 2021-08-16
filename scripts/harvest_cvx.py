@@ -19,6 +19,11 @@ ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
+HBTC_CRV_STRATEGY = "0xff26f400e57bf726822eacbb64fa1c52f1f27988"
+PBTC_CRV_STRATEGY = "0x1C1fD689103bbFD701b3B7D41A3807F12814033D"
+OBTC_CRV_STRATEGY = "0x2bb864cdb4856ab2d148c5ca52dd7ccec126d138"
+BBTC_CRV_STRATEGY = "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0"
+TRICRYPTO_CRV_STRATEGY = "0x05ec4356e1acd89cc2d16adc7415c8c95e736ac1"
 
 
 def safe_harvest(harvester, strategy_name, strategy):
@@ -52,7 +57,15 @@ if __name__ == "__main__":
         use_flashbots=True,
     )
 
-    for strategy_address in [CVX_CRV_HELPER_STRATEGY, CVX_HELPER_STRATEGY]:
+    for strategy_address in [
+        CVX_CRV_HELPER_STRATEGY,
+        CVX_HELPER_STRATEGY,
+        HBTC_CRV_STRATEGY,
+        PBTC_CRV_STRATEGY,
+        OBTC_CRV_STRATEGY,
+        BBTC_CRV_STRATEGY,
+        TRICRYPTO_CRV_STRATEGY,
+    ]:
         strategy = web3.eth.contract(
             address=strategy_address, abi=get_abi("eth", "strategy")
         )

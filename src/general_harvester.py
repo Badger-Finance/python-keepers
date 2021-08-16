@@ -157,11 +157,14 @@ class GeneralHarvester(IHarvester):
                     tx_type=f"Harvest {strategy_name}",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
+                    chain=self.chain,
                 )
             elif tx_hash != HexBytes(0):
                 if not self.use_flashbots:
                     send_success_to_discord(
-                        tx_type=f"Harvest {strategy_name}", tx_hash=tx_hash
+                        tx_type=f"Harvest {strategy_name}",
+                        tx_hash=tx_hash,
+                        chain=self.chain,
                     )
                 else:
                     send_error_to_discord(
