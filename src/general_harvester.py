@@ -21,7 +21,10 @@ from utils import (
 logging.basicConfig(level=logging.INFO)
 
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
+
 MAX_GAS_PRICE = int(200e9)  # 200 gwei
+PRIORITY_FEE_MULTIPLIER = 5  # Pay 5x the average priority fee
+# PRIORITY_FEE = int(20e9)  # 20 gwei
 NUM_FLASHBOTS_BUNDLES = 6
 
 
@@ -149,7 +152,7 @@ class GeneralHarvester(IHarvester):
             )
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
-                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Harvest {strategy_name}",
                     tx_hash=tx_hash,
@@ -226,12 +229,13 @@ class GeneralHarvester(IHarvester):
         }
         if self.chain == "eth":
             base_fee = get_latest_base_fee(self.web3)
-            # Use double the recommended priority fee as miner tip
-            priority_fee = 2 * self.web3.eth.max_priority_fee
+            # Use x times recommended priority fee as miner tip
+            self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
+            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
+            # priority_fee = PRIORITY_FEE
             options["maxPriorityFeePerGas"] = priority_fee
-            # Hard limit of 200gwei on the gas price
-            # TODO: Maybe don't submit tx at all if gas price > MAX_GAS_PRICE
-            options["maxFeePerGas"] = min(MAX_GAS_PRICE, 2 * base_fee + priority_fee)
+            # Hard limit on the gas price
+            options["maxFeePerGas"] = MAX_GAS_PRICE
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
         return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
@@ -252,9 +256,10 @@ class GeneralHarvester(IHarvester):
         elif self.chain == "eth":
             # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
             base_fee = get_latest_base_fee(self.web3)
-            # Use double the recommended priority fee as miner tip
-            priority_fee = 2 * self.web3.eth.max_priority_fee
-            gas_price = min(MAX_GAS_PRICE, 2 * base_fee + priority_fee)
+            # Use x times the recommended priority fee as miner tip
+            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
+            # priority_fee = PRIORITY_FEE
+            gas_price = 2 * base_fee + priority_fee
         return gas_price
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:

@@ -36,6 +36,7 @@ if __name__ == "__main__":
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
+    # flashbots_signer = Account.create()
 
     web3 = Web3(Web3.HTTPProvider(node_url))
 
@@ -51,7 +52,7 @@ if __name__ == "__main__":
         use_flashbots=True,
     )
 
-    for strategy_address in [CVX_HELPER_STRATEGY, CVX_CRV_HELPER_STRATEGY]:
+    for strategy_address in [CVX_CRV_HELPER_STRATEGY, CVX_HELPER_STRATEGY]:
         strategy = web3.eth.contract(
             address=strategy_address, abi=get_abi("eth", "strategy")
         )

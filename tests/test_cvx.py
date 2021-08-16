@@ -45,7 +45,7 @@ def setup_keeper_acl(keeper_address):
 @pytest.fixture
 def strategy() -> contract:
     return web3.eth.contract(
-        address=CVX_HELPER_STRATEGY, abi=get_abi("eth", "strategy")
+        address=CVX_CRV_HELPER_STRATEGY, abi=get_abi("eth", "strategy")
     )
 
 
