@@ -20,7 +20,7 @@ Cadence: Daily 18:30 UTC
 #### General Harvester
 ```
 Chain: Polygon
-Cadence: Hourly
+Cadence: Hourly, 5 min past the hour
 Setts: 
 ```
 #### ibBTC Fee Collector

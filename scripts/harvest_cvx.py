@@ -69,17 +69,17 @@ if __name__ == "__main__":
         keeper_address=keeper_address,
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
-        use_flashbots=True,
+        use_flashbots=False,
     )
 
     for strategy_address in [
-        # CVX_CRV_HELPER_STRATEGY,
-        # CVX_HELPER_STRATEGY,
+        CVX_CRV_HELPER_STRATEGY,
+        CVX_HELPER_STRATEGY,
         HBTC_CRV_STRATEGY,
         PBTC_CRV_STRATEGY,
         OBTC_CRV_STRATEGY,
         BBTC_CRV_STRATEGY,
-        # TRICRYPTO_CRV_STRATEGY,
+        TRICRYPTO_CRV_STRATEGY,
     ]:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
