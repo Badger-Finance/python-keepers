@@ -94,7 +94,7 @@ if __name__ == "__main__":
             keeper_acl=CONFIG.get(chain).get("keeper_acl"),
             keeper_address=keeper_address,
             keeper_key=keeper_key,
-            web3=node_url,
+            web3=node,
             base_oracle_address=CONFIG.get(chain).get("gas_oracle"),
         )
 
