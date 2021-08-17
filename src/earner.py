@@ -23,6 +23,8 @@ logging.basicConfig(level=logging.INFO)
 EARN_PCT_THRESHOLD = 0.01
 EARN_OVERRIDE_THRESHOLD = 2
 
+EARN_EXCEPTIONS = {}
+
 class Earner():
     def __init__(
         self,
@@ -54,7 +56,7 @@ class Earner():
     ):
         override_threshold = EARN_EXCEPTIONS.get(strategy.address, self.web3.fromWei(EARN_OVERRIDE_THRESHOLD, "ether"))
             
-        # handle skipping outside of earn call, only call this on setts we want to harvest
+        # handle skipping outside of earn call, only call this on setts we want to earn
         controller = self.web3.eth.contract(
             address=vault.functions.controller().call(),
             abi=get_abi(self.chain, "controller")
@@ -73,18 +75,18 @@ class Earner():
         vault_before = want.functions.balanceOf(vault.address).call()
         strategy_before = strategy.functions.balanceOf().call()
 
-        if self.should_earn(vault_before, strategy_before):
-            self.__process_harvest(strategy)
+        if self.should_earn(override_threshold, vault_before, strategy_before):
+            self.__process_earn(strategy)
     
-    def should_earn(self, vault_balance: int, strategy_balance: int) -> bool:
+    def should_earn(self, override_threshold: int, vault_balance: int, strategy_balance: int) -> bool:
          # Always allow earn on first run
         if strategy_balance == 0:
-            self.logger.info("No strategy balance, earn()")
+            self.logger.info("No strategy balance, earn")
             return True
         # Earn if deposits have accumulated over a static threshold
-        if vault_balance >= self.override_threshold:
+        if vault_balance >= override_threshold:
             self.logger.info(
-                f"Vault balance of {vault_balance} over earn threshold override of {self.override_threshold}"
+                f"Vault balance of {vault_balance} over earn threshold override of {override_threshold}"
             )
             return True
         # Earn if deposits have accumulated over % threshold
@@ -99,7 +101,7 @@ class Earner():
                 {
                     "vault_balance": vault_balance,
                     "strategy_balance": strategy_balance,
-                    "override_threshold": self.override_threshold,
+                    "override_threshold": override_threshold,
                     "vault_to_strategy_ratio": vault_balance / strategy_balance,
                 }
             )
@@ -124,7 +126,6 @@ class Earner():
         self,
         strategy: contract = None,
         sett_name: str = None,
-        harvested: Decimal = None,
     ):
         """Private function to create, broadcast, confirm tx on eth and then send
         transaction to Discord for monitoring
@@ -133,7 +134,6 @@ class Earner():
             strategy (contract, optional): Defaults to None.
             sett_name (str, optional): Defaults to None.
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
-            harvested (Decimal, optional): Amount of Sushi harvested. Defaults to None.
         """
         try:
             tx_hash = self.__send_earn_tx(strategy)
@@ -149,7 +149,7 @@ class Earner():
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(tx_type=f"Earn {sett_name}", tx_hash=tx_hash)
         except Exception as e:
-            self.logger.error(f"Error processing harvest tx: {e}")
+            self.logger.error(f"Error processing earn tx: {e}")
             send_error_to_discord(sett_name, "Earn", error=e)
 
     def __send_earn_tx(self, strategy: contract) -> HexBytes:
@@ -180,10 +180,10 @@ class Earner():
 
     def estimate_gas_fee(self, strategy_address: str) -> Decimal:
         current_gas_price = self.__get_gas_price()
-        estimated_gas_to_harvest = self.keeper_acl.functions.harvest(
+        estimated_gas_to_earn = self.keeper_acl.functions.earn(
             strategy_address
         ).estimateGas({"from": self.keeper_address})
-        return Decimal(current_gas_price * estimated_gas_to_harvest)
+        return Decimal(current_gas_price * estimated_gas_to_earn)
 
     def __get_gas_price(self) -> int:
         if self.chain == "poly":
@@ -218,11 +218,11 @@ class Earner():
         return total_gas_used * gas_price_base * base_usd
 
     def __build_transaction(self, strategy_address: str) -> dict:
-        """Builds transaction depending on which chain we're harvesting. EIP-1559
+        """Builds transaction depending on which chain we're earning. EIP-1559
         requires different handling for ETH txs than the other EVM chains.
 
         Args:
-            contract (contract): contract to use to build harvest tx
+            contract (contract): contract to use to build earn tx
 
         Returns:
             dict: tx dictionary
