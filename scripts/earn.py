@@ -30,9 +30,9 @@ CONFIG = {
 }
 
 
-def safe_earn(earner, sett_name, strategy):
+def safe_earn(earner, sett_name, vault, strategy):
     try:
-        earner.earn(sett_name, strategy)
+        earner.earn(vault, strategy)
     except Exception as e:
         logger.error(f"Error running {sett_name} earn: {e}")
 
@@ -42,8 +42,10 @@ def get_abi(chain: str, contract_id: str):
         return json.load(f)
 
 
-def get_strategies(node: Web3, chain: str) -> list:
+def get_strategies_and_vaults(node: Web3, chain: str) -> list:
     strategies = []
+    vaults = []
+
     vault_owner = node.toChecksumAddress(CONFIG.get(chain).get("vault_owner"))
     registry = node.eth.contract(
         address=node.toChecksumAddress(CONFIG.get(chain).get("registry")),
@@ -51,10 +53,11 @@ def get_strategies(node: Web3, chain: str) -> list:
     )
 
     for vault_address in registry.functions.fromAuthor(vault_owner).call():
-        strategy = get_strategy_from_vault(node, chain, vault_address)
+        strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+        vaults.append(vault)
         strategies.append(strategy)
 
-    return strategies
+    return strategies, vaults
 
 
 def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contract:
@@ -76,7 +79,7 @@ def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contr
         address=strategy_address, abi=get_abi(chain, "strategy")
     )
 
-    return strategy_contract
+    return strategy_contract, vault_contract
 
 
 if __name__ == "__main__":
@@ -84,7 +87,7 @@ if __name__ == "__main__":
         node_url = get_secret(f"quiknode/{chain}-node-url", "NODE_URL")
         node = Web3(Web3.HTTPProvider(node_url))
 
-        strategies = get_strategies(node, chain)
+        strategies, vaults = get_strategies_and_vaults(node, chain)
 
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
         keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
@@ -98,8 +101,8 @@ if __name__ == "__main__":
             base_oracle_address=CONFIG.get(chain).get("gas_oracle"),
         )
 
-        for strategy in strategies:
+        for strategy, vault in zip(strategies, vaults):
             strat_name = strategy.functions.getName().call()
 
             logger.info(f"+-----Earning {strat_name}-----+")
-            safe_earn(earner, strat_name, strategy)
+            safe_earn(earner, strat_name, vault, strategy)
