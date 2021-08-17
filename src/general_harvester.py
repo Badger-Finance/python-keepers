@@ -69,7 +69,7 @@ class GeneralHarvester(IHarvester):
         """
         strategy_name = strategy.functions.getName().call()
         # TODO: update for ACL
-        if not self.__is_keeper_whitelisted(strategy):
+        if not self.__is_keeper_whitelisted(strategy, "harvest"):
             raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
 
         want_address = strategy.functions.want().call()
@@ -103,14 +103,14 @@ class GeneralHarvester(IHarvester):
                 strategy_name=strategy_name,
                 harvested=want_to_harvest,
             )
-    
+
     def harvest_no_return(
-        self, 
+        self,
         strategy: contract,
     ):
         strategy_name = strategy.functions.getName().call()
         # TODO: update for ACL
-        if not self.__is_keeper_whitelisted(strategy):
+        if not self.__is_keeper_whitelisted(strategy, "harvest"):
             raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
 
         want_address = strategy.functions.want().call()
@@ -138,6 +138,28 @@ class GeneralHarvester(IHarvester):
                 strategy_name=strategy_name,
             )
 
+    def tend(self, strategy: contract):
+        strategy_name = strategy.functions.getName().call()
+        # TODO: update for ACL
+        if not self.__is_keeper_whitelisted(strategy, "tend"):
+            raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
+
+        # TODO: figure out how to handle profit estimation
+        # current_price_eth = self.get_current_rewards_price()
+        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
+
+        gas_fee = self.estimate_gas_fee(strategy.address, function="tend")
+        self.logger.info(f"estimated gas cost: {gas_fee}")
+
+        self.__process_tend(
+            strategy=strategy,
+            strategy_name=strategy_name,
+        )
+
+    def tend_then_harvest(self, strategy: contract):
+        self.tend(strategy)
+        self.harvest(strategy)
+
     def estimate_harvest_amount(self, strategy_address: str) -> Decimal:
         return self.keeper_acl.functions.harvest(strategy_address).call(
             {"from": self.keeper_address}
@@ -150,7 +172,7 @@ class GeneralHarvester(IHarvester):
         # should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
         return True
 
-    def __is_keeper_whitelisted(self, strategy: contract) -> bool:
+    def __is_keeper_whitelisted(self, strategy: contract, function: str) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
 
         Args:
@@ -160,17 +182,45 @@ class GeneralHarvester(IHarvester):
             bool: True if our bot is whitelisted to make function calls to strategy,
             False otherwise.
         """
-        harvester_key = self.keeper_acl.functions.HARVESTER_ROLE().call()
-        return self.keeper_acl.functions.hasRole(
-            harvester_key, self.keeper_address
-        ).call()
+        if function == "harvest":
+            key = self.keeper_acl.functions.HARVESTER_ROLE().call()
+        elif function == "tend":
+            key = self.keeper_acl.functions.TENDER_ROLE().call()
+        return self.keeper_acl.functions.hasRole(key, self.keeper_address).call()
+
+    def __process_tend(
+        self,
+        strategy: contract = None,
+        strategy_name: str = None,
+    ):
+        try:
+            tx_hash = self.__send_tend_tx(strategy)
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
+            if succeeded:
+                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
+                send_success_to_discord(
+                    tx_type=f"Tend {strategy_name}",
+                    tx_hash=tx_hash,
+                    gas_cost=gas_price_of_tx,
+                    chain=self.chain,
+                )
+            elif tx_hash != HexBytes(0):
+                send_success_to_discord(
+                    tx_type=f"Tend {strategy_name}",
+                    tx_hash=tx_hash,
+                    chain=self.chain,
+                )
+        except Exception as e:
+            self.logger.error(f"Error processing tend tx: {e}")
+            send_error_to_discord(strategy_name, "Tend", error=e)
 
     def __process_harvest(
         self,
         strategy: contract = None,
         strategy_name: str = None,
         harvested: Decimal = None,
-        returns: bool = True
+        returns: bool = True,
     ):
         """Private function to create, broadcast, confirm tx on eth and then send
         transaction to Discord for monitoring
@@ -181,7 +231,9 @@ class GeneralHarvester(IHarvester):
             harvested (Decimal, optional): Amount of Sushi harvested. Defaults to None.
         """
         try:
-            tx_hash, max_target_block = self.__send_harvest_tx(strategy, returns=returns)
+            tx_hash, max_target_block = self.__send_harvest_tx(
+                strategy, returns=returns
+            )
             succeeded, msg = confirm_transaction(
                 self.web3, tx_hash, max_block=max_target_block
             )
@@ -251,7 +303,36 @@ class GeneralHarvester(IHarvester):
         finally:
             return tx_hash, max_target_block
 
-    def __build_transaction(self, strategy_address: str, returns: bool = True) -> dict:
+    def __send_tend_tx(self, strategy: contract) -> HexBytes:
+        """Sends transaction to ETH node for confirmation.
+
+        Args:
+            strategy (contract)
+
+        Raises:
+            Exception: If we have an issue sending transaction (unable to communicate with
+            node, etc.) we log the error and return a tx_hash of 0x00.
+
+        Returns:
+            HexBytes: Transaction hash for transaction that was sent.
+        """
+        try:
+            tx = self.__build_transaction(strategy.address, function="tend")
+            signed_tx = self.web3.eth.account.sign_transaction(
+                tx, private_key=self.keeper_key
+            )
+            tx_hash = signed_tx.hash
+
+            self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        except ValueError as e:
+            self.logger.error(f"Error in sending tend tx: {e}")
+            tx_hash = get_hash_from_failed_tx_error(e, "Tend")
+        finally:
+            return tx_hash
+
+    def __build_transaction(
+        self, strategy_address: str, returns: bool = True, function: str = "harvest"
+    ) -> dict:
         """Builds transaction depending on which chain we're harvesting. EIP-1559
         requires different handling for ETH txs than the other EVM chains.
 
@@ -275,18 +356,41 @@ class GeneralHarvester(IHarvester):
             options["maxFeePerGas"] = MAX_GAS_PRICE
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
-        
+
+        if function == "harvest":
+            return self.__build_harvest_transaction(strategy_address, returns, options)
+        elif function == "tend":
+            return self.__build_tend_transaction(strategy_address, options)
+
+    def __build_harvest_transaction(
+        self, strategy_address: str, returns: bool, options: dict
+    ) -> dict:
         if returns:
             return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
                 options
             )
         else:
-            return self.keeper_acl.functions.harvestNoReturn(strategy_address).buildTransaction(
-                options
-            )
+            return self.keeper_acl.functions.harvestNoReturn(
+                strategy_address
+            ).buildTransaction(options)
 
-    def estimate_gas_fee(self, strategy_address: str, returns: bool = True) -> Decimal:
+    def __build_tend_transaction(self, strategy_address: str, options: dict) -> dict:
+        return self.keeper_acl.functions.tend(strategy_address).buildTransaction(
+            options
+        )
+
+    def estimate_gas_fee(
+        self, strategy_address: str, returns: bool = True, function: str = "harvest"
+    ) -> Decimal:
         current_gas_price = self.__get_effective_gas_price()
+        if function == "harvest":
+            estimated_gas = self.__estimate_harvest_gas(strategy_address, returns)
+        elif function == "tend":
+            estimated_gas = self.__estimate_tend_gas(strategy_address)
+
+        return Decimal(current_gas_price * estimated_gas)
+
+    def __estimate_harvest_gas(self, strategy_address: str, returns: bool) -> Decimal:
         if returns:
             estimated_gas_to_harvest = self.keeper_acl.functions.harvest(
                 strategy_address
@@ -295,7 +399,15 @@ class GeneralHarvester(IHarvester):
             estimated_gas_to_harvest = self.keeper_acl.functions.harvestNoReturn(
                 strategy_address
             ).estimateGas({"from": self.keeper_address})
-        return Decimal(current_gas_price * estimated_gas_to_harvest)
+
+        return Decimal(estimated_gas_to_harvest)
+
+    def __estimate_tend_gas(self, strategy_address: str) -> Decimal:
+        return Decimal(
+            self.keeper_acl.functions.tend(strategy_address).estimateGas(
+                {"from": self.keeper_address}
+            )
+        )
 
     def __get_effective_gas_price(self) -> int:
         if self.chain == "poly":
@@ -306,7 +418,6 @@ class GeneralHarvester(IHarvester):
             base_fee = get_latest_base_fee(self.web3)
             # Use x times the recommended priority fee as miner tip
             priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
-            # priority_fee = PRIORITY_FEE
             gas_price = 2 * base_fee + priority_fee
         return gas_price
 

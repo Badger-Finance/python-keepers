@@ -25,7 +25,8 @@ EARN_OVERRIDE_THRESHOLD = 2
 
 EARN_EXCEPTIONS = {}
 
-class Earner():
+
+class Earner:
     def __init__(
         self,
         chain: str = "eth",
@@ -48,23 +49,19 @@ class Earner():
             address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
         )
-    
-    def earn(
-        self,
-        vault: contract,
-        strategy: contract,
-        sett_name: str = None
-    ):
-        override_threshold = EARN_EXCEPTIONS.get(strategy.address, self.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether"))
-            
+
+    def earn(self, vault: contract, strategy: contract, sett_name: str = None):
+        override_threshold = EARN_EXCEPTIONS.get(
+            strategy.address, self.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether")
+        )
+
         # handle skipping outside of earn call, only call this on setts we want to earn
         controller = self.web3.eth.contract(
             address=vault.functions.controller().call(),
-            abi=get_abi(self.chain, "controller")
+            abi=get_abi(self.chain, "controller"),
         )
         want = self.web3.eth.contract(
-            address=vault.functions.token().call(),
-            abi=get_abi(self.chain, "erc20")
+            address=vault.functions.token().call(), abi=get_abi(self.chain, "erc20")
         )
 
         # Pre safety checks
@@ -78,9 +75,11 @@ class Earner():
 
         if self.should_earn(override_threshold, vault_before, strategy_before):
             self.__process_earn(vault, sett_name)
-    
-    def should_earn(self, override_threshold: int, vault_balance: int, strategy_balance: int) -> bool:
-         # Always allow earn on first run
+
+    def should_earn(
+        self, override_threshold: int, vault_balance: int, strategy_balance: int
+    ) -> bool:
+        # Always allow earn on first run
         if strategy_balance == 0:
             self.logger.info("No strategy balance, earn")
             return True
@@ -119,9 +118,7 @@ class Earner():
             False otherwise.
         """
         earner_key = self.keeper_acl.functions.EARNER_ROLE().call()
-        return self.keeper_acl.functions.hasRole(
-            earner_key, self.keeper_address
-        ).call()
+        return self.keeper_acl.functions.hasRole(earner_key, self.keeper_address).call()
 
     def __process_earn(
         self,
@@ -146,10 +143,12 @@ class Earner():
                     tx_type=f"Earn {sett_name}",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
-                    chain=self.chain
+                    chain=self.chain,
                 )
             elif tx_hash != HexBytes(0):
-                send_success_to_discord(tx_type=f"Earn {sett_name}", tx_hash=tx_hash, chain=self.chain)
+                send_success_to_discord(
+                    tx_type=f"Earn {sett_name}", tx_hash=tx_hash, chain=self.chain
+                )
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
             send_error_to_discord(sett_name, "Earn", error=e)

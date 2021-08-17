@@ -26,16 +26,26 @@ BBTC_CRV_STRATEGY = "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0"
 TRICRYPTO_CRV_STRATEGY = "0x05ec4356e1acd89cc2d16adc7415c8c95e736ac1"
 
 
-def safe_harvest(harvester, strategy_name, strategy):
+def safe_harvest(harvester, strategy_name, strategy) -> str:
     try:
         harvester.harvest(strategy)
+        return "Success!"
     except Exception as e:
         logger.error(f"Error running {strategy_name} harvest: {e}")
-        logger.info("Trying to run harvestNoReturn")
-        try:
-            harvester.harvest_no_return(strategy)
-        except Exception as e:
-            logger.error(f"Error running {strategy_name} harvestNoReturn: {e}")
+
+    logger.info("Trying to run harvestNoReturn")
+    try:
+        harvester.harvest_no_return(strategy)
+        return "Success!"
+    except Exception as e:
+        logger.error(f"Error running {strategy_name} harvestNoReturn: {e}")
+
+    logger.info("Tend first, then harvest")
+    try:
+        harvester.tend_then_harvest(strategy)
+        return "Success!"
+    except Exception as e:
+        logger.error(f"Error running {strategy_name} tend_then_harvest: {e}")
 
 
 if __name__ == "__main__":
@@ -63,8 +73,8 @@ if __name__ == "__main__":
     )
 
     for strategy_address in [
-        #CVX_CRV_HELPER_STRATEGY,
-        #CVX_HELPER_STRATEGY,
+        # CVX_CRV_HELPER_STRATEGY,
+        # CVX_HELPER_STRATEGY,
         HBTC_CRV_STRATEGY,
         PBTC_CRV_STRATEGY,
         OBTC_CRV_STRATEGY,
@@ -72,7 +82,8 @@ if __name__ == "__main__":
         # TRICRYPTO_CRV_STRATEGY,
     ]:
         strategy = web3.eth.contract(
-            address=web3.toChecksumAddress(strategy_address), abi=get_abi("eth", "strategy")
+            address=web3.toChecksumAddress(strategy_address),
+            abi=get_abi("eth", "strategy"),
         )
         strategy_name = strategy.functions.getName().call()
 
