@@ -7,6 +7,7 @@ metadata:
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
   schedule: "*/30 * * * *"
+  suspend: true
   jobTemplate:
     spec:
       template:
@@ -21,4 +22,3 @@ spec:
               - name: LOG_LEVEL
                 value: 'info'
           restartPolicy: OnFailure
-          suspend: true
