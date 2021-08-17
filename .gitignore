@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Node and hardhat files
+node_modules
+package.json
+package-lock.json
+hardhat.config.js

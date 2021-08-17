@@ -37,20 +37,24 @@ def send_error_to_discord(
     error: Exception = None,
     message="Transaction timed out.",
 ):
-    webhook = Webhook.from_url(
-        get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
-        adapter=RequestsWebhookAdapter(),
-    )
+    try:
+        webhook = Webhook.from_url(
+            get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
+            adapter=RequestsWebhookAdapter(),
+        )
 
-    embed = Embed(
-        title=f"**{tx_type} Failed for {sett_name}**",
-        description=f"{sett_name} Sett {tx_type} Details",
-    )
-    if error:
-        message = str(error)
-    embed.add_field(name="Failure information", value=message, inline=True)
+        embed = Embed(
+            title=f"**{tx_type} Failed for {sett_name}**",
+            description=f"{sett_name} Sett {tx_type} Details",
+        )
+        if error:
+            message = str(error)
+        embed.add_field(name="Failure information", value=message, inline=True)
 
-    webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
+        webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
+
+    except Exception as e:
+        logger.error(f"Error sending error to discord: {e}")
 
 
 def send_success_to_discord(
@@ -61,64 +65,70 @@ def send_success_to_discord(
     sett_name: str = None,
     chain: str = "ETH",
 ):
-    webhook = Webhook.from_url(
-        get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
-        adapter=RequestsWebhookAdapter(),
-    )
-
-    status = "Completed" if gas_cost else "Pending"
-
-    (explorer_name, explorer_url) = get_explorer(chain, tx_hash)
-
-    # init embed object
-    if tx_type in ["Harvest", "Tend"]:
-        embed = Embed(
-            title=f"**Badger {tx_type} Report**",
-            description=f"{sett_name} Sett {tx_type} Details",
-        )
-    else:
-        embed = Embed(
-            title=f"**Badger {tx_type} Report**",
-            description=f"{status} {tx_type}",
+    try:
+        webhook = Webhook.from_url(
+            get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
+            adapter=RequestsWebhookAdapter(),
         )
 
-    fields = []
-    # append link to tx scan website
-    fields.append(
-        {
-            "name": f"{explorer_name} Transaction",
-            "value": explorer_url,
-            "inline": False,
-        }
-    )
-    # append gas cost if tx finished
-    if status == "Completed":
+        status = "Completed" if gas_cost else "Pending"
+
+        (explorer_name, explorer_url) = get_explorer(chain, tx_hash)
+
+        # init embed object
+        if tx_type in ["Harvest", "Tend"]:
+            embed = Embed(
+                title=f"**Badger {tx_type} Report**",
+                description=f"{sett_name} Sett {tx_type} Details",
+            )
+        else:
+            embed = Embed(
+                title=f"**Badger {tx_type} Report**",
+                description=f"{status} {tx_type}",
+            )
+
+        fields = []
+        # append link to tx scan website
         fields.append(
             {
-                "name": "Gas Cost",
-                "value": f"${round(gas_cost, 2)}",
-                "inline": True,
+                "name": f"{explorer_name} Transaction",
+                "value": explorer_url,
+                "inline": False,
             }
         )
-    # add amount harvested / tended
-    if tx_type in ["Harvest", "Tend"]:
-        fields.append(
-            {
-                "name": f"Amount {tx_type}ed",
-                "value": amt,
-                "inline": True,
-            }
-        )
+        # append gas cost if tx finished
+        if status == "Completed":
+            fields.append(
+                {
+                    "name": "Gas Cost",
+                    "value": f"${round(gas_cost, 2)}",
+                    "inline": True,
+                }
+            )
+        # add amount harvested / tended
+        if tx_type in ["Harvest", "Tend"]:
+            fields.append(
+                {
+                    "name": f"Amount {tx_type}ed",
+                    "value": amt,
+                    "inline": True,
+                }
+            )
 
-    for field in fields:
-        embed.add_field(
-            name=field.get("name"), value=field.get("value"), inline=field.get("inline")
-        )
+        for field in fields:
+            embed.add_field(
+                name=field.get("name"),
+                value=field.get("value"),
+                inline=field.get("inline"),
+            )
 
-    if tx_type in ["Harvest", "Tend"]:
-        webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
-    else:
-        webhook.send(embed=embed, username=f"{tx_type}")
+        if tx_type in ["Harvest", "Tend"]:
+            webhook.send(embed=embed, username=f"{sett_name} {tx_type}er")
+        else:
+            webhook.send(embed=embed, username=f"{tx_type}")
+
+    except Exception as e:
+        logger.error(f"Error sending success to discord: {e}")
 
 
 def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
