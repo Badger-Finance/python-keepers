@@ -54,7 +54,7 @@ class Earner():
         vault: contract,
         strategy: contract
     ):
-        override_threshold = EARN_EXCEPTIONS.get(strategy.address, self.web3.fromWei(EARN_OVERRIDE_THRESHOLD, "ether"))
+        override_threshold = EARN_EXCEPTIONS.get(strategy.address, self.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether"))
             
         # handle skipping outside of earn call, only call this on setts we want to earn
         controller = self.web3.eth.contract(
@@ -76,7 +76,7 @@ class Earner():
         strategy_before = strategy.functions.balanceOf().call()
 
         if self.should_earn(override_threshold, vault_before, strategy_before):
-            self.__process_earn(strategy)
+            self.__process_earn(vault)
     
     def should_earn(self, override_threshold: int, vault_balance: int, strategy_balance: int) -> bool:
          # Always allow earn on first run
@@ -124,19 +124,19 @@ class Earner():
 
     def __process_earn(
         self,
-        strategy: contract = None,
+        vault: contract = None,
         sett_name: str = None,
     ):
         """Private function to create, broadcast, confirm tx on eth and then send
         transaction to Discord for monitoring
 
         Args:
-            strategy (contract, optional): Defaults to None.
+            vault (contract, optional): Defaults to None.
             sett_name (str, optional): Defaults to None.
             overrides (dict, optional): Dictionary settings for transaction. Defaults to None.
         """
         try:
-            tx_hash = self.__send_earn_tx(strategy)
+            tx_hash = self.__send_earn_tx(vault)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
@@ -152,11 +152,11 @@ class Earner():
             self.logger.error(f"Error processing earn tx: {e}")
             send_error_to_discord(sett_name, "Earn", error=e)
 
-    def __send_earn_tx(self, strategy: contract) -> HexBytes:
+    def __send_earn_tx(self, vault: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
-            strategy (contract)
+            vault (contract)
             overrides (dict)
 
         Raises:
@@ -167,11 +167,13 @@ class Earner():
             HexBytes: Transaction hash for transaction that was sent.
         """
         try:
-            tx = self.__build_transaction(strategy.address)
+            tx = self.__build_transaction(vault.address)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
-            tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            tx_hash = signed_tx.hash
+            self.logger.info(f"attempted tx_hash: {tx_hash}")
+            self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending earn tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(e, "Earn")
