@@ -32,7 +32,7 @@ CONFIG = {
 
 def safe_earn(earner, sett_name, vault, strategy):
     try:
-        earner.earn(vault, strategy)
+        earner.earn(vault, strategy, sett_name=sett_name)
     except Exception as e:
         logger.error(f"Error running {sett_name} earn: {e}")
 

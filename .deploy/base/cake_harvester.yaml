@@ -21,3 +21,4 @@ spec:
               - name: LOG_LEVEL
                 value: 'info'
           restartPolicy: OnFailure
+          suspend: true
