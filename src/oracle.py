@@ -116,7 +116,7 @@ class Oracle:
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                 "from": self.keeper_address,
                 "maxPriorityFeePerGas": priority_fee,
-                "maxFeePerGas": MAX_GAS_PRICE
+                "maxFeePerGas": MAX_GAS_PRICE,
             }
 
             if function == "Propose":

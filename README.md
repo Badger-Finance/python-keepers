@@ -19,9 +19,8 @@ Cadence: Daily 18:30 UTC
 ```
 #### General Harvester
 ```
-Chain: Polygon
-Cadence: Hourly, 5 min past the hour
-Setts: 
+Chain: Ethereum, Polygon
+Cadence: Daily, 9:30 UTC
 ```
 #### ibBTC Fee Collector
 ```
