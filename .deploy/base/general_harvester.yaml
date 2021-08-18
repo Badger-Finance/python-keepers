@@ -7,7 +7,7 @@ metadata:
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
   schedule: "30 9 * * *"
-  # suspend: true
+  suspend: true
   jobTemplate:
     spec:
       template:
