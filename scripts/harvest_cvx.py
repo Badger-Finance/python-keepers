@@ -50,6 +50,7 @@ strategies = [
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
+    logger.info(f"HARVESTING strategy: {strategy.address}")
     try:
         harvester.harvest(strategy)
         return "Success!"
