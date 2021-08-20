@@ -15,12 +15,16 @@ from utils import (
     hours,
     confirm_transaction,
     get_hash_from_failed_tx_error,
+    get_latest_base_fee,
     send_success_to_discord,
     send_error_to_discord,
     send_rebase_to_discord,
     send_rebase_error_to_discord,
 )
 from web3 import Web3, contract, exceptions
+
+MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
+PRIORITY_FEE_MULTIPLIER = 3  # Pay 3x the average priority fee
 
 
 class Rebaser:
@@ -158,13 +162,16 @@ class Rebaser:
             HexBytes: Transaction hash for transaction that was sent.
         """
         try:
-            tx = self.digg_orchestrator.functions.rebase().buildTransaction(
-                {
-                    "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-                    "gasPrice": self.__get_gas_price(),
-                    "from": self.keeper_address,
-                }
-            )
+            self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
+            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
+            options = {
+                "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
+                "from": self.keeper_address,
+                "maxPriorityFeePerGas": priority_fee,
+                "maxFeePerGas": MAX_GAS_PRICE,
+            }
+
+            tx = self.digg_orchestrator.functions.rebase().buildTransaction(options)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
@@ -174,12 +181,6 @@ class Rebaser:
             tx_hash = get_hash_from_failed_tx_error(e, self.logger)
         finally:
             return tx_hash
-
-    def __get_gas_price(self) -> int:
-        response = requests.get(
-            "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
-        )
-        return int(response.json().get("data").get("rapid") * 1.1)
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
         tx = self.web3.eth.get_transaction(tx_hash)

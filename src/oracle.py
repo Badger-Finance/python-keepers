@@ -15,6 +15,7 @@ from utils import (
     hours,
     confirm_transaction,
     get_hash_from_failed_tx_error,
+    get_latest_base_fee,
     send_success_to_discord,
     send_error_to_discord,
     send_oracle_error_to_discord,
@@ -23,6 +24,8 @@ from utils import (
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
 WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+MAX_GAS_PRICE = int(200e9)  # 200 gwei
+PRIORITY_FEE_MULTIPLIER = 3  # Pay 3x the average priority fee
 
 
 class Oracle:
@@ -107,50 +110,34 @@ class Oracle:
             HexBytes: Transaction hash for transaction that was sent.
         """
         try:
+            self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
+            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
+            options = {
+                "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
+                "from": self.keeper_address,
+                "maxPriorityFeePerGas": priority_fee,
+                "maxFeePerGas": MAX_GAS_PRICE,
+            }
+
             if function == "Propose":
                 tx = self.centralized_oracle.functions.proposeReport(
                     price
-                ).buildTransaction(
-                    {
-                        "nonce": self.web3.eth.get_transaction_count(
-                            self.keeper_address
-                        ),
-                        "gasPrice": self.__get_gas_price(),
-                        "from": self.keeper_address,
-                    }
-                )
+                ).buildTransaction(options)
             elif function == "Approve":
                 tx = self.centralized_oracle.functions.approveReport(
                     price
-                ).buildTransaction(
-                    {
-                        "nonce": self.web3.eth.get_transaction_count(
-                            self.keeper_address
-                        ),
-                        "gasPrice": self.__get_gas_price(),
-                        "from": self.keeper_address,
-                    }
-                )
+                ).buildTransaction(options)
+
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
         except ValueError as e:
             self.logger.error(f"Error in sending oracle tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(e, self.logger)
         finally:
             return tx_hash
-
-    def __get_gas_price(self) -> int:
-        """Gets gwei price of rapid transaction + 10% (ensure transaction going to get processed)
-
-        Returns:
-            int: Gwei price of rapid transaction + boost
-        """
-        response = requests.get(
-            "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
-        )
-        return int(response.json().get("data").get("rapid") * 1.1)
 
     def _get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
         """Calculates price in USD of total gas used during transaction.

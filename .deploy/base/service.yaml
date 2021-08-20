@@ -82,3 +82,17 @@ spec:
     - name: http
       port: 9000
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: earner-keeper
+  labels:
+    app: earner-keeper
+    service: earner-keeper
+spec:
+  selector:
+    app: earner-keeper
+  ports:
+    - name: http
+      port: 9000
+---

@@ -1,24 +1,23 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: general-harvester-keeper
+  name: earner-keeper
   labels:
-    app: general-harvester-keeper
+    app: earner-keeper
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "30 9 * * *"
+  schedule: "*/10 * * * *"
   startingDeadlineSeconds: 300
-  # suspend: true
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: general-harvester-keeper
+          serviceAccountName: earner-keeper
           containers:
-          - name: general-harvester-keeper
+          - name: earner-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/general_harvest.py"]
+            command: ["python", "scripts/earn.py"]
             env:
               - name: LOG_LEVEL
                 value: 'info'
