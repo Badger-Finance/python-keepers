@@ -346,7 +346,6 @@ class GeneralHarvester(IHarvester):
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,
-            "gas": GAS_LIMIT
         }
         if self.chain == "eth":
             # Use x times recommended priority fee as miner tip
@@ -356,6 +355,7 @@ class GeneralHarvester(IHarvester):
             options["maxPriorityFeePerGas"] = priority_fee
             # Hard limit on the gas price
             options["maxFeePerGas"] = MAX_GAS_PRICE
+            options["gas"] = GAS_LIMIT
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
 
