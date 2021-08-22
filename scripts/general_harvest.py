@@ -119,7 +119,10 @@ if __name__ == "__main__":
 
         if chain == "eth":
             strategies = [
-                node.eth.contract(address=node.toChecksumAddress(address), abi=get_abi(chain, "strategy"))
+                node.eth.contract(
+                    address=node.toChecksumAddress(address),
+                    abi=get_abi(chain, "strategy"),
+                )
                 for address in CONFIG.get(chain).get("strategies")
             ]
         else:
