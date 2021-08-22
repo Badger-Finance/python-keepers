@@ -22,6 +22,7 @@ logging.basicConfig(level=logging.INFO)
 
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
+GAS_LIMIT = 6000000
 MAX_GAS_PRICE = int(200e9)  # 200 gwei
 PRIORITY_FEE_MULTIPLIER = 5  # Pay 5x the average priority fee
 # PRIORITY_FEE = int(20e9)  # 20 gwei
@@ -345,6 +346,7 @@ class GeneralHarvester(IHarvester):
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,
+            "gas": GAS_LIMIT
         }
         if self.chain == "eth":
             # Use x times recommended priority fee as miner tip
@@ -358,8 +360,14 @@ class GeneralHarvester(IHarvester):
             options["gasPrice"] = self.__get_effective_gas_price()
 
         if function == "harvest":
+            self.logger.info(
+                f"estimated gas fee: {self.__estimate_harvest_gas(strategy_address, returns)}"
+            )
             return self.__build_harvest_transaction(strategy_address, returns, options)
         elif function == "tend":
+            self.logger.info(
+                f"estimated gas fee: {self.__estimate_tend_gas(strategy_address)}"
+            )
             return self.__build_tend_transaction(strategy_address, options)
 
     def __build_harvest_transaction(
@@ -437,6 +445,7 @@ class GeneralHarvester(IHarvester):
             tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
 
         total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
+        self.logger.info(f"gas used: {total_gas_used}")
         if self.chain == "eth":
             gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 10 ** 18)
         else:
