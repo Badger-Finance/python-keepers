@@ -4,6 +4,7 @@ import requests
 import sys
 from decimal import Decimal
 from hexbytes import HexBytes
+from time import sleep
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
@@ -159,6 +160,7 @@ class GeneralHarvester(IHarvester):
 
     def tend_then_harvest(self, strategy: contract):
         self.tend(strategy)
+        sleep(60)
         self.harvest(strategy)
 
     def estimate_harvest_amount(self, strategy_address: str) -> Decimal:
