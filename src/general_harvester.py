@@ -83,7 +83,7 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = (
-            self.estimate_harvest_amount(strategy.address)
+            self.estimate_harvest_amount(strategy.address, want)
             / 10 ** want.functions.decimals().call()
         )
         self.logger.info(f"estimated want change: {want_to_harvest}")
@@ -163,10 +163,21 @@ class GeneralHarvester(IHarvester):
         sleep(60)
         self.harvest(strategy)
 
-    def estimate_harvest_amount(self, strategy_address: str) -> Decimal:
-        return self.keeper_acl.functions.harvest(strategy_address).call(
-            {"from": self.keeper_address}
+    def estimate_harvest_amount(self, strategy: contract, want: contract) -> Decimal:
+        want_decs = want.functions.decimals().call()
+        want_post_harvest = (
+            self.keeper_acl.functions.harvest(strategy.address).call(
+                {"from": self.keeper_address}
+            )
         )
+        want_pre_harvest = strategy.functions.balanceOf().call()
+        self.logger.info(f"pre harvest want: {want_pre_harvest}")
+        self.logger.info(f"post harvest want: {want_post_harvest}")
+        est_want_change = want_post_harvest - want_pre_harvest
+        # call badger api to get prices
+        prices = requests.get("https://api.badger.finance/v2/prices?currency=eth").json()
+        price_per_want = prices.get(want.address)
+        return price_per_want * est_want_change
 
     def is_profitable(self) -> bool:
         # TODO: Implement this

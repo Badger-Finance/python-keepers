@@ -10,6 +10,7 @@ ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
+HBTC_STRATEGY = "0xf4146A176b09C664978e03d28d07Db4431525dAd"
 
 
 # Uses EIP-1559 txs which ganache-cli doesn't support
@@ -46,6 +47,12 @@ def setup_keeper_acl(keeper_address):
 def strategy() -> contract:
     return web3.eth.contract(
         address=CVX_CRV_HELPER_STRATEGY, abi=get_abi("eth", "strategy")
+    )
+
+@pytest.fixture
+def btc_strategy() -> contract:
+    return web3.eth.contract(
+        address=web3.toChecksumAddress(HBTC_STRATEGY), abi=get_abi("eth", "strategy")
     )
 
 
@@ -93,3 +100,9 @@ def test_harvest(keeper_address, harvester, strategy):
     assert (should_harvest and before_claimable != 0 and after_claimable == 0) or (
         before_claimable == after_claimable and not should_harvest
     )
+
+def test_btc_profit_est(harvester, btc_strategy):
+    want = web3.eth.contract(
+        address=btc_strategy.functions.want().call(), abi=get_abi("eth", "erc20")
+    )
+    assert harvester.estimate_harvest_amount(btc_strategy, want) == 10
