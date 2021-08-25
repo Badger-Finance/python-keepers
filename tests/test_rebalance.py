@@ -111,7 +111,7 @@ def test_rebalance(keeper_address, rebalancer, strategy):
     """
     accounts[0].transfer(keeper_address, "10 ether")
 
-    digg_price_bf = strategy.functions.lastDiggPrice().call()
+    digg_price_bf = strategy.functions.lastDiggPrice().call() / 10 ** 18
     logger.info(f"digg price before: {digg_price_bf}")
 
     rebalancer.rebalance(strategy)
