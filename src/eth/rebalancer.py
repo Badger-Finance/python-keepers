@@ -27,6 +27,7 @@ stable_vault_abi = "0x3ee8ecef1c5d6b924a03a32eff4233d3de5190e5"
 STABILIZE_VAULT = "0x608b6D82eb121F3e5C0baeeD32d81007B916E83C"
 stable_strat_abi = "0xfb688967bac33abd93da18ac0cbf1a69cd5f0093"
 STABILIZE_STRAT = "0xA6af1B913E205B8E9B95D3B30768c0989e942316"
+DIGG_TOKEN = "0x798D1bE841a82a273720CE31c822C61a67a601C3"
 NUM_FLASHBOTS_BUNDLES = 6
 
 
@@ -54,6 +55,10 @@ class Rebalancer:
             address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
         )
+        self.digg = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(DIGG_TOKEN),
+            abi=get_abi(self.chain, "erc20"),
+        )
 
         self.use_flashbots = use_flashbots
 
@@ -74,18 +79,24 @@ class Rebalancer:
         if not self.__is_keeper_whitelisted(strategy):
             raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
 
-        last_digg_price = strategy.functions.lastDiggPrice().call() / 10 ** 18
-        self.logger.info(f"last digg price: {last_digg_price}")
-        amt_to_trade = strategy.functions.tradeAmountLeft().call()
-        self.logger.info(f"amt left to trade: {amt_to_trade}")
+        digg_current_supply = self.digg.functions.totalSupply().call()
+        self.logger.info(f"current digg supply: {digg_current_supply}")
+        digg_last_supply = strategy.functions.lastDiggTotalSupply().call()
+        self.logger.info(f"last digg supply: {digg_last_supply}")
 
-        gas_fee = self.estimate_gas_fee(strategy)
-        self.logger.info(f"estimated gas cost: {gas_fee}")
+        if digg_current_supply != digg_last_supply:
+            last_digg_price = strategy.functions.lastDiggPrice().call() / 10 ** 18
+            self.logger.info(f"last digg price: {last_digg_price}")
+            amt_to_trade = strategy.functions.tradeAmountLeft().call()
+            self.logger.info(f"amt left to trade: {amt_to_trade}")
 
-        self.__process_rebalance(
-            strategy=strategy,
-            strategy_name=strategy_name,
-        )
+            gas_fee = self.estimate_gas_fee(strategy)
+            self.logger.info(f"estimated gas cost: {gas_fee}")
+
+            self.__process_rebalance(
+                strategy=strategy,
+                strategy_name=strategy_name,
+            )
 
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
