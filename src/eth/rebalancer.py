@@ -14,9 +14,8 @@ from utils import (
     send_error_to_discord,
     send_success_to_discord,
     get_abi,
-    get_hash_from_failed_tx_error,
-    get_latest_base_fee,
 )
+from tx_utils import get_gas_price_of_tx, get_latest_base_fee, get_effective_gas_price
 
 logging.basicConfig(level=logging.INFO)
 
@@ -123,8 +122,7 @@ class Rebalancer:
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
-                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
+                gas_price_of_tx = get_gas_price_of_tx(self.web3, self.base_usd_oracle, tx_hash)
                 send_success_to_discord(
                     tx_type=f"Rebalance {strategy_name}",
                     tx_hash=tx_hash,
@@ -160,7 +158,7 @@ class Rebalancer:
             HexBytes: Transaction hash for transaction that was sent.
         """
         max_target_block = None
-        tx_hash = None
+        tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy)
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -185,7 +183,6 @@ class Rebalancer:
 
         except ValueError as e:
             self.logger.error(f"Error in sending rebalance tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, "Rebalance")
         finally:
             return tx_hash, max_target_block
 
@@ -216,50 +213,10 @@ class Rebalancer:
         return tx
 
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
-        current_gas_price = self.__get_effective_gas_price()
+        current_gas_price = get_effective_gas_price(self.web3)
         estimated_gas = strategy.functions.rebalance().estimateGas(
             {"from": self.keeper_address}
         )
         self.logger.info(f"estimated gas fee: {estimated_gas}")
 
         return Decimal(current_gas_price * estimated_gas)
-
-    def __get_effective_gas_price(self) -> int:
-        # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
-        base_fee = get_latest_base_fee(self.web3)
-        # Use x times the recommended priority fee as miner tip
-        gas_data = self.web3.eth.fee_history("0x4", "latest", [70])
-        rewards = gas_data.get("reward", [[int(10e9)]])
-        priority_fee = sum([r[0] for r in rewards]) / len(rewards)
-        gas_price = 2 * base_fee + priority_fee
-        return gas_price
-
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        """Gets the actual amount of gas used by the transaction and converts
-        it from gwei to USD value for monitoring.
-
-        Args:
-            tx_hash (HexBytes): tx id of target transaction
-
-        Returns:
-            Decimal: USD value of gas used in tx
-        """
-        try:
-            tx_receipt = self.web3.eth.get_transaction_receipt(tx_hash)
-        except exceptions.TransactionNotFound:
-            tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
-
-        total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
-        self.logger.info(f"gas used: {total_gas_used}")
-        if self.chain == "eth":
-            gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 10 ** 18)
-        else:
-            tx = self.web3.eth.get_transaction(tx_hash)
-            gas_price_base = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-
-        base_usd = Decimal(
-            self.base_usd_oracle.functions.latestAnswer().call()
-            / 10 ** self.base_usd_oracle.functions.decimals().call()
-        )
-
-        return total_gas_used * gas_price_base * base_usd
