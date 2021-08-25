@@ -17,6 +17,7 @@ STABILIZE_STRAT = "0xA6af1B913E205B8E9B95D3B30768c0989e942316"
 
 logger = logging.getLogger("test_rebalance")
 
+
 def mock_send_discord(
     tx_hash: HexBytes,
     tx_type: str,

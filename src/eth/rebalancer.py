@@ -222,7 +222,7 @@ class Rebalancer:
         # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
         base_fee = get_latest_base_fee(self.web3)
         # Use x times the recommended priority fee as miner tip
-        gas_data = self.web3.eth.fee_history(2, 'latest', [70])
+        gas_data = self.web3.eth.fee_history(2, "latest", [70])
         rewards = gas_data.get("reward", [[int(10e9)]])
         priority_fee = sum([r[0] for r in rewards]) / len(rewards)
         gas_price = 2 * base_fee + priority_fee
