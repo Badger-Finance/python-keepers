@@ -1,0 +1,24 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: rebalancer-keeper
+  labels:
+    app: rebalancer-keeper
+spec:
+  # cron to run at 4pm EST every day "0 20 * * *"
+  schedule: "10-59/5 20 * * *"
+  startingDeadlineSeconds: 180
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: rebalancer-keeper
+          containers:
+          - name: rebalancer-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/rebalance.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure

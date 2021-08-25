@@ -96,3 +96,17 @@ spec:
     - name: http
       port: 9000
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rebalancer-keeper
+  labels:
+    app: rebalancer-keeper
+    service: rebalancer-keeper
+spec:
+  selector:
+    app: rebalancer-keeper
+  ports:
+    - name: http
+      port: 9000
+---

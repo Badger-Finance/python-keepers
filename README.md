@@ -19,7 +19,7 @@ Cadence: Daily 18:30 UTC
 ```
 #### General Harvester
 ```
-Chain: Ethereum, Polygon
+Chain: Polygon
 Cadence: Daily, 9:30 UTC
 ```
 #### ibBTC Fee Collector
@@ -31,12 +31,17 @@ Cadence: Daily 10:00 UTC
 ```
 Chain: Ethereum
 Cadence: Daily 10:15 UTC
-Setts: cvxCRV, cvx
+Setts: all but cvxCRV, cvx, uni pools, sushi badger/wbtc, single asset vaults
 ```
 #### Rebaser
 ```
 Chain: Ethereum
-Cadence: Daily 20:00 UTC
+Cadence: Every 5 min from 19:00 UTC - 20:59 UTC
+```
+#### Rebalancer
+```
+Chain: Ethereum
+Cadence: Every 5 min from 20:10 UTC - 20:59 UTC
 ```
 ## testing:
 

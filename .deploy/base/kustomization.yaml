@@ -8,5 +8,6 @@ resources:
   - ibbtc_fee_collector.yaml
   - propose_centralized_oracle.yaml
   - rebase.yaml
+  - rebalancer.yaml
   - service.yaml
   - service_account.yaml
