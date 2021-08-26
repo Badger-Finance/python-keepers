@@ -1,9 +1,8 @@
-import logging
-import os
-import requests
-import sys
 from decimal import Decimal
 from hexbytes import HexBytes
+import logging
+import os
+import sys
 from time import sleep
 from web3 import Web3, contract, exceptions
 

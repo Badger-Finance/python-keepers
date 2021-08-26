@@ -3,10 +3,8 @@ from hexbytes import HexBytes
 import logging
 import pytest
 from brownie import accounts, Contract, web3
-import os
 from web3 import contract
 
-from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
 from tests.utils import test_address, test_key
 from src.eth.rebalancer import Rebalancer
