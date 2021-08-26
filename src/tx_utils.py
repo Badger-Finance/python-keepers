@@ -5,12 +5,10 @@ from web3 import Web3, contract, exceptions
 
 logger = logging.getLogger("tx-utils")
 
+
 def get_gas_price_of_tx(
-    web3: Web3,
-    gas_oracle: contract,
-    tx_hash: HexBytes,
-    chain: str = "eth"
-    ) -> Decimal:
+    web3: Web3, gas_oracle: contract, tx_hash: HexBytes, chain: str = "eth"
+) -> Decimal:
     """Gets the actual amount of gas used by the transaction and converts
     it from gwei to USD value for monitoring.
 
@@ -46,6 +44,7 @@ def get_gas_price_of_tx(
 
     return gas_price_of_tx
 
+
 def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
     latest = web3.eth.get_block("latest")
     raw_base_fee = latest.get("baseFeePerGas", hex(default))
@@ -55,15 +54,24 @@ def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
         base_fee = int(raw_base_fee)
     return base_fee
 
+
 def get_effective_gas_price(web3: Web3) -> int:
     # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
     base_fee = get_latest_base_fee(web3)
     logger.info(f"latest base fee: {base_fee}")
-    # Get average of 70th percentile priority fees of last 4 blocks
-    gas_data = web3.eth.fee_history("0x4", "latest", [70])
-    rewards = gas_data.get("reward", [[int(10e9)]])
-    priority_fee = int(sum([r[0] for r in rewards]) / len(rewards))
+
+    priority_fee = get_priority_fee(web3)
     logger.info(f"avg priority fee: {priority_fee}")
     # max fee aka gas price enough to get included in next 6 blocks
     gas_price = 2 * base_fee + priority_fee
     return gas_price
+
+
+def get_priority_fee(web3: Web3) -> int:
+    # Get average of 70th percentile priority fees of last 4 blocks
+    gas_data = web3.eth.fee_history("0x4", "latest", [70])
+    rewards = gas_data.get("reward", [[int(10e9)]])
+    priority_fee = int(sum([r[0] for r in rewards]) / len(rewards))
+
+    logger.info(f"piority fee: {priority_fee}")
+    return priority_fee

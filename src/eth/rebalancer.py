@@ -14,7 +14,12 @@ from utils import (
     send_success_to_discord,
     get_abi,
 )
-from tx_utils import get_gas_price_of_tx, get_latest_base_fee, get_effective_gas_price
+from tx_utils import (
+    get_gas_price_of_tx,
+    get_latest_base_fee,
+    get_effective_gas_price,
+    get_priority_fee,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -121,7 +126,9 @@ class Rebalancer:
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
-                gas_price_of_tx = get_gas_price_of_tx(self.web3, self.base_usd_oracle, tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash
+                )
                 send_success_to_discord(
                     tx_type=f"Rebalance {strategy_name}",
                     tx_hash=tx_hash,
@@ -196,9 +203,7 @@ class Rebalancer:
             dict: tx dictionary
         """
         # Use x times recommended priority fee as miner tip
-        gas_data = self.web3.eth.fee_history("0x4", "latest", [70])
-        rewards = gas_data.get("reward", [[int(10e9)]])
-        priority_fee = int(sum([r[0] for r in rewards]) / len(rewards))
+        priority_fee = get_priority_fee(self.web3)
         self.logger.info(f"max_priority_fee: {priority_fee}")
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
