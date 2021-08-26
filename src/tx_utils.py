@@ -71,7 +71,7 @@ def get_priority_fee(
     web3: Web3,
     num_blocks: str = "0x4",
     percentile: int = 70,
-    default_reward: int = 10e9,
+    default_reward: int = int(10e9),
 ) -> int:
     """Calculates priority fee looking at current block - num_blocks historic
     priority fees at the given percentile and taking the average.
@@ -79,7 +79,7 @@ def get_priority_fee(
     Args:
         web3 (Web3): Web3 object
         num_blocks (str, optional): Number of historic blocks to look at in hex form (no leading 0s). Defaults to "0x4".
-        percentiles (list, optional): Percentile of transactions in blocks to use to analyze fees. Defaults to [70].
+        percentiles (int, optional): Percentile of transactions in blocks to use to analyze fees. Defaults to 70.
         default_reward (int, optional): If call fails, what default reward to use in gwei. Defaults to 10e9.
 
     Returns:
