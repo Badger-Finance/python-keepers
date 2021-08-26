@@ -49,6 +49,7 @@ def strategy() -> contract:
         address=CVX_CRV_HELPER_STRATEGY, abi=get_abi("eth", "strategy")
     )
 
+
 @pytest.fixture
 def btc_strategy() -> contract:
     return web3.eth.contract(
@@ -100,6 +101,7 @@ def test_harvest(keeper_address, harvester, strategy):
     assert (should_harvest and before_claimable != 0 and after_claimable == 0) or (
         before_claimable == after_claimable and not should_harvest
     )
+
 
 def test_btc_profit_est(harvester, btc_strategy):
     want = web3.eth.contract(
