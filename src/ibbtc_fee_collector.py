@@ -18,7 +18,7 @@ from utils import (
     send_success_to_discord,
     send_oracle_error_to_discord,
 )
-from tx_utils import get_priority_fee, get_effective_gas_price
+from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 from web3 import Web3, contract, exceptions
 
 IBBTC_CORE_ADDRESS = "0x2A8facc9D49fBc3ecFf569847833C380A13418a8"
@@ -104,7 +104,7 @@ class ibBTCFeeCollector:
             tx_hash = self.__send_collection_tx()
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(self.web3, self.eth_usd_oracle, tx_hash)
                 send_success_to_discord(
                     tx_hash=tx_hash,
                     tx_type="ibBTC Fee Collection",
@@ -143,14 +143,3 @@ class ibBTCFeeCollector:
             tx_hash = get_hash_from_failed_tx_error(e, self.logger)
         finally:
             return tx_hash
-
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        tx = self.web3.eth.get_transaction(tx_hash)
-
-        total_gas_used = Decimal(tx.get("gas", 0))
-        gas_price_eth = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-        eth_usd = Decimal(
-            self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
-        )
-
-        return total_gas_used * gas_price_eth * eth_usd
