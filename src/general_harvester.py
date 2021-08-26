@@ -18,6 +18,7 @@ from utils import (
     get_hash_from_failed_tx_error,
     get_latest_base_fee,
 )
+from tx_utils import get_priority_fee
 
 logging.basicConfig(level=logging.INFO)
 
@@ -361,11 +362,7 @@ class GeneralHarvester(IHarvester):
             "from": self.keeper_address,
         }
         if self.chain == "eth":
-            # Use x times recommended priority fee as miner tip
-            self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
-            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
-            # priority_fee = PRIORITY_FEE
-            options["maxPriorityFeePerGas"] = priority_fee
+            options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
             # Hard limit on the gas price
             options["maxFeePerGas"] = MAX_GAS_PRICE
             options["gas"] = GAS_LIMIT

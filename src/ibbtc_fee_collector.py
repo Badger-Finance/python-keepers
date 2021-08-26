@@ -18,12 +18,14 @@ from utils import (
     send_success_to_discord,
     send_oracle_error_to_discord,
 )
+from tx_utils import get_priority_fee, get_effective_gas_price
 from web3 import Web3, contract, exceptions
 
 IBBTC_CORE_ADDRESS = "0x2A8facc9D49fBc3ecFf569847833C380A13418a8"
 BTC_ETH_CHAINLINK = "0xdeb288F737066589598e9214E782fa5A8eD689e8"
 
 FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
+MAX_GAS_PRICE = int(200e9)
 
 
 class ibBTCFeeCollector:
@@ -88,7 +90,7 @@ class ibBTCFeeCollector:
         return fee_percent_of_claim <= FEE_THRESHOLD
 
     def __estimate_gas_fee(self) -> Decimal:
-        current_gas_price = self.__get_gas_price()
+        current_gas_price = get_effective_gas_price(self.web3)
         estimated_gas_tx = self.ibbtc.functions.collectFee().estimateGas(
             {"from": self.keeper_address}
         )
@@ -124,14 +126,14 @@ class ibBTCFeeCollector:
         Returns:
             HexBytes: Transaction hash for transaction that was sent.
         """
+        options = {
+            "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
+            "from": self.keeper_address,
+            "maxPriorityFeePerGas": get_priority_fee(self.web3),
+            "maxFeePerGas": MAX_GAS_PRICE,
+        }
         try:
-            tx = self.ibbtc.functions.collectFee().buildTransaction(
-                {
-                    "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-                    "gasPrice": self.__get_gas_price(),
-                    "from": self.keeper_address,
-                }
-            )
+            tx = self.ibbtc.functions.collectFee().buildTransaction(options)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
@@ -141,12 +143,6 @@ class ibBTCFeeCollector:
             tx_hash = get_hash_from_failed_tx_error(e, self.logger)
         finally:
             return tx_hash
-
-    def __get_gas_price(self) -> int:
-        response = requests.get(
-            "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
-        )
-        return int(response.json().get("data").get("rapid") * 1.1)
 
     def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
         tx = self.web3.eth.get_transaction(tx_hash)
