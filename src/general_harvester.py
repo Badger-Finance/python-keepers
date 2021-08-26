@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMIT = 6000000
-MAX_GAS_PRICE = int(60e9)  # 200 gwei
+MAX_GAS_PRICE = int(200e9)  # 200 gwei
 PRIORITY_FEE_MULTIPLIER = 5  # Pay 5x the average priority fee
 # PRIORITY_FEE = int(20e9)  # 20 gwei
 NUM_FLASHBOTS_BUNDLES = 6
