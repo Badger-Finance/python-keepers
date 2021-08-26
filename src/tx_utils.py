@@ -70,11 +70,22 @@ def get_effective_gas_price(web3: Web3) -> int:
 def get_priority_fee(
     web3: Web3,
     num_blocks: str = "0x4",
-    percentiles: list = [70],
+    percentile: int = 70,
     default_reward: int = 10e9,
 ) -> int:
-    # Get average of 70th percentile priority fees of last 4 blocks
-    gas_data = web3.eth.fee_history(num_blocks, "latest", percentiles)
+    """Calculates priority fee looking at current block - num_blocks historic
+    priority fees at the given percentile and taking the average.
+
+    Args:
+        web3 (Web3): Web3 object
+        num_blocks (str, optional): Number of historic blocks to look at in hex form (no leading 0s). Defaults to "0x4".
+        percentiles (list, optional): Percentile of transactions in blocks to use to analyze fees. Defaults to [70].
+        default_reward (int, optional): If call fails, what default reward to use in gwei. Defaults to 10e9.
+
+    Returns:
+        int: [description]
+    """
+    gas_data = web3.eth.fee_history(num_blocks, "latest", [percentile])
     rewards = gas_data.get("reward", [[default_reward]])
     priority_fee = int(sum([r[0] for r in rewards]) / len(rewards))
 
