@@ -19,7 +19,7 @@ Cadence: Daily 18:30 UTC
 ```
 #### General Harvester
 ```
-Chain: Ethereum, Polygon
+Chain: Polygon
 Cadence: Daily, 9:30 UTC
 ```
 #### ibBTC Fee Collector
@@ -31,19 +31,24 @@ Cadence: Daily 10:00 UTC
 ```
 Chain: Ethereum
 Cadence: Daily 10:15 UTC
-Setts: cvxCRV, cvx
+Setts: all but cvxCRV, cvx, uni pools, sushi badger/wbtc, single asset vaults
 ```
 #### Rebaser
 ```
 Chain: Ethereum
-Cadence: Daily 20:00 UTC
+Cadence: Every 5 min from 19:00 UTC - 20:59 UTC
+```
+#### Rebalancer
+```
+Chain: Ethereum
+Cadence: Every 5 min from 20:10 UTC - 20:59 UTC
 ```
 ## testing:
 
-Set `TEST_DISCORD_WEBHOOK_URL` in `.env` to a test url if you have one or want to see notifications.
+Set `WEB3_INFURA_PROJECT_ID` environment variable in terminal before running script.
 
-To test sushi bots with the forked mainnet network:
-`brownie test tests/test_sushi.py -s`
+To run tests with the forked mainnet network:
+`brownie test tests/<test-file> --network=hardhat-fork`
 
 To test pancake bots on the forked bsc network:
 `brownie test tests/test_cake.py -s --network bsc-fork`
