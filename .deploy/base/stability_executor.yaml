@@ -1,24 +1,24 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: rebalancer-keeper
+  name: stability-executor-keeper
   labels:
-    app: rebalancer-keeper
+    app: stability-executor-keeper
 spec:
   # cron to run at 4pm EST every day "0 20 * * *"
-  schedule: "10-59/5 20 * * *"
+  schedule: "15-59/5 20 * * *"
   startingDeadlineSeconds: 180
-  suspend: false
+  suspend: true
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: rebalancer-keeper
+          serviceAccountName: stability-executor-keeper
           containers:
-          - name: rebalancer-keeper
+          - name: stability-executor-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/rebalance.py"]
+            command: ["python", "scripts/stability_execute.py"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

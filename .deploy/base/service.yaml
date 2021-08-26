@@ -110,3 +110,17 @@ spec:
     - name: http
       port: 9000
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stability-executor-keeper
+  labels:
+    app: stability-executor-keeper
+    service: stability-executor-keeper
+spec:
+  selector:
+    app: stability-executor-keeper
+  ports:
+    - name: http
+      port: 9000
+---

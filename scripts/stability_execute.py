@@ -3,7 +3,6 @@ import os
 import sys
 from eth_account.account import Account
 from flashbots import flashbot
-from pathlib import Path
 from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
@@ -12,7 +11,7 @@ from utils import get_secret, get_abi
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
 )
-from rebalancer import Rebalancer
+from stability_executor import StabilityExecutor
 
 logging.basicConfig(level=logging.INFO)
 
@@ -39,7 +38,7 @@ if __name__ == "__main__":
         address=STABILIZE_STRAT, abi=get_abi("eth", "stability_strat")
     )
 
-    rebalancer = Rebalancer(
+    stability_executor = StabilityExecutor(
         web3=web3,
         keeper_acl=KEEPER_ACL,
         keeper_address=keeper_address,
@@ -49,4 +48,4 @@ if __name__ == "__main__":
     )
 
     logger.info("+-----REBALANCING DIGG STABILITY SETT-----+")
-    rebalancer.rebalance(strategy)
+    stability_executor.execute_batch(strategy)
