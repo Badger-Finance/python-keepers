@@ -11,3 +11,4 @@ resources:
   - rebalancer.yaml
   - service.yaml
   - service_account.yaml
+  - stability_executor.yaml

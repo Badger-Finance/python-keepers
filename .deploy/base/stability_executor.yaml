@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: stability-executor-keeper
+  labels:
+    app: stability-executor-keeper
+spec:
+  # cron to run at 4pm EST every day "0 20 * * *"
+  schedule: "15-59/5 20 * * *"
+  startingDeadlineSeconds: 180
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: stability-executor-keeper
+          containers:
+          - name: stability-executor-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/stability_execute.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure
