@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMIT = 6000000
-MAX_GAS_PRICE = int(60e9)  # 200 gwei
+MAX_GAS_PRICE = int(200e9)  # 200 gwei
 PRIORITY_FEE_MULTIPLIER = 5  # Pay 5x the average priority fee
 # PRIORITY_FEE = int(20e9)  # 20 gwei
 NUM_FLASHBOTS_BUNDLES = 6
@@ -83,7 +83,7 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = (
-            self.estimate_harvest_amount(strategy.address, want)
+            self.estimate_harvest_amount(strategy, want)
             / 10 ** want.functions.decimals().call()
         )
         self.logger.info(f"estimated want change: {want_to_harvest}")
