@@ -213,15 +213,17 @@ class Rebalancer:
             "maxFeePerGas": MAX_GAS_PRICE,
             "gas": GAS_LIMIT,
         }
-        tx = self.keeper_acl.functions.rebalance(strategy.address).buildTransaction(options)
+        tx = self.keeper_acl.functions.rebalance(strategy.address).buildTransaction(
+            options
+        )
 
         return tx
 
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
         current_gas_price = get_effective_gas_price(self.web3)
-        estimated_gas = self.keeper_acl.functions.rebalance(strategy.address).estimateGas(
-            {"from": self.keeper_address}
-        )
+        estimated_gas = self.keeper_acl.functions.rebalance(
+            strategy.address
+        ).estimateGas({"from": self.keeper_address})
         self.logger.info(f"estimated gas fee: {estimated_gas}")
 
         return Decimal(current_gas_price * estimated_gas)

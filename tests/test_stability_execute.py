@@ -54,8 +54,12 @@ def keeper_address() -> str:
 
 @pytest.fixture(autouse=True)
 def patch_stability_executor(monkeypatch):
-    monkeypatch.setattr("src.eth.stability_executor.send_success_to_discord", mock_send_discord)
-    monkeypatch.setattr("tests.test_stability_execute.web3.eth.fee_history", mock_fee_history)
+    monkeypatch.setattr(
+        "src.eth.stability_executor.send_success_to_discord", mock_send_discord
+    )
+    monkeypatch.setattr(
+        "tests.test_stability_execute.web3.eth.fee_history", mock_fee_history
+    )
 
 
 @pytest.fixture(autouse=True)
