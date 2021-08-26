@@ -6,7 +6,7 @@ metadata:
     app: rebalancer-keeper
 spec:
   # cron to run at 4pm EST every day "0 20 * * *"
-  schedule: "10-59/5 20 * * *"
+  schedule: "10-59/5 20,21 * * *"
   startingDeadlineSeconds: 180
   suspend: false
   jobTemplate:
