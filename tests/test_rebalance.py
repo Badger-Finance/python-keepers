@@ -73,14 +73,14 @@ def setup_keeper_acl(keeper_address):
 
 
 @pytest.fixture(autouse=True)
-def setup_stability_vault(keeper_address):
+def setup_stability_vault(keeper_address, setup_keeper_acl):
     stability_strategy = Contract.from_abi(
         "StabilizeStrategyDiggV1",
         STABILIZE_STRAT,
         get_abi("eth", "stability_strat"),
     )
     governance = stability_strategy.governance()
-    stability_strategy.setKeeper(keeper_address, {"from": governance})
+    stability_strategy.setKeeper(setup_keeper_acl.address, {"from": governance})
     return stability_strategy
 
 

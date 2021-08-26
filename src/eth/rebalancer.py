@@ -106,7 +106,8 @@ class Rebalancer:
             bool: True if our bot is whitelisted to make function calls to strategy,
             False otherwise.
         """
-        return strategy.functions.keeper().call() == self.keeper_address
+        key = self.keeper_acl.functions.HARVESTER_ROLE().call()
+        return self.keeper_acl.functions.hasRole(key, self.keeper_address).call()
 
     def __process_rebalance(
         self,
@@ -212,13 +213,13 @@ class Rebalancer:
             "maxFeePerGas": MAX_GAS_PRICE,
             "gas": GAS_LIMIT,
         }
-        tx = strategy.functions.rebalance().buildTransaction(options)
+        tx = self.keeper_acl.functions.rebalance(strategy.address).buildTransaction(options)
 
         return tx
 
     def estimate_gas_fee(self, strategy: contract) -> Decimal:
         current_gas_price = get_effective_gas_price(self.web3)
-        estimated_gas = strategy.functions.rebalance().estimateGas(
+        estimated_gas = self.keeper_acl.functions.rebalance(strategy.address).estimateGas(
             {"from": self.keeper_address}
         )
         self.logger.info(f"estimated gas fee: {estimated_gas}")
