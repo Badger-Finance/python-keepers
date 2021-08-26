@@ -83,7 +83,7 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = (
-            self.estimate_harvest_amount(strategy.address, want)
+            self.estimate_harvest_amount(strategy, want)
             / 10 ** want.functions.decimals().call()
         )
         self.logger.info(f"estimated want change: {want_to_harvest}")
