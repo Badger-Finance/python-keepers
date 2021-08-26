@@ -67,10 +67,15 @@ def get_effective_gas_price(web3: Web3) -> int:
     return gas_price
 
 
-def get_priority_fee(web3: Web3) -> int:
+def get_priority_fee(
+    web3: Web3,
+    num_blocks: str = "0x4",
+    percentiles: list = [70],
+    default_reward: int = 10e9,
+) -> int:
     # Get average of 70th percentile priority fees of last 4 blocks
-    gas_data = web3.eth.fee_history("0x4", "latest", [70])
-    rewards = gas_data.get("reward", [[int(10e9)]])
+    gas_data = web3.eth.fee_history(num_blocks, "latest", percentiles)
+    rewards = gas_data.get("reward", [[default_reward]])
     priority_fee = int(sum([r[0] for r in rewards]) / len(rewards))
 
     logger.info(f"piority fee: {priority_fee}")
