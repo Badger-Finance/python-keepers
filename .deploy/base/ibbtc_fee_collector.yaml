@@ -8,6 +8,7 @@ spec:
   # cron to run every 6 AM EST every day "0 10 * * *"
   schedule: "0 10 * * *"
   startingDeadlineSeconds: 300
+  suspend: true
   jobTemplate:
     spec:
       template:
