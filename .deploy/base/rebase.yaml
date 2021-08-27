@@ -8,6 +8,7 @@ spec:
   # cron to run at 4pm EST every day "0 20 * * *"
   schedule: "*/5 19,20 * * *"
   startingDeadlineSeconds: 180
+  suspend: true
   jobTemplate:
     spec:
       template:
