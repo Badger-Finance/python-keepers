@@ -18,16 +18,13 @@ from utils import (
     get_hash_from_failed_tx_error,
     get_latest_base_fee,
 )
-from tx_utils import get_priority_fee
+from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
 logging.basicConfig(level=logging.INFO)
 
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMIT = 6000000
-MAX_GAS_PRICE = int(200e9)  # 200 gwei
-PRIORITY_FEE_MULTIPLIER = 5  # Pay 5x the average priority fee
-# PRIORITY_FEE = int(20e9)  # 20 gwei
 NUM_FLASHBOTS_BUNDLES = 6
 
 
@@ -212,7 +209,9 @@ class GeneralHarvester(IHarvester):
             tx_hash = self.__send_tend_tx(strategy)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash
+                )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Tend {strategy_name}",
@@ -253,7 +252,9 @@ class GeneralHarvester(IHarvester):
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash
+                )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Harvest {strategy_name}",
@@ -363,8 +364,7 @@ class GeneralHarvester(IHarvester):
         }
         if self.chain == "eth":
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
-            # Hard limit on the gas price
-            options["maxFeePerGas"] = MAX_GAS_PRICE
+            options["maxFeePerGas"] = self.__get_effective_gas_price()
             options["gas"] = GAS_LIMIT
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
@@ -432,39 +432,5 @@ class GeneralHarvester(IHarvester):
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "eth":
-            # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
-            base_fee = get_latest_base_fee(self.web3)
-            # Use x times the recommended priority fee as miner tip
-            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
-            gas_price = 2 * base_fee + priority_fee
+            gas_price = get_effective_gas_price(self.web3)
         return gas_price
-
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        """Gets the actual amount of gas used by the transaction and converts
-        it from gwei to USD value for monitoring.
-
-        Args:
-            tx_hash (HexBytes): tx id of target transaction
-
-        Returns:
-            Decimal: USD value of gas used in tx
-        """
-        try:
-            tx_receipt = self.web3.eth.get_transaction_receipt(tx_hash)
-        except exceptions.TransactionNotFound:
-            tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
-
-        total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
-        self.logger.info(f"gas used: {total_gas_used}")
-        if self.chain == "eth":
-            gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 10 ** 18)
-        else:
-            tx = self.web3.eth.get_transaction(tx_hash)
-            gas_price_base = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-
-        base_usd = Decimal(
-            self.base_usd_oracle.functions.latestAnswer().call()
-            / 10 ** self.base_usd_oracle.functions.decimals().call()
-        )
-
-        return total_gas_used * gas_price_base * base_usd

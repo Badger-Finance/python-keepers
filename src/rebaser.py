@@ -25,7 +25,6 @@ from tx_utils import get_gas_price_of_tx, get_priority_fee
 from web3 import Web3, contract, exceptions
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
-PRIORITY_FEE_MULTIPLIER = 3  # Pay 3x the average priority fee
 
 
 class Rebaser:
