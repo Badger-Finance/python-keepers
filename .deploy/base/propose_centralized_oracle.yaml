@@ -8,7 +8,7 @@ spec:
   # cron to run at 2:30pm EST (cron in UTC time) every day "30 18 * * *"
   schedule: "30 18 * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
