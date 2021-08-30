@@ -358,6 +358,17 @@ def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
 
 
 def get_last_harvest_times(web3: Web3, keeper_acl: contract, start_block: int = 0):
+    """Fetches the latest harvest timestamps of strategies from Etherscan API which occur after `start_block`.
+    NOTE: Temporary function until Harvested events are emitted from all strategies.
+
+    Args:
+        web3 (Web3): Web3 node instance.
+        keeper_acl (contract): Keeper ACL web3 contract instance.
+        start_block (int, optional): Minimum block number to start fetching harvest timestamps from. Defaults to 0.
+
+    Returns:
+        dict: Dictionary of strategy addresses and their latest harvest timestamps.
+    """
     endpoint = "https://api.etherscan.io/api"
     params = (
         "?module=account"
