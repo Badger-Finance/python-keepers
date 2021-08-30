@@ -12,3 +12,4 @@ resources:
   - service.yaml
   - service_account.yaml
   - stability_executor.yaml
+  - eth_tender.yaml
