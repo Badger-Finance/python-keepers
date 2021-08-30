@@ -6,11 +6,15 @@ from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
 from tests.utils import test_address, test_key
 
-ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
-CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
-CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
-HBTC_STRATEGY = "0xf4146A176b09C664978e03d28d07Db4431525dAd"
+ETH_USD_CHAINLINK = web3.toChecksumAddress("0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419")
+KEEPER_ACL = web3.toChecksumAddress("0x711A339c002386f9db409cA55b6A35a604aB6cF6")
+CVX_HELPER_STRATEGY = web3.toChecksumAddress(
+    "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
+)
+CVX_CRV_HELPER_STRATEGY = web3.toChecksumAddress(
+    "0x826048381d65a65DAa51342C51d464428d301896"
+)
+HBTC_STRATEGY = web3.toChecksumAddress("0xf4146A176b09C664978e03d28d07Db4431525dAd")
 
 
 # Uses EIP-1559 txs which ganache-cli doesn't support
@@ -46,15 +50,14 @@ def setup_keeper_acl(keeper_address):
 @pytest.fixture
 def strategy() -> contract:
     return web3.eth.contract(
-        address=CVX_CRV_HELPER_STRATEGY, abi=get_abi("eth", "strategy")
+        address=CVX_CRV_HELPER_STRATEGY,
+        abi=get_abi("eth", "strategy"),
     )
 
 
 @pytest.fixture
 def btc_strategy() -> contract:
-    return web3.eth.contract(
-        address=web3.toChecksumAddress(HBTC_STRATEGY), abi=get_abi("eth", "strategy")
-    )
+    return web3.eth.contract(address=HBTC_STRATEGY, abi=get_abi("eth", "strategy"))
 
 
 @pytest.fixture
@@ -84,7 +87,7 @@ def test_harvest(keeper_address, harvester, strategy):
     # Hack: For some reason, harvest call() fails without first calling estimateGas()
     harvester.estimate_gas_fee(strategy.address)
 
-    before_claimable = harvester.estimate_harvest_amount(strategy.address)
+    before_claimable = harvester.estimate_harvest_amount(strategy)
     print(f"{strategy_name} before_claimable: {before_claimable}")
 
     # current_price_eth = harvester.get_current_rewards_price()
@@ -95,7 +98,7 @@ def test_harvest(keeper_address, harvester, strategy):
 
     harvester.harvest(strategy)
 
-    after_claimable = harvester.estimate_harvest_amount(strategy.address)
+    after_claimable = harvester.estimate_harvest_amount(strategy)
     print(f"{strategy_name} after_claimable: {after_claimable}")
 
     assert (should_harvest and before_claimable != 0 and after_claimable == 0) or (

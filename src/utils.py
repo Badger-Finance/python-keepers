@@ -6,8 +6,7 @@ from discord import Webhook, RequestsWebhookAdapter, Embed
 from hexbytes import HexBytes
 import json
 import logging
-import os
-from web3 import Web3, exceptions
+from web3 import Web3, contract, exceptions
 import requests
 
 logger = logging.getLogger("utils")
@@ -356,3 +355,35 @@ def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
     else:
         base_fee = int(raw_base_fee)
     return base_fee
+
+
+def get_last_harvest_times(web3: Web3, keeper_acl: contract, start_block: int = 0):
+    endpoint = "https://api.etherscan.io/api"
+    params = (
+        "?module=account"
+        "&action=txlist"
+        f"&address={keeper_acl.address}"
+        f"&startblock={start_block}"
+        f"&endblock={web3.eth.block_number}"
+        "&sort=desc"
+        f"&apikey={get_secret('keepers/etherscan', 'ETHERSCAN_TOKEN')}"
+    )
+    times = {}
+    try:
+        r = requests.get(endpoint + params)
+        data = r.json()
+        for tx in data["result"]:
+            if (
+                web3.toChecksumAddress(tx["to"]) != keeper_acl.address
+                or "input" not in tx
+            ):
+                continue
+            fn, args = keeper_acl.decode_function_input(tx["input"])
+            if (
+                str(fn) == "<Function harvest(address)>"
+                and args["strategy"] not in times
+            ):
+                times[args["strategy"]] = int(tx["timeStamp"])
+        return times
+    except (KeyError, requests.HTTPError):
+        raise ValueError("Last harvest time couldn't be fetched")
