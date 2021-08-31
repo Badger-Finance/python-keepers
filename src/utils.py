@@ -316,37 +316,6 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     return (explorer_name, explorer_url)
 
 
-def get_coingecko_price(token_address: str, base="usd") -> float:
-    """Fetches the price of token in USD/ETH from CoinGecko API.
-
-    Args:
-        token_address (str): Contract address of the ERC-20 token to get price for.
-
-    Returns:
-        float: Price of token in base currency.
-    """
-    endpoint = "https://api.coingecko.com/api/v3/"
-    try:
-        params = "/simple/supported_vs_currencies"
-        r = requests.get(endpoint + params)
-
-        supported_bases = r.json()
-        if base not in supported_bases:
-            raise ValueError("Unsupported base currency")
-
-        params = (
-            "simple/token_price/ethereum?contract_addresses="
-            + token_address
-            + "&vs_currencies=eth%2Cusd&include_last_updated_at=true"
-        )
-        r = requests.get(endpoint + params)
-        data = r.json()
-        return data[token_address.lower()][base]
-
-    except (KeyError, requests.HTTPError):
-        raise ValueError("Price could not be fetched")
-
-
 def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
     latest = web3.eth.get_block("latest")
     raw_base_fee = latest.get("baseFeePerGas", hex(default))
@@ -370,19 +339,21 @@ def get_last_harvest_times(web3: Web3, keeper_acl: contract, start_block: int = 
         dict: Dictionary of strategy addresses and their latest harvest timestamps.
     """
     endpoint = "https://api.etherscan.io/api"
-    params = (
-        "?module=account"
-        "&action=txlist"
-        f"&address={keeper_acl.address}"
-        f"&startblock={start_block}"
-        f"&endblock={web3.eth.block_number}"
-        "&sort=desc"
-        f"&apikey={get_secret('keepers/etherscan', 'ETHERSCAN_TOKEN')}"
-    )
-    times = {}
+    payload = {
+        "module": "account",
+        "action": "txlist",
+        "address": keeper_acl.address,
+        "startblock": start_block,
+        "endblock": web3.eth.block_number,
+        "sort": "desc",
+        "apikey": get_secret("keepers/etherscan", "ETHERSCAN_TOKEN"),
+    }
     try:
-        r = requests.get(endpoint + params)
-        data = r.json()
+        response = requests.get(endpoint, params=payload)
+        response.raise_for_status()  # Raise HTTP errors
+
+        data = response.json()
+        times = {}
         for tx in data["result"]:
             if (
                 web3.toChecksumAddress(tx["to"]) != keeper_acl.address
