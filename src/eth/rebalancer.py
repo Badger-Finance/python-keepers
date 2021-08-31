@@ -16,7 +16,6 @@ from utils import (
 )
 from tx_utils import (
     get_gas_price_of_tx,
-    get_latest_base_fee,
     get_effective_gas_price,
     get_priority_fee,
 )

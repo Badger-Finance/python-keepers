@@ -316,16 +316,6 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     return (explorer_name, explorer_url)
 
 
-def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
-    latest = web3.eth.get_block("latest")
-    raw_base_fee = latest.get("baseFeePerGas", hex(default))
-    if type(raw_base_fee) == str and raw_base_fee.startswith("0x"):
-        base_fee = int(raw_base_fee, 0)
-    else:
-        base_fee = int(raw_base_fee)
-    return base_fee
-
-
 def get_last_harvest_times(web3: Web3, keeper_acl: contract, start_block: int = 0):
     """Fetches the latest harvest timestamps of strategies from Etherscan API which occur after `start_block`.
     NOTE: Temporary function until Harvested events are emitted from all strategies.
