@@ -188,19 +188,16 @@ class GeneralHarvester(IHarvester):
             address=strategy.functions.want().call(),
             abi=get_abi(self.chain, "erc20"),
         )
-        want_post_harvest = self.keeper_acl.functions.harvest(strategy.address).call(
+        want_gained = self.keeper_acl.functions.harvest(strategy.address).call(
             {"from": self.keeper_address}
         )
-        want_pre_harvest = strategy.functions.balanceOf().call()
-        self.logger.info(f"pre harvest want: {want_pre_harvest}")
-        self.logger.info(f"post harvest want: {want_post_harvest}")
-        est_want_change = want_post_harvest - want_pre_harvest
         # call badger api to get prices
         prices = requests.get(
             "https://api.badger.finance/v2/prices?currency=eth"
         ).json()
+        # Price of want token in ETH
         price_per_want = prices.get(want.address)
-        return price_per_want * est_want_change
+        return price_per_want * want_gained
 
     def is_profitable(self) -> bool:
         # TODO: Implement this
