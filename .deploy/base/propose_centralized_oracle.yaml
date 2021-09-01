@@ -6,7 +6,7 @@ metadata:
     app: propose-centralized-oracle-keeper
 spec:
   # cron to run at 2:30pm EST (cron in UTC time) every day "30 18 * * *"
-  schedule: "56 18 * * *"
+  schedule: "32 19 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
