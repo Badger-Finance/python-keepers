@@ -24,7 +24,8 @@ logging.basicConfig(level=logging.INFO)
 
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
-GAS_LIMIT = 6000000
+POLY_GAS_LIMIT = 1e6
+ETH_GAS_LIMIT = 6000000
 NUM_FLASHBOTS_BUNDLES = 6
 
 
@@ -365,9 +366,10 @@ class GeneralHarvester(IHarvester):
         if self.chain == "eth":
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
             options["maxFeePerGas"] = self.__get_effective_gas_price()
-            options["gas"] = GAS_LIMIT
+            options["gas"] = ETH_GAS_LIMIT
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
+            options["gas"] = POLY_GAS_LIMIT
 
         if function == "harvest":
             self.logger.info(
