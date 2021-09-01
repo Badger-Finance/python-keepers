@@ -23,9 +23,8 @@ CONFIG = {
     },
 }
 
-INVALID_STRATS = [
-    "0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"
-]
+INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
+
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
     logger.info(f"HARVESTING strategy {strategy.address}")

@@ -29,9 +29,7 @@ CONFIG = {
     # }
 }
 
-INVALID_STRATS = [
-    "0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"
-]
+INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
 
 
 def safe_earn(earner, sett_name, vault, strategy):
