@@ -23,6 +23,9 @@ CONFIG = {
     },
 }
 
+INVALID_STRATS = [
+    "0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"
+]
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
     logger.info(f"HARVESTING strategy {strategy.address}")
@@ -115,8 +118,9 @@ if __name__ == "__main__":
         )
 
         for strategy in strategies:
-            strat_name = strategy.functions.getName().call()
+            if strategy.address not in INVALID_STRATS:
+                strat_name = strategy.functions.getName().call()
 
-            logger.info(f"+-----Harvesting {strat_name}-----+")
-            res = safe_harvest(harvester, strat_name, strategy)
-            logger.info(f"{res}")
+                logger.info(f"+-----Harvesting {strat_name}-----+")
+                res = safe_harvest(harvester, strat_name, strategy)
+                logger.info(f"{res}")
