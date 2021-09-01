@@ -17,10 +17,15 @@ In order to prevent overwriting the current working prod manifests the contribut
 Chain: Ethereum
 Cadence: Daily 18:30 UTC
 ```
-#### General Harvester
+#### Poly Earner (earner.yaml)
 ```
 Chain: Polygon
-Cadence: Daily, 9:30 UTC
+Cadence: Every 10 min, 7-59 minutes
+```
+#### Poly Harvester (general_harvester.yaml)
+```
+Chain: Polygon
+Cadence: Hourly, 5 after the hour
 ```
 #### ibBTC Fee Collector
 ```
