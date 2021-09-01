@@ -316,7 +316,9 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     return (explorer_name, explorer_url)
 
 
-def get_last_harvest_times(web3: Web3, keeper_acl: contract, start_block: int = 0):
+def get_last_harvest_times(
+    web3: Web3, keeper_acl: contract, start_block: int = 0, etherscan_key: str = None
+):
     """Fetches the latest harvest timestamps of strategies from Etherscan API which occur after `start_block`.
     NOTE: Temporary function until Harvested events are emitted from all strategies.
 
@@ -328,6 +330,9 @@ def get_last_harvest_times(web3: Web3, keeper_acl: contract, start_block: int = 
     Returns:
         dict: Dictionary of strategy addresses and their latest harvest timestamps.
     """
+    if etherscan_key is None:
+        etherscan_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
+
     endpoint = "https://api.etherscan.io/api"
     payload = {
         "module": "account",
@@ -336,7 +341,7 @@ def get_last_harvest_times(web3: Web3, keeper_acl: contract, start_block: int = 
         "startblock": start_block,
         "endblock": web3.eth.block_number,
         "sort": "desc",
-        "apikey": get_secret("keepers/etherscan", "ETHERSCAN_TOKEN"),
+        "apikey": etherscan_key,
     }
     try:
         response = requests.get(endpoint, params=payload)

@@ -4,7 +4,7 @@ import requests
 import sys
 from decimal import Decimal
 from hexbytes import HexBytes
-from time import sleep, time
+from time import sleep
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
@@ -22,8 +22,8 @@ from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of
 
 logging.basicConfig(level=logging.INFO)
 
-SECONDS_PER_DAY = 60 * 60 * 24
 MAX_BLOCKS_PER_DAY = 7000
+MIN_TIME_BETWEEN_HARVESTS = 60 * 60 * 23  # 23 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMIT = 6000000
@@ -55,17 +55,28 @@ class GeneralHarvester(IHarvester):
             abi=get_abi(self.chain, "oracle"),
         )
         # Times of last harvest
-        self.last_harvest_times = get_last_harvest_times(
-            self.web3,
-            self.keeper_acl,
-            start_block=self.web3.eth.block_number - MAX_BLOCKS_PER_DAY,
-        )
+        if self.chain == "eth":
+            self.last_harvest_times = get_last_harvest_times(
+                self.web3,
+                self.keeper_acl,
+                start_block=self.web3.eth.block_number - MAX_BLOCKS_PER_DAY,
+            )
+        else:
+            # Don't care about poly
+            self.last_harvest_times = {}
+
         self.use_flashbots = use_flashbots
 
-    def is_time_to_harvest(self, strategy_address):
+    def is_time_to_harvest(self, strategy):
+        # Can always harvest on poly since they're cheap
+        if self.chain == "poly":
+            return True
+
         try:
-            last_harvest = self.last_harvest_times[strategy_address]
-            return time() - last_harvest > SECONDS_PER_DAY
+            last_harvest = self.last_harvest_times[strategy.address]
+            current_time = self.web3.eth.get_block("latest")["timestamp"]
+
+            return current_time - last_harvest > MIN_TIME_BETWEEN_HARVESTS
         except KeyError:
             return True
 
@@ -83,7 +94,7 @@ class GeneralHarvester(IHarvester):
         """
         strategy_name = strategy.functions.getName().call()
 
-        if not self.is_time_to_harvest(strategy.address):
+        if not self.is_time_to_harvest(strategy):
             raise ValueError(f"{strategy_name} was harvested in last 24 hours")
 
         # TODO: update for ACL
@@ -128,7 +139,7 @@ class GeneralHarvester(IHarvester):
     ):
         strategy_name = strategy.functions.getName().call()
 
-        if not self.is_time_to_harvest(strategy.address):
+        if not self.is_time_to_harvest(strategy):
             raise ValueError(f"{strategy_name} was harvested in last 24 hours")
 
         # TODO: update for ACL
@@ -270,6 +281,10 @@ class GeneralHarvester(IHarvester):
             tx_hash, max_target_block = self.__send_harvest_tx(
                 strategy, returns=returns
             )
+            # Update last harvest harvest time to make sure we don't double harvest
+            self.last_harvest_times[strategy.address] = self.web3.eth.get_block(
+                "latest"
+            )["timestamp"]
             succeeded, msg = confirm_transaction(
                 self.web3, tx_hash, max_block=max_target_block
             )

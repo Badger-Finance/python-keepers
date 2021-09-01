@@ -1,9 +1,12 @@
+import os
 import pytest
 from brownie import accounts, Contract, web3
+from decimal import Decimal
+from hexbytes import HexBytes
 from web3 import contract
 
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi
+from src.utils import get_abi, get_last_harvest_times, hours
 from tests.utils import test_address, test_key
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress("0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419")
@@ -17,10 +20,38 @@ CVX_CRV_HELPER_STRATEGY = web3.toChecksumAddress(
 HBTC_STRATEGY = web3.toChecksumAddress("0xf4146A176b09C664978e03d28d07Db4431525dAd")
 
 
+def mock_get_last_harvest_times(web3, keeper_acl, start_block):
+    return get_last_harvest_times(
+        web3, keeper_acl, start_block, etherscan_key=os.getenv("ETHERSCAN_TOKEN")
+    )
+
+
+def mock_send_discord(
+    tx_hash: HexBytes,
+    tx_type: str,
+    gas_cost: Decimal = None,
+    amt: Decimal = None,
+    sett_name: str = None,
+    chain: str = "ETH",
+):
+    print("sent")
+
+
 # Uses EIP-1559 txs which ganache-cli doesn't support
 @pytest.mark.require_network("hardhat-fork")
 def test_correct_network():
     pass
+
+
+@pytest.fixture(autouse=True)
+def mock_fns(monkeypatch):
+    # TODO: Ideally should find a way to mock get_secret
+    monkeypatch.setattr(
+        "src.general_harvester.send_success_to_discord", mock_send_discord
+    )
+    monkeypatch.setattr(
+        "src.general_harvester.get_last_harvest_times", mock_get_last_harvest_times
+    )
 
 
 @pytest.fixture
@@ -111,3 +142,26 @@ def test_btc_profit_est(harvester, btc_strategy):
         address=btc_strategy.functions.want().call(), abi=get_abi("eth", "erc20")
     )
     # assert harvester.estimate_harvest_amount(btc_strategy) == 10
+
+
+def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
+    strategy_name = strategy.functions.getName().call()
+    accounts[0].transfer(keeper_address, "10 ether")
+
+    # Strategy should be harvestable at this point
+    chain.sleep(hours(24))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(strategy) == True
+    harvester.harvest(strategy)
+
+    # Strategy shouldn't be harvestable
+    assert harvester.is_time_to_harvest(strategy) == False
+    with pytest.raises(ValueError) as e:
+        harvester.harvest(strategy)
+    assert str(e.value) == f"{strategy_name} was harvested in last 24 hours"
+
+    # Strategy should be harvestable again after 24 hours
+    chain.sleep(hours(24))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(strategy) == True
+    harvester.harvest(strategy)
