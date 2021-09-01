@@ -21,7 +21,7 @@ from utils import (
     send_rebase_to_discord,
     send_rebase_error_to_discord,
 )
-from tx_utils import get_gas_price_of_tx, get_priority_fee
+from tx_utils import get_gas_price_of_tx, get_priority_fee, get_effective_gas_price
 from web3 import Web3, contract, exceptions
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
@@ -170,7 +170,7 @@ class Rebaser:
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                 "from": self.keeper_address,
                 "maxPriorityFeePerGas": priority_fee,
-                "maxFeePerGas": MAX_GAS_PRICE,
+                "maxFeePerGas": get_effective_gas_price(self.web3),
             }
 
             tx = self.digg_orchestrator.functions.rebase().buildTransaction(options)

@@ -20,7 +20,7 @@ from utils import (
     send_error_to_discord,
     send_oracle_error_to_discord,
 )
-from tx_utils import get_priority_fee, get_gas_price_of_tx
+from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
@@ -118,7 +118,7 @@ class Oracle:
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                 "from": self.keeper_address,
                 "maxPriorityFeePerGas": priority_fee,
-                "maxFeePerGas": MAX_GAS_PRICE,
+                "maxFeePerGas": get_effective_gas_price(self.web3),
             }
 
             if function == "Propose":
