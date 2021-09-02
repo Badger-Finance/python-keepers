@@ -81,11 +81,11 @@ class GeneralHarvester(IHarvester):
         vault_balance = want.functions.balanceOf(strategy.address).call()
         self.logger.info(f"vault balance: {vault_balance}")
 
-        want_to_harvest = (
-            self.estimate_harvest_amount(strategy, want)
-            / 10 ** want.functions.decimals().call()
-        )
-        self.logger.info(f"estimated want change: {want_to_harvest}")
+        # want_to_harvest = (
+        #     self.estimate_harvest_amount(strategy, want)
+        #     / 10 ** want.functions.decimals().call()
+        # )
+        # self.logger.info(f"estimated want change: {want_to_harvest}")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
@@ -102,7 +102,6 @@ class GeneralHarvester(IHarvester):
             self.__process_harvest(
                 strategy=strategy,
                 strategy_name=strategy_name,
-                harvested=want_to_harvest,
             )
 
     def harvest_no_return(
