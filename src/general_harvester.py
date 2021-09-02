@@ -24,10 +24,19 @@ logging.basicConfig(level=logging.INFO)
 
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
-POLY_GAS_LIMIT = 1e6
+POLY_GAS_LIMIT = int(1e6)
 ETH_GAS_LIMIT = 6000000
 NUM_FLASHBOTS_BUNDLES = 6
-
+API_PARAMS = {
+    "eth": {
+        "currency": "eth",
+        "chain": "eth"
+    },
+    "poly": {
+        "currency": "matic",
+        "chain": "matic"
+    }
+}
 
 class GeneralHarvester(IHarvester):
     def __init__(
@@ -171,8 +180,10 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"post harvest want: {want_post_harvest}")
         est_want_change = want_post_harvest - want_pre_harvest
         # call badger api to get prices
+        currency = API_PARAMS[self.chain]["currency"]
+        chain = API_PARAMS[self.chain]["chain"]
         prices = requests.get(
-            "https://api.badger.finance/v2/prices?currency=eth"
+            f"https://api.badger.finance/v2/prices?currency={currency}?chain={chain}"
         ).json()
         price_per_want = prices.get(want.address)
         return price_per_want * est_want_change
