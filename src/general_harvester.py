@@ -292,6 +292,7 @@ class GeneralHarvester(IHarvester):
             HexBytes: Transaction hash for transaction that was sent.
         """
         max_target_block = None
+        tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, returns=returns)
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -333,6 +334,7 @@ class GeneralHarvester(IHarvester):
         Returns:
             HexBytes: Transaction hash for transaction that was sent.
         """
+        tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, function="tend")
             signed_tx = self.web3.eth.account.sign_transaction(
