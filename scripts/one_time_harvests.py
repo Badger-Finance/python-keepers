@@ -24,11 +24,11 @@ strategies = [
     # "0xff26f400e57bf726822eacbb64fa1c52f1f27988",  # HBTC_CRV_STRATEGY
     # "0x1C1fD689103bbFD701b3B7D41A3807F12814033D",  # PBTC_CRV_STRATEGY
     "0x2bb864cdb4856ab2d148c5ca52dd7ccec126d138",  # OBTC_CRV_STRATEGY
-    "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0",  # BBTC_CRV_STRATEGY
+    # "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0",  # BBTC_CRV_STRATEGY
     # "0x05ec4356e1acd89cc2d16adc7415c8c95e736ac1",  # TRICRYPTO_CRV_STRATEGY
-    "0x6582a5b139fc1c6360846efdc4440d51aad4df7b",  # native.renCrv
-    "0xf1ded284e891943b3e9c657d7fc376b86164ffc2",  # native.sbtcCrv
-    "0x522bb024c339a12be1a47229546f288c40b62d29",  # native.tbtcCrv
+    # "0x6582a5b139fc1c6360846efdc4440d51aad4df7b",  # native.renCrv
+    # "0xf1ded284e891943b3e9c657d7fc376b86164ffc2",  # native.sbtcCrv
+    # "0x522bb024c339a12be1a47229546f288c40b62d29",  # native.tbtcCrv
     # "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf",  # native.uniBadgerWbtc
     # "0xaaE82E3c89e15E6F26F60724f115d5012363e030",  # harvest.renCrv
     # "0x7A56d65254705B4Def63c68488C0182968C452ce",  # native.sushiWbtcEth
