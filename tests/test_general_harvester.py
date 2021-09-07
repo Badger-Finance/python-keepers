@@ -149,7 +149,7 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     accounts[0].transfer(keeper_address, "10 ether")
 
     # Strategy should be harvestable at this point
-    chain.sleep(hours(24))
+    chain.sleep(hours(72))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
@@ -158,10 +158,10 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     assert harvester.is_time_to_harvest(strategy) == False
     with pytest.raises(ValueError) as e:
         harvester.harvest(strategy)
-    assert str(e.value) == f"{strategy_name} was harvested in last 24 hours"
+    assert str(e.value) == f"{strategy_name} was harvested in last 72 hours"
 
     # Strategy should be harvestable again after 24 hours
-    chain.sleep(hours(24))
+    chain.sleep(hours(72))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)

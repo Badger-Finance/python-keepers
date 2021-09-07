@@ -23,7 +23,7 @@ from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of
 logging.basicConfig(level=logging.INFO)
 
 MAX_BLOCKS_PER_DAY = 7000
-MIN_TIME_BETWEEN_HARVESTS = 60 * 60 * 23  # 23 hours
+MAX_TIME_BETWEEN_HARVESTS = 60 * 60 * 71  # 71 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMIT = 6000000
@@ -67,7 +67,22 @@ class GeneralHarvester(IHarvester):
 
         self.use_flashbots = use_flashbots
 
-    def is_time_to_harvest(self, strategy):
+    def is_time_to_harvest(
+        self,
+        strategy: contract,
+        harvest_interval_threshold: int = MAX_TIME_BETWEEN_HARVESTS,
+    ) -> bool:
+        """Calculates the time between harvests for the supplied strategy and returns true if
+        it has been longer than the supplied harvest_interval_threshold which is measured in seconds.
+
+        Args:
+            strategy (contract): Vault strategy web3 contract object
+            harvest_interval_threshold (int, optional): Amount of time in seconds that is acceptable to not
+                have harvested within. Defaults to MAX_TIME_BETWEEN_HARVESTS (71 hours in seconds).
+
+        Returns:
+            bool: True if time since last harvest is > harvest_interval_threshold, else False
+        """
         # Can always harvest on poly since they're cheap
         if self.chain == "poly":
             return True
@@ -76,7 +91,7 @@ class GeneralHarvester(IHarvester):
             last_harvest = self.last_harvest_times[strategy.address]
             current_time = self.web3.eth.get_block("latest")["timestamp"]
 
-            return current_time - last_harvest > MIN_TIME_BETWEEN_HARVESTS
+            return current_time - last_harvest > harvest_interval_threshold
         except KeyError:
             return True
 
@@ -93,9 +108,6 @@ class GeneralHarvester(IHarvester):
             ValueError: If the keeper isn't whitelisted, throw an error and alert user.
         """
         strategy_name = strategy.functions.getName().call()
-
-        if not self.is_time_to_harvest(strategy):
-            raise ValueError(f"{strategy_name} was harvested in last 24 hours")
 
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted(strategy, "harvest"):
@@ -138,9 +150,6 @@ class GeneralHarvester(IHarvester):
         strategy: contract,
     ):
         strategy_name = strategy.functions.getName().call()
-
-        if not self.is_time_to_harvest(strategy):
-            raise ValueError(f"{strategy_name} was harvested in last 24 hours")
 
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted(strategy, "harvest"):
