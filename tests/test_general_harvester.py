@@ -37,12 +37,6 @@ def mock_send_discord(
     print("sent")
 
 
-# Uses EIP-1559 txs which ganache-cli doesn't support
-@pytest.mark.require_network("hardhat-fork")
-def test_correct_network():
-    pass
-
-
 @pytest.fixture(autouse=True)
 def mock_fns(monkeypatch):
     # TODO: Ideally should find a way to mock get_secret
@@ -103,6 +97,7 @@ def harvester(keeper_address, keeper_key) -> GeneralHarvester:
     )
 
 
+@pytest.mark.require_network("hardhat-fork")
 def test_harvest(keeper_address, harvester, strategy):
     """
     Check if the contract should be harvestable, then call the harvest function
@@ -144,24 +139,22 @@ def test_btc_profit_est(harvester, btc_strategy):
     # assert harvester.estimate_harvest_amount(btc_strategy) == 10
 
 
+@pytest.mark.require_network("hardhat-fork")
 def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     strategy_name = strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")
 
     # Strategy should be harvestable at this point
-    chain.sleep(hours(24))
+    chain.sleep(hours(72))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
 
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(strategy) == False
-    with pytest.raises(ValueError) as e:
-        harvester.harvest(strategy)
-    assert str(e.value) == f"{strategy_name} was harvested in last 24 hours"
 
-    # Strategy should be harvestable again after 24 hours
-    chain.sleep(hours(24))
+    # Strategy should be harvestable again after 72 hours
+    chain.sleep(hours(72))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
