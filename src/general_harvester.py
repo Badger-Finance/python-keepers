@@ -27,9 +27,19 @@ THREE_DAYS_OF_BLOCKS = 21_000
 MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
-GAS_LIMIT = 6000000
+POLY_GAS_LIMIT = int(1e6)
+ETH_GAS_LIMIT = 6000000
 NUM_FLASHBOTS_BUNDLES = 6
-
+API_PARAMS = {
+    "eth": {
+        "currency": "eth",
+        "chain": "eth"
+    },
+    "poly": {
+        "currency": "matic",
+        "chain": "matic"
+    }
+}
 
 class GeneralHarvester(IHarvester):
     def __init__(
@@ -143,7 +153,6 @@ class GeneralHarvester(IHarvester):
             self.__process_harvest(
                 strategy=strategy,
                 strategy_name=strategy_name,
-                harvested=want_to_harvest,
             )
 
     def harvest_no_return(
@@ -213,8 +222,10 @@ class GeneralHarvester(IHarvester):
             {"from": self.keeper_address}
         )
         # call badger api to get prices
+        currency = API_PARAMS[self.chain]["currency"]
+        chain = API_PARAMS[self.chain]["chain"]
         prices = requests.get(
-            "https://api.badger.finance/v2/prices?currency=eth"
+            f"https://api.badger.finance/v2/prices?currency={currency}?chain={chain}"
         ).json()
         # Price of want token in ETH
         price_per_want = prices.get(want.address)
@@ -338,6 +349,7 @@ class GeneralHarvester(IHarvester):
             HexBytes: Transaction hash for transaction that was sent.
         """
         max_target_block = None
+        tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, returns=returns)
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -379,6 +391,7 @@ class GeneralHarvester(IHarvester):
         Returns:
             HexBytes: Transaction hash for transaction that was sent.
         """
+        tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, function="tend")
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -412,9 +425,10 @@ class GeneralHarvester(IHarvester):
         if self.chain == "eth":
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
             options["maxFeePerGas"] = self.__get_effective_gas_price()
-            options["gas"] = GAS_LIMIT
+            options["gas"] = ETH_GAS_LIMIT
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
+            options["gas"] = POLY_GAS_LIMIT
 
         if function == "harvest":
             self.logger.info(

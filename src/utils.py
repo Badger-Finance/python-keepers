@@ -250,7 +250,7 @@ def get_secret(
 
 
 def confirm_transaction(
-    web3: Web3, tx_hash: HexBytes, timeout: int = 60, max_block: int = None
+    web3: Web3, tx_hash: HexBytes, timeout: int = 120, max_block: int = None
 ) -> tuple[bool, str]:
     """Waits for transaction to appear within a given timeframe or before a given block (if specified), and then times out.
 
