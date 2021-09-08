@@ -25,7 +25,6 @@ def get_gas_price_of_tx(
         tx_receipt = web3.eth.get_transaction_receipt(tx_hash)
     except exceptions.TransactionNotFound:
         tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-    logger.info(f"tx: {tx_receipt}")
     total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
     logger.info(f"gas used: {total_gas_used}")
     if chain == "eth":

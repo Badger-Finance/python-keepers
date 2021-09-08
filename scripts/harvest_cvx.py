@@ -10,7 +10,7 @@ from web3 import Web3
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret
+from utils import get_abi, get_secret, hours
 from tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
@@ -46,24 +46,24 @@ strategies = [
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    hours_24 = 60 * 60 * 24
-    hours_48 = 60 * 60 * 48
-    hours_60 = 60 * 60 * 60
+    hours_24 = hours(24)
+    hours_48 = hours(48)
+    hours_60 = hours(60)
 
     if harvester.is_time_to_harvest(strategy, hours_24) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 24 hours and gas < 80 for {strategy_name}")
+        logger.info(f"Been longer than 24 hours and base fee < 80 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(
         100e9
     ):
-        logger.info(f"Been longer than 48 hours and gas < 100 for {strategy_name}")
+        logger.info(f"Been longer than 48 hours and base fee < 100 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
         120e9
     ):
-        logger.info(f"Been longer than 60 hours and gas < 120 for {strategy_name}")
+        logger.info(f"Been longer than 60 hours and base fee < 120 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy):
@@ -75,6 +75,7 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
+    logger.info(f"+-----Harvesting {strategy_name}-----+")
     try:
         harvester.harvest(strategy)
         return "Success!"
@@ -126,8 +127,7 @@ if __name__ == "__main__":
         )
         strategy_name = strategy.functions.getName().call()
 
-        logger.info(f"+-----Harvesting {strategy_name}-----+")
-        safe_harvest(harvester, strategy_name, strategy)
+        conditional_harvest(harvester, strategy_name, strategy)
 
         # Sleep for 2 blocks in between harvests
         time.sleep(30)
