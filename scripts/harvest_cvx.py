@@ -75,7 +75,7 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
-    logger.info(f"+-----Harvesting {strategy_name}-----+")
+    logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
     try:
         harvester.harvest(strategy)
         return "Success!"

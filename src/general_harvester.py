@@ -23,7 +23,7 @@ from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of
 
 logging.basicConfig(level=logging.INFO)
 
-MAX_BLOCKS_PER_DAY = 7000
+THREE_DAYS_OF_BLOCKS = 21_000
 MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
@@ -60,7 +60,7 @@ class GeneralHarvester(IHarvester):
             self.last_harvest_times = get_last_harvest_times(
                 self.web3,
                 self.keeper_acl,
-                start_block=self.web3.eth.block_number - MAX_BLOCKS_PER_DAY,
+                start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
             )
         else:
             # Don't care about poly
