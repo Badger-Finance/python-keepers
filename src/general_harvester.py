@@ -31,15 +31,10 @@ POLY_GAS_LIMIT = int(1e6)
 ETH_GAS_LIMIT = 6000000
 NUM_FLASHBOTS_BUNDLES = 6
 API_PARAMS = {
-    "eth": {
-        "currency": "eth",
-        "chain": "eth"
-    },
-    "poly": {
-        "currency": "matic",
-        "chain": "matic"
-    }
+    "eth": {"currency": "eth", "chain": "eth"},
+    "poly": {"currency": "matic", "chain": "matic"},
 }
+
 
 class GeneralHarvester(IHarvester):
     def __init__(
@@ -302,14 +297,12 @@ class GeneralHarvester(IHarvester):
             tx_hash, max_target_block = self.__send_harvest_tx(
                 strategy, returns=returns
             )
-            # Update last harvest harvest time to make sure we don't double harvest
-            self.last_harvest_times[strategy.address] = self.web3.eth.get_block(
-                "latest"
-            )["timestamp"]
             succeeded, msg = confirm_transaction(
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
+                # If successful, update last harvest harvest time to make sure we don't double harvest
+                self.update_last_harvest_time(strategy.address)
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash
                 )
@@ -322,6 +315,8 @@ class GeneralHarvester(IHarvester):
                 )
             elif tx_hash != HexBytes(0):
                 if not self.use_flashbots:
+                    # And if pending
+                    self.update_last_harvest_time(strategy.address)
                     send_success_to_discord(
                         tx_type=f"Harvest {strategy_name}",
                         tx_hash=tx_hash,
@@ -495,3 +490,8 @@ class GeneralHarvester(IHarvester):
         elif self.chain == "eth":
             gas_price = get_effective_gas_price(self.web3)
         return gas_price
+
+    def update_last_harvest_time(self, strategy_address: str):
+        self.last_harvest_times[strategy_address] = self.web3.eth.get_block("latest")[
+            "timestamp"
+        ]
