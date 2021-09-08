@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")
 from harvester import IHarvester
 from utils import (
     confirm_transaction,
+    hours,
     send_error_to_discord,
     send_success_to_discord,
     get_abi,
@@ -23,7 +24,7 @@ from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of
 logging.basicConfig(level=logging.INFO)
 
 MAX_BLOCKS_PER_DAY = 7000
-MAX_TIME_BETWEEN_HARVESTS = 60 * 60 * 71  # 71 hours
+MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMIT = 6000000
