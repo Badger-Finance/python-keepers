@@ -129,3 +129,4 @@ if __name__ == "__main__":
                 logger.info(f"+-----Harvesting {strat_name}-----+")
                 res = safe_harvest(harvester, strat_name, strategy)
                 logger.info(f"{res}")
+                sleep(30)
