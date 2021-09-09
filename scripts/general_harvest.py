@@ -4,6 +4,7 @@ import os
 import sys
 from time import sleep
 from web3 import Web3, contract
+from web3.middleware import geth_poa_middleware
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
@@ -106,6 +107,7 @@ if __name__ == "__main__":
 
         if chain == "poly":
             discord_url = get_secret("keepers/discord/poly-url", "DISCORD_WEBHOOK_URL")
+            node.middleware_onion.inject(geth_poa_middleware, layer=0)
         else:
             discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
 
