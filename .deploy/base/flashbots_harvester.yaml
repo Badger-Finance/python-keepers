@@ -6,7 +6,7 @@ metadata:
     app: flashbots-harvester-keeper
 spec:
   #schedule: "*/30 4-12 * * *"
-  schedule: "33 14 * * *"
+  schedule: "46 14 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
