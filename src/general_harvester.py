@@ -17,7 +17,6 @@ from utils import (
     get_abi,
     get_hash_from_failed_tx_error,
     get_latest_base_fee,
-    get_last_harvest_times,
     get_secret,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
