@@ -10,7 +10,8 @@ from web3 import Web3
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret
+from utils import get_abi, get_secret, hours
+from tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
@@ -88,13 +89,12 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
-    logger.info(f"HARVESTING strategy {strategy.address}")
+    logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
     try:
         harvester.harvest(strategy)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running {strategy_name} harvest: {e}")
-
     logger.info("Trying to run harvestNoReturn")
     try:
         harvester.harvest_no_return(strategy)
@@ -118,6 +118,7 @@ if __name__ == "__main__":
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
+    discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
     # flashbots_signer = Account.create()
 
     web3 = Web3(Web3.HTTPProvider(node_url))
@@ -132,6 +133,7 @@ if __name__ == "__main__":
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
         use_flashbots=False,
+        discord_url=discord_url,
     )
 
     for strategy_address in strategies:
@@ -141,8 +143,7 @@ if __name__ == "__main__":
         )
         strategy_name = strategy.functions.getName().call()
 
-        logger.info(f"+-----Harvesting {strategy_name}-----+")
-        safe_harvest(harvester, strategy_name, strategy)
+        conditional_harvest(harvester, strategy_name, strategy)
 
         # Sleep for 2 blocks in between harvests
         time.sleep(30)

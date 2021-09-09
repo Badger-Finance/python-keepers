@@ -20,12 +20,12 @@ Cadence: Daily 18:30 UTC
 #### Poly Earner (earner.yaml)
 ```
 Chain: Polygon
-Cadence: Every 10 min, 7-59 minutes
+Cadence: Every 10 min, starting on the hour
 ```
 #### Poly Harvester (general_harvester.yaml)
 ```
 Chain: Polygon
-Cadence: Hourly, 5 after the hour
+Cadence: Hourly, 45 after the hour
 ```
 #### ibBTC Fee Collector
 ```
@@ -35,8 +35,8 @@ Cadence: Daily 10:00 UTC
 #### Private Harvester
 ```
 Chain: Ethereum
-Cadence: Daily 10:15 UTC
-Setts: all but cvxCRV, cvx, uni pools, sushi badger/wbtc, single asset vaults
+Cadence: Every 30 min between 4:00 and 12:00 UTC
+Setts: all but uni pools, sushi badger/wbtc, single asset vaults
 ```
 #### Rebaser
 ```
