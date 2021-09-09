@@ -10,7 +10,8 @@ from web3 import Web3
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret
+from utils import get_abi, get_secret, hours
+from tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
@@ -18,7 +19,7 @@ logger = logging.getLogger(Path(__file__).name)
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
-strategies = [
+strategies = {
     # "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
     "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
     "0xff26f400e57bf726822eacbb64fa1c52f1f27988",  # HBTC_CRV_STRATEGY
@@ -39,17 +40,47 @@ strategies = [
     "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
     "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
     # "0xA6af1B913E205B8E9B95D3B30768c0989e942316",  # experimental.digg
-]
+}
+
+
+def conditional_harvest(harvester, strategy_name, strategy) -> str:
+    latest_base_fee = get_latest_base_fee(harvester.web3)
+
+    hours_24 = hours(24)
+    hours_48 = hours(48)
+    hours_60 = hours(60)
+
+    if harvester.is_time_to_harvest(strategy, hours_24) and latest_base_fee < int(80e9):
+        logger.info(f"Been longer than 24 hours and base fee < 80 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(
+        100e9
+    ):
+        logger.info(f"Been longer than 48 hours and base fee < 100 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
+        120e9
+    ):
+        logger.info(f"Been longer than 60 hours and base fee < 120 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(strategy):
+        logger.info(
+            f"Been longer than 71 hours harvest no matter what for {strategy_name}"
+        )
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
-    logger.info(f"HARVESTING strategy {strategy.address}")
+    logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
     try:
         harvester.harvest(strategy)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running {strategy_name} harvest: {e}")
-
     logger.info("Trying to run harvestNoReturn")
     try:
         harvester.harvest_no_return(strategy)
@@ -73,6 +104,7 @@ if __name__ == "__main__":
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
+    discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
     # flashbots_signer = Account.create()
 
     web3 = Web3(Web3.HTTPProvider(node_url))
@@ -87,6 +119,7 @@ if __name__ == "__main__":
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
         use_flashbots=False,
+        discord_url=discord_url,
     )
 
     for strategy_address in strategies:
@@ -96,8 +129,7 @@ if __name__ == "__main__":
         )
         strategy_name = strategy.functions.getName().call()
 
-        logger.info(f"+-----Harvesting {strategy_name}-----+")
-        safe_harvest(harvester, strategy_name, strategy)
+        conditional_harvest(harvester, strategy_name, strategy)
 
         # Sleep for 2 blocks in between harvests
         time.sleep(30)

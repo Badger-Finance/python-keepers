@@ -6,8 +6,7 @@ from discord import Webhook, RequestsWebhookAdapter, Embed
 from hexbytes import HexBytes
 import json
 import logging
-import os
-from web3 import Web3, exceptions
+from web3 import Web3, contract, exceptions
 import requests
 
 logger = logging.getLogger("utils")
@@ -118,10 +117,13 @@ def send_success_to_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    url: str = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
     chain: str = "ETH",
+    url: str = None,
 ):
     try:
+        if not url:
+            url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
+
         webhook = Webhook.from_url(
             url,
             adapter=RequestsWebhookAdapter(),
@@ -318,42 +320,51 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     return (explorer_name, explorer_url)
 
 
-def get_coingecko_price(token_address: str, base="usd") -> float:
-    """Fetches the price of token in USD/ETH from CoinGecko API.
+def get_last_harvest_times(
+    web3: Web3, keeper_acl: contract, start_block: int = 0, etherscan_key: str = None
+):
+    """Fetches the latest harvest timestamps of strategies from Etherscan API which occur after `start_block`.
+    NOTE: Temporary function until Harvested events are emitted from all strategies.
 
     Args:
-        token_address (str): Contract address of the ERC-20 token to get price for.
+        web3 (Web3): Web3 node instance.
+        keeper_acl (contract): Keeper ACL web3 contract instance.
+        start_block (int, optional): Minimum block number to start fetching harvest timestamps from. Defaults to 0.
 
     Returns:
-        float: Price of token in base currency.
+        dict: Dictionary of strategy addresses and their latest harvest timestamps.
     """
-    endpoint = "https://api.coingecko.com/api/v3/"
+    if etherscan_key is None:
+        etherscan_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
+
+    endpoint = "https://api.etherscan.io/api"
+    payload = {
+        "module": "account",
+        "action": "txlist",
+        "address": keeper_acl.address,
+        "startblock": start_block,
+        "endblock": web3.eth.block_number,
+        "sort": "desc",
+        "apikey": etherscan_key,
+    }
     try:
-        params = "/simple/supported_vs_currencies"
-        r = requests.get(endpoint + params)
+        response = requests.get(endpoint, params=payload)
+        response.raise_for_status()  # Raise HTTP errors
 
-        supported_bases = r.json()
-        if base not in supported_bases:
-            raise ValueError("Unsupported base currency")
-
-        params = (
-            "simple/token_price/ethereum?contract_addresses="
-            + token_address
-            + "&vs_currencies=eth%2Cusd&include_last_updated_at=true"
-        )
-        r = requests.get(endpoint + params)
-        data = r.json()
-        return data[token_address.lower()][base]
-
+        data = response.json()
+        times = {}
+        for tx in data["result"]:
+            if (
+                web3.toChecksumAddress(tx["to"]) != keeper_acl.address
+                or "input" not in tx
+            ):
+                continue
+            fn, args = keeper_acl.decode_function_input(tx["input"])
+            if (
+                str(fn) == "<Function harvest(address)>"
+                and args["strategy"] not in times
+            ):
+                times[args["strategy"]] = int(tx["timeStamp"])
+        return times
     except (KeyError, requests.HTTPError):
-        raise ValueError("Price could not be fetched")
-
-
-def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
-    latest = web3.eth.get_block("latest")
-    raw_base_fee = latest.get("baseFeePerGas", hex(default))
-    if type(raw_base_fee) == str and raw_base_fee.startswith("0x"):
-        base_fee = int(raw_base_fee, 0)
-    else:
-        base_fee = int(raw_base_fee)
-    return base_fee
+        raise ValueError("Last harvest time couldn't be fetched")
