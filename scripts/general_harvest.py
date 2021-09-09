@@ -104,6 +104,11 @@ if __name__ == "__main__":
         else:
             strategies = get_strategies(node, chain)
 
+        if chain == "poly":
+            discord_url = get_secret("keepers/discord/poly-url", "DISCORD_WEBHOOK_URL")
+        else:
+            discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
+
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
         keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
 
@@ -114,6 +119,7 @@ if __name__ == "__main__":
             keeper_address=keeper_address,
             keeper_key=keeper_key,
             base_oracle_address=CONFIG.get(chain).get("gas_oracle"),
+            discord_url=discord_url,
         )
 
         for strategy in strategies:

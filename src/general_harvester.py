@@ -18,6 +18,7 @@ from utils import (
     get_abi,
     get_hash_from_failed_tx_error,
     get_last_harvest_times,
+    get_secret,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
@@ -45,7 +46,8 @@ class GeneralHarvester(IHarvester):
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
-        use_flashbots=False,
+        use_flashbots: bool = False,
+        discord_url: str = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
     ):
         self.logger = logging.getLogger("harvester")
         self.chain = chain
@@ -72,6 +74,7 @@ class GeneralHarvester(IHarvester):
             self.last_harvest_times = {}
 
         self.use_flashbots = use_flashbots
+        self.discord_url = discord_url
 
     def is_time_to_harvest(
         self,
@@ -267,12 +270,14 @@ class GeneralHarvester(IHarvester):
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(
                     tx_type=f"Tend {strategy_name}",
                     tx_hash=tx_hash,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
         except Exception as e:
             self.logger.error(f"Error processing tend tx: {e}")
@@ -312,6 +317,7 @@ class GeneralHarvester(IHarvester):
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
             elif tx_hash != HexBytes(0):
                 if not self.use_flashbots:
@@ -321,6 +327,7 @@ class GeneralHarvester(IHarvester):
                         tx_type=f"Harvest {strategy_name}",
                         tx_hash=tx_hash,
                         chain=self.chain,
+                        url=self.discord_url,
                     )
                 else:
                     send_error_to_discord(

@@ -62,11 +62,12 @@ def send_success_to_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
+    url: str = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
     chain: str = "ETH",
 ):
     try:
         webhook = Webhook.from_url(
-            get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
+            url,
             adapter=RequestsWebhookAdapter(),
         )
 
