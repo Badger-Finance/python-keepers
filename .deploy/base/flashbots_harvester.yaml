@@ -19,7 +19,7 @@ spec:
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
             command: ["python", "scripts/harvest_cvx.py"]
-            # command: ["python", "scripts/one_time_harvests.py"]
+            #command: ["python", "scripts/one_time_harvests.py"]
             env:
               - name: LOG_LEVEL
                 value: "info"
