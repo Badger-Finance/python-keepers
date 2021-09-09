@@ -30,15 +30,10 @@ POLY_GAS_LIMIT = int(1e6)
 ETH_GAS_LIMIT = 6000000
 NUM_FLASHBOTS_BUNDLES = 6
 API_PARAMS = {
-    "eth": {
-        "currency": "eth",
-        "chain": "eth"
-    },
-    "poly": {
-        "currency": "matic",
-        "chain": "matic"
-    }
+    "eth": {"currency": "eth", "chain": "eth"},
+    "poly": {"currency": "matic", "chain": "matic"},
 }
+
 
 class GeneralHarvester(IHarvester):
     def __init__(
