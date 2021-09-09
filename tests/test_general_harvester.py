@@ -47,7 +47,7 @@ def mock_fns(monkeypatch):
         "src.general_harvester.get_last_harvest_times", mock_get_last_harvest_times
     )
     monkeypatch.setattr(
-        GeneralHarvester, "send_success_to_discord", lambda *args, **kwargs: print("none")
+        "src.general_harvester.send_success_to_discord", mock_send_discord
     )
 
 

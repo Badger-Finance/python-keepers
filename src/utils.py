@@ -11,6 +11,7 @@ import requests
 
 logger = logging.getLogger("utils")
 
+
 def get_secret(
     secret_name: str, secret_key: str, region_name: str = "us-west-1"
 ) -> str:
@@ -65,6 +66,7 @@ def get_secret(
 
     return None
 
+
 def get_abi(chain: str, contract_id: str):
     with open(f"./abi/{chain}/{contract_id}.json") as f:
         return json.load(f)
@@ -115,12 +117,11 @@ def send_success_to_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    url: str = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
     chain: str = "ETH",
 ):
     try:
         webhook = Webhook.from_url(
-            url,
+            get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
             adapter=RequestsWebhookAdapter(),
         )
 
