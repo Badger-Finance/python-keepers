@@ -118,10 +118,16 @@ def send_success_to_discord(
     amt: Decimal = None,
     sett_name: str = None,
     chain: str = "ETH",
+    url: str = None,
 ):
     try:
+        if chain.lower() == "poly":
+            url = get_secret("keepers/discord/poly-url", "DISCORD_WEBHOOK_URL")
+        else:
+            url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
+
         webhook = Webhook.from_url(
-            get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
+            url,
             adapter=RequestsWebhookAdapter(),
         )
 

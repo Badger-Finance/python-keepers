@@ -104,6 +104,7 @@ if __name__ == "__main__":
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
+    discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
     # flashbots_signer = Account.create()
 
     web3 = Web3(Web3.HTTPProvider(node_url))
@@ -118,6 +119,7 @@ if __name__ == "__main__":
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
         use_flashbots=False,
+        discord_url=discord_url,
     )
 
     for strategy_address in strategies:

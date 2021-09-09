@@ -33,6 +33,7 @@ def mock_send_discord(
     amt: Decimal = None,
     sett_name: str = None,
     chain: str = "ETH",
+    url: str = None,
 ):
     print("sent")
 
@@ -45,9 +46,6 @@ def mock_fns(monkeypatch):
     )
     monkeypatch.setattr(
         "src.general_harvester.get_last_harvest_times", mock_get_last_harvest_times
-    )
-    monkeypatch.setattr(
-        "src.general_harvester.send_success_to_discord", mock_send_discord
     )
 
 
@@ -109,7 +107,7 @@ def test_harvest(keeper_address, harvester, strategy):
     and 0 after. If not then claimable rewards should be the same before and after
     calling harvest
     """
-    accounts[0].transfer(keeper_address, "1 ether")
+    accounts[0].transfer(keeper_address, "10 ether")
 
     strategy_name = strategy.functions.getName().call()
 
