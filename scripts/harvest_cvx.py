@@ -18,8 +18,12 @@ logger = logging.getLogger(Path(__file__).name)
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
-strategies = [
-    # "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
+CVX_HELPERS = {
+    "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
+    "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
+}
+strategies = {
+    "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
     "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
     "0xff26f400e57bf726822eacbb64fa1c52f1f27988",  # HBTC_CRV_STRATEGY
     "0x1C1fD689103bbFD701b3B7D41A3807F12814033D",  # PBTC_CRV_STRATEGY
@@ -39,7 +43,48 @@ strategies = [
     "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
     "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
     # "0xA6af1B913E205B8E9B95D3B30768c0989e942316",  # experimental.digg
-]
+}
+
+
+def conditional_harvest(harvester, strategy_name, strategy) -> str:
+    latest_base_fee = get_latest_base_fee(harvester.web3)
+
+    hours_6 = hours(6)
+    hours_24 = hours(24)
+    hours_48 = hours(48)
+    hours_60 = hours(60)
+    # separate check for cvx helpers
+    if (
+        strategy.address in CVX_HELPERS
+        and harvester.is_time_to_harvest(strategy, hours_6)
+        and latest_base_fee < int(150e9)
+    ):
+        logger.info(f"Been longer than 6 hours and base fee < 150 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
+
+    if harvester.is_time_to_harvest(strategy, hours_24) and latest_base_fee < int(80e9):
+        logger.info(f"Been longer than 24 hours and base fee < 80 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(
+        100e9
+    ):
+        logger.info(f"Been longer than 48 hours and base fee < 100 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
+        120e9
+    ):
+        logger.info(f"Been longer than 60 hours and base fee < 120 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(strategy):
+        logger.info(
+            f"Been longer than 71 hours harvest no matter what for {strategy_name}"
+        )
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
