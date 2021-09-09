@@ -6,7 +6,7 @@ from hexbytes import HexBytes
 from web3 import contract
 
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi, get_last_harvest_times, hours
+from src.utils import get_abi, get_last_harvest_times, hours, get_secret
 from tests.utils import test_address, test_key
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress("0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419")
@@ -45,6 +45,9 @@ def mock_fns(monkeypatch):
     )
     monkeypatch.setattr(
         "src.general_harvester.get_last_harvest_times", mock_get_last_harvest_times
+    )
+    monkeypatch.setattr(
+        GeneralHarvester, "send_success_to_discord", lambda *args, **kwargs: print("none")
     )
 
 
