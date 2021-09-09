@@ -17,6 +17,8 @@ from utils import (
     get_abi,
     get_hash_from_failed_tx_error,
     get_latest_base_fee,
+    get_last_harvest_times,
+    get_secret,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
@@ -47,7 +49,8 @@ class GeneralHarvester(IHarvester):
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
-        use_flashbots=False,
+        use_flashbots: bool = False,
+        discord_url: str = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
     ):
         self.logger = logging.getLogger("harvester")
         self.chain = chain
@@ -64,6 +67,7 @@ class GeneralHarvester(IHarvester):
         )
 
         self.use_flashbots = use_flashbots
+        self.discord_url = discord_url
 
     def harvest(
         self,
@@ -171,7 +175,6 @@ class GeneralHarvester(IHarvester):
         self.harvest(strategy)
 
     def estimate_harvest_amount(self, strategy: contract, want: contract) -> Decimal:
-        want_decs = want.functions.decimals().call()
         want_post_harvest = self.keeper_acl.functions.harvest(strategy.address).call(
             {"from": self.keeper_address}
         )
@@ -229,12 +232,14 @@ class GeneralHarvester(IHarvester):
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(
                     tx_type=f"Tend {strategy_name}",
                     tx_hash=tx_hash,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
         except Exception as e:
             self.logger.error(f"Error processing tend tx: {e}")
@@ -272,6 +277,7 @@ class GeneralHarvester(IHarvester):
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
             elif tx_hash != HexBytes(0):
                 if not self.use_flashbots:
@@ -279,6 +285,7 @@ class GeneralHarvester(IHarvester):
                         tx_type=f"Harvest {strategy_name}",
                         tx_hash=tx_hash,
                         chain=self.chain,
+                        url=self.discord_url,
                     )
                 else:
                     send_error_to_discord(
