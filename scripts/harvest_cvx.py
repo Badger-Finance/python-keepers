@@ -19,8 +19,8 @@ logger = logging.getLogger(Path(__file__).name)
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
-CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
-CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
+CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
+CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
 
 strategies = {
     "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
@@ -43,7 +43,7 @@ strategies = {
     "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
     "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
     # "0xA6af1B913E205B8E9B95D3B30768c0989e942316",  # experimental.digg
-    "0x3406402caE1f745714a9aFFc45939854e7Fbe12B", # locked cvx vault
+    "0x3406402caE1f745714a9aFFc45939854e7Fbe12B",  # locked cvx vault
 }
 
 
@@ -63,7 +63,7 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
         logger.info(f"Been longer than 8 hours and base fee < 100 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
-    
+
     if (
         strategy.address == CVX_HELPER_STRATEGY
         and harvester.is_time_to_harvest(strategy, hours_8)

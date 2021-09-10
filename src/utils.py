@@ -361,7 +361,11 @@ def get_last_harvest_times(
                 continue
             fn, args = keeper_acl.decode_function_input(tx["input"])
             if (
-                str(fn) == "<Function harvest(address)>"
+                str(fn)
+                in [
+                    "<Function harvest(address)>",
+                    "<Function harvestNoReturn(address)>",
+                ]
                 and args["strategy"] not in times
             ):
                 times[args["strategy"]] = int(tx["timeStamp"])
