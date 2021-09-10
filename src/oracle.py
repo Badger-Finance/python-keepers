@@ -15,17 +15,16 @@ from utils import (
     hours,
     confirm_transaction,
     get_hash_from_failed_tx_error,
-    get_latest_base_fee,
     send_success_to_discord,
     send_error_to_discord,
     send_oracle_error_to_discord,
 )
+from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
 WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 MAX_GAS_PRICE = int(200e9)  # 200 gwei
-PRIORITY_FEE_MULTIPLIER = 3  # Pay 3x the average priority fee
 
 
 class Oracle:
@@ -82,7 +81,9 @@ class Oracle:
             tx_hash = self.__send_centralized_oracle_tx(price, function)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
-                gas_price_of_tx = self._get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.eth_usd_oracle, tx_hash
+                )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Centralized Oracle {function}",
@@ -111,12 +112,12 @@ class Oracle:
         """
         try:
             self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
-            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
+            priority_fee = get_priority_fee(self.web3)
             options = {
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                 "from": self.keeper_address,
                 "maxPriorityFeePerGas": priority_fee,
-                "maxFeePerGas": MAX_GAS_PRICE,
+                "maxFeePerGas": get_effective_gas_price(self.web3),
             }
 
             if function == "Propose":
@@ -138,27 +139,6 @@ class Oracle:
             tx_hash = get_hash_from_failed_tx_error(e, self.logger)
         finally:
             return tx_hash
-
-    def _get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        """Calculates price in USD of total gas used during transaction.
-
-        Args:
-            tx_hash (HexBytes): Determine gas price of tx_hash
-
-        Returns:
-            Decimal: USD cost of gas to perform transaction
-        """
-        self.logger.info(f"tx_hash {tx_hash.hex()} of type {type(tx_hash.hex())}")
-        tx = self.web3.eth.get_transaction(str(tx_hash.hex()))
-        self.logger.info(f"successful get_transaction: {tx}")
-
-        total_gas_used = Decimal(tx.get("gas", 0))
-        gas_price_eth = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-        eth_usd = Decimal(
-            self.eth_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
-        )
-
-        return total_gas_used * gas_price_eth * eth_usd
 
     def get_digg_twap_centralized(self) -> int:
         """Calculates 24 hour TWAP for digg based on sushi and uni wbtc / digg pools

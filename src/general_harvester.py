@@ -4,6 +4,7 @@ import requests
 import sys
 from decimal import Decimal
 from hexbytes import HexBytes
+from time import sleep
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
@@ -11,21 +12,29 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")
 from harvester import IHarvester
 from utils import (
     confirm_transaction,
+    hours,
     send_error_to_discord,
     send_success_to_discord,
     get_abi,
     get_hash_from_failed_tx_error,
-    get_latest_base_fee,
+    get_last_harvest_times,
+    get_secret,
 )
+from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
 logging.basicConfig(level=logging.INFO)
 
+THREE_DAYS_OF_BLOCKS = 21_000
+MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
-MAX_GAS_PRICE = int(200e9)  # 200 gwei
-PRIORITY_FEE_MULTIPLIER = 5  # Pay 5x the average priority fee
-# PRIORITY_FEE = int(20e9)  # 20 gwei
+POLY_GAS_LIMIT = int(1e6)
+ETH_GAS_LIMIT = 6000000
 NUM_FLASHBOTS_BUNDLES = 6
+API_PARAMS = {
+    "eth": {"currency": "eth", "chain": "eth"},
+    "poly": {"currency": "matic", "chain": "matic"},
+}
 
 
 class GeneralHarvester(IHarvester):
@@ -37,7 +46,8 @@ class GeneralHarvester(IHarvester):
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
-        use_flashbots=False,
+        use_flashbots: bool = False,
+        discord_url: str = None,
     ):
         self.logger = logging.getLogger("harvester")
         self.chain = chain
@@ -52,8 +62,47 @@ class GeneralHarvester(IHarvester):
             address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
         )
+        # Times of last harvest
+        if self.chain == "eth":
+            self.last_harvest_times = get_last_harvest_times(
+                self.web3,
+                self.keeper_acl,
+                start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
+            )
+        else:
+            # Don't care about poly
+            self.last_harvest_times = {}
 
         self.use_flashbots = use_flashbots
+        self.discord_url = discord_url
+
+    def is_time_to_harvest(
+        self,
+        strategy: contract,
+        harvest_interval_threshold: int = MAX_TIME_BETWEEN_HARVESTS,
+    ) -> bool:
+        """Calculates the time between harvests for the supplied strategy and returns true if
+        it has been longer than the supplied harvest_interval_threshold which is measured in seconds.
+
+        Args:
+            strategy (contract): Vault strategy web3 contract object
+            harvest_interval_threshold (int, optional): Amount of time in seconds that is acceptable to not
+                have harvested within. Defaults to MAX_TIME_BETWEEN_HARVESTS (71 hours in seconds).
+
+        Returns:
+            bool: True if time since last harvest is > harvest_interval_threshold, else False
+        """
+        # Can always harvest on poly since they're cheap
+        if self.chain == "poly":
+            return True
+
+        try:
+            last_harvest = self.last_harvest_times[strategy.address]
+            current_time = self.web3.eth.get_block("latest")["timestamp"]
+
+            return current_time - last_harvest > harvest_interval_threshold
+        except KeyError:
+            return True
 
     def harvest(
         self,
@@ -68,6 +117,7 @@ class GeneralHarvester(IHarvester):
             ValueError: If the keeper isn't whitelisted, throw an error and alert user.
         """
         strategy_name = strategy.functions.getName().call()
+
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted(strategy, "harvest"):
             raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
@@ -81,7 +131,7 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = (
-            self.estimate_harvest_amount(strategy.address)
+            self.estimate_harvest_amount(strategy)
             / 10 ** want.functions.decimals().call()
         )
         self.logger.info(f"estimated want change: {want_to_harvest}")
@@ -101,7 +151,6 @@ class GeneralHarvester(IHarvester):
             self.__process_harvest(
                 strategy=strategy,
                 strategy_name=strategy_name,
-                harvested=want_to_harvest,
             )
 
     def harvest_no_return(
@@ -109,6 +158,7 @@ class GeneralHarvester(IHarvester):
         strategy: contract,
     ):
         strategy_name = strategy.functions.getName().call()
+
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted(strategy, "harvest"):
             raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
@@ -158,12 +208,26 @@ class GeneralHarvester(IHarvester):
 
     def tend_then_harvest(self, strategy: contract):
         self.tend(strategy)
+        sleep(60)
         self.harvest(strategy)
 
-    def estimate_harvest_amount(self, strategy_address: str) -> Decimal:
-        return self.keeper_acl.functions.harvest(strategy_address).call(
+    def estimate_harvest_amount(self, strategy: contract) -> Decimal:
+        want = self.web3.eth.contract(
+            address=strategy.functions.want().call(),
+            abi=get_abi(self.chain, "erc20"),
+        )
+        want_gained = self.keeper_acl.functions.harvest(strategy.address).call(
             {"from": self.keeper_address}
         )
+        # call badger api to get prices
+        currency = API_PARAMS[self.chain]["currency"]
+        chain = API_PARAMS[self.chain]["chain"]
+        prices = requests.get(
+            f"https://api.badger.finance/v2/prices?currency={currency}?chain={chain}"
+        ).json()
+        # Price of want token in ETH
+        price_per_want = prices.get(want.address)
+        return price_per_want * want_gained
 
     def is_profitable(self) -> bool:
         # TODO: Implement this
@@ -197,19 +261,23 @@ class GeneralHarvester(IHarvester):
             tx_hash = self.__send_tend_tx(strategy)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash
+                )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Tend {strategy_name}",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(
                     tx_type=f"Tend {strategy_name}",
                     tx_hash=tx_hash,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
         except Exception as e:
             self.logger.error(f"Error processing tend tx: {e}")
@@ -238,20 +306,28 @@ class GeneralHarvester(IHarvester):
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                # If successful, update last harvest harvest time to make sure we don't double harvest
+                self.update_last_harvest_time(strategy.address)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash
+                )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Harvest {strategy_name}",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
             elif tx_hash != HexBytes(0):
                 if not self.use_flashbots:
+                    # And if pending
+                    self.update_last_harvest_time(strategy.address)
                     send_success_to_discord(
                         tx_type=f"Harvest {strategy_name}",
                         tx_hash=tx_hash,
                         chain=self.chain,
+                        url=self.discord_url,
                     )
                 else:
                     send_error_to_discord(
@@ -275,6 +351,7 @@ class GeneralHarvester(IHarvester):
             HexBytes: Transaction hash for transaction that was sent.
         """
         max_target_block = None
+        tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, returns=returns)
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -316,6 +393,7 @@ class GeneralHarvester(IHarvester):
         Returns:
             HexBytes: Transaction hash for transaction that was sent.
         """
+        tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, function="tend")
             signed_tx = self.web3.eth.account.sign_transaction(
@@ -347,19 +425,22 @@ class GeneralHarvester(IHarvester):
             "from": self.keeper_address,
         }
         if self.chain == "eth":
-            # Use x times recommended priority fee as miner tip
-            self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
-            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
-            # priority_fee = PRIORITY_FEE
-            options["maxPriorityFeePerGas"] = priority_fee
-            # Hard limit on the gas price
-            options["maxFeePerGas"] = MAX_GAS_PRICE
+            options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
+            options["maxFeePerGas"] = self.__get_effective_gas_price()
+            options["gas"] = ETH_GAS_LIMIT
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
+            options["gas"] = POLY_GAS_LIMIT
 
         if function == "harvest":
+            self.logger.info(
+                f"estimated gas fee: {self.__estimate_harvest_gas(strategy_address, returns)}"
+            )
             return self.__build_harvest_transaction(strategy_address, returns, options)
         elif function == "tend":
+            self.logger.info(
+                f"estimated gas fee: {self.__estimate_tend_gas(strategy_address)}"
+            )
             return self.__build_tend_transaction(strategy_address, options)
 
     def __build_harvest_transaction(
@@ -414,38 +495,10 @@ class GeneralHarvester(IHarvester):
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "eth":
-            # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
-            base_fee = get_latest_base_fee(self.web3)
-            # Use x times the recommended priority fee as miner tip
-            priority_fee = PRIORITY_FEE_MULTIPLIER * self.web3.eth.max_priority_fee
-            gas_price = 2 * base_fee + priority_fee
+            gas_price = get_effective_gas_price(self.web3)
         return gas_price
 
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        """Gets the actual amount of gas used by the transaction and converts
-        it from gwei to USD value for monitoring.
-
-        Args:
-            tx_hash (HexBytes): tx id of target transaction
-
-        Returns:
-            Decimal: USD value of gas used in tx
-        """
-        try:
-            tx_receipt = self.web3.eth.get_transaction_receipt(tx_hash)
-        except exceptions.TransactionNotFound:
-            tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
-
-        total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
-        if self.chain == "eth":
-            gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 10 ** 18)
-        else:
-            tx = self.web3.eth.get_transaction(tx_hash)
-            gas_price_base = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-
-        base_usd = Decimal(
-            self.base_usd_oracle.functions.latestAnswer().call()
-            / 10 ** self.base_usd_oracle.functions.decimals().call()
-        )
-
-        return total_gas_used * gas_price_base * base_usd
+    def update_last_harvest_time(self, strategy_address: str):
+        self.last_harvest_times[strategy_address] = self.web3.eth.get_block("latest")[
+            "timestamp"
+        ]

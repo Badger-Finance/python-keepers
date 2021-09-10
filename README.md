@@ -17,10 +17,15 @@ In order to prevent overwriting the current working prod manifests the contribut
 Chain: Ethereum
 Cadence: Daily 18:30 UTC
 ```
-#### General Harvester
+#### Poly Earner (earner.yaml)
 ```
-Chain: Ethereum, Polygon
-Cadence: Daily, 9:30 UTC
+Chain: Polygon
+Cadence: Every 10 min, starting on the hour
+```
+#### Poly Harvester (general_harvester.yaml)
+```
+Chain: Polygon
+Cadence: Hourly, 45 after the hour
 ```
 #### ibBTC Fee Collector
 ```
@@ -30,20 +35,25 @@ Cadence: Daily 10:00 UTC
 #### Private Harvester
 ```
 Chain: Ethereum
-Cadence: Daily 10:15 UTC
-Setts: cvxCRV, cvx
+Cadence: Every 30 min between 4:00 and 12:00 UTC
+Setts: all but uni pools, sushi badger/wbtc, single asset vaults
 ```
 #### Rebaser
 ```
 Chain: Ethereum
-Cadence: Daily 20:00 UTC
+Cadence: Every 5 min from 19:00 UTC - 20:59 UTC
+```
+#### Rebalancer
+```
+Chain: Ethereum
+Cadence: Every 5 min from 20:10 UTC - 20:59 UTC
 ```
 ## testing:
 
-Set `TEST_DISCORD_WEBHOOK_URL` in `.env` to a test url if you have one or want to see notifications.
+Set `WEB3_INFURA_PROJECT_ID` environment variable in terminal before running script.
 
-To test sushi bots with the forked mainnet network:
-`brownie test tests/test_sushi.py -s`
+To run tests with the forked mainnet network:
+`brownie test tests/<test-file> --network=hardhat-fork`
 
 To test pancake bots on the forked bsc network:
 `brownie test tests/test_cake.py -s --network bsc-fork`

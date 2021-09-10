@@ -29,6 +29,8 @@ CONFIG = {
     # }
 }
 
+INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
+
 
 def safe_earn(earner, sett_name, vault, strategy):
     try:
@@ -102,7 +104,8 @@ if __name__ == "__main__":
         )
 
         for strategy, vault in zip(strategies, vaults):
-            strat_name = strategy.functions.getName().call()
+            if strategy.address not in INVALID_STRATS:
+                strat_name = strategy.functions.getName().call()
 
-            logger.info(f"+-----Earning {strat_name}-----+")
-            safe_earn(earner, strat_name, vault, strategy)
+                logger.info(f"+-----Earning {strat_name}-----+")
+                safe_earn(earner, strat_name, vault, strategy)

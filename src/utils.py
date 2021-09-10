@@ -6,11 +6,65 @@ from discord import Webhook, RequestsWebhookAdapter, Embed
 from hexbytes import HexBytes
 import json
 import logging
-import os
-from web3 import Web3, exceptions
+from web3 import Web3, contract, exceptions
 import requests
 
 logger = logging.getLogger("utils")
+
+
+def get_secret(
+    secret_name: str, secret_key: str, region_name: str = "us-west-1"
+) -> str:
+    """Retrieves secret from AWS secretsmanager.
+    Args:
+        secret_name (str): secret name in secretsmanager
+        secret_key (str): Dict key value to use to access secret value
+        region_name (str, optional): AWS region name for secret. Defaults to "us-west-1".
+    Raises:
+        e: DecryptionFailureException - Secrets Manager can't decrypt the protected secret text using the provided KMS key.
+        e: InternalServiceErrorException - An error occurred on the server side.
+        e: InvalidParameterException - You provided an invalid value for a parameter.
+        e: InvalidRequestException - You provided a parameter value that is not valid for the current state of the resource.
+        e: ResourceNotFoundException - We can't find the resource that you asked for.
+    Returns:
+        str: secret value
+    """
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name="secretsmanager",
+        region_name=region_name,
+    )
+
+    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
+    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+    # We rethrow the exception by default.
+
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "DecryptionFailureException":
+            raise e
+        elif e.response["Error"]["Code"] == "InternalServiceErrorException":
+            raise e
+        elif e.response["Error"]["Code"] == "InvalidParameterException":
+            raise e
+        elif e.response["Error"]["Code"] == "InvalidRequestException":
+            raise e
+        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
+            raise e
+    else:
+        # Decrypts secret using the associated KMS CMK.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        if "SecretString" in get_secret_value_response:
+            return json.loads(get_secret_value_response["SecretString"]).get(secret_key)
+        else:
+            return base64.b64decode(get_secret_value_response["SecretBinary"]).get(
+                secret_key
+            )
+
+    return None
 
 
 def get_abi(chain: str, contract_id: str):
@@ -64,10 +118,14 @@ def send_success_to_discord(
     amt: Decimal = None,
     sett_name: str = None,
     chain: str = "ETH",
+    url: str = None,
 ):
     try:
+        if not url:
+            url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
+
         webhook = Webhook.from_url(
-            get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL"),
+            url,
             adapter=RequestsWebhookAdapter(),
         )
 
@@ -195,63 +253,8 @@ def send_oracle_error_to_discord(tx_type: str, error: Exception):
     webhook.send(embed=embed, username=f"{tx_type}")
 
 
-def get_secret(
-    secret_name: str, secret_key: str, region_name: str = "us-west-1"
-) -> str:
-    """Retrieves secret from AWS secretsmanager.
-    Args:
-        secret_name (str): secret name in secretsmanager
-        secret_key (str): Dict key value to use to access secret value
-        region_name (str, optional): AWS region name for secret. Defaults to "us-west-1".
-    Raises:
-        e: DecryptionFailureException - Secrets Manager can't decrypt the protected secret text using the provided KMS key.
-        e: InternalServiceErrorException - An error occurred on the server side.
-        e: InvalidParameterException - You provided an invalid value for a parameter.
-        e: InvalidRequestException - You provided a parameter value that is not valid for the current state of the resource.
-        e: ResourceNotFoundException - We can't find the resource that you asked for.
-    Returns:
-        str: secret value
-    """
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name="secretsmanager",
-        region_name=region_name,
-    )
-
-    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
-    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-    # We rethrow the exception by default.
-
-    try:
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-    except ClientError as e:
-        if e.response["Error"]["Code"] == "DecryptionFailureException":
-            raise e
-        elif e.response["Error"]["Code"] == "InternalServiceErrorException":
-            raise e
-        elif e.response["Error"]["Code"] == "InvalidParameterException":
-            raise e
-        elif e.response["Error"]["Code"] == "InvalidRequestException":
-            raise e
-        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
-            raise e
-    else:
-        # Decrypts secret using the associated KMS CMK.
-        # Depending on whether the secret is a string or binary, one of these fields will be populated.
-        if "SecretString" in get_secret_value_response:
-            return json.loads(get_secret_value_response["SecretString"]).get(secret_key)
-        else:
-            return base64.b64decode(get_secret_value_response["SecretBinary"]).get(
-                secret_key
-            )
-
-    return None
-
-
 def confirm_transaction(
-    web3: Web3, tx_hash: HexBytes, timeout: int = 60, max_block: int = None
+    web3: Web3, tx_hash: HexBytes, timeout: int = 120, max_block: int = None
 ) -> tuple[bool, str]:
     """Waits for transaction to appear within a given timeframe or before a given block (if specified), and then times out.
 
@@ -317,42 +320,51 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     return (explorer_name, explorer_url)
 
 
-def get_coingecko_price(token_address: str, base="usd") -> float:
-    """Fetches the price of token in USD/ETH from CoinGecko API.
+def get_last_harvest_times(
+    web3: Web3, keeper_acl: contract, start_block: int = 0, etherscan_key: str = None
+):
+    """Fetches the latest harvest timestamps of strategies from Etherscan API which occur after `start_block`.
+    NOTE: Temporary function until Harvested events are emitted from all strategies.
 
     Args:
-        token_address (str): Contract address of the ERC-20 token to get price for.
+        web3 (Web3): Web3 node instance.
+        keeper_acl (contract): Keeper ACL web3 contract instance.
+        start_block (int, optional): Minimum block number to start fetching harvest timestamps from. Defaults to 0.
 
     Returns:
-        float: Price of token in base currency.
+        dict: Dictionary of strategy addresses and their latest harvest timestamps.
     """
-    endpoint = "https://api.coingecko.com/api/v3/"
+    if etherscan_key is None:
+        etherscan_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
+
+    endpoint = "https://api.etherscan.io/api"
+    payload = {
+        "module": "account",
+        "action": "txlist",
+        "address": keeper_acl.address,
+        "startblock": start_block,
+        "endblock": web3.eth.block_number,
+        "sort": "desc",
+        "apikey": etherscan_key,
+    }
     try:
-        params = "/simple/supported_vs_currencies"
-        r = requests.get(endpoint + params)
+        response = requests.get(endpoint, params=payload)
+        response.raise_for_status()  # Raise HTTP errors
 
-        supported_bases = r.json()
-        if base not in supported_bases:
-            raise ValueError("Unsupported base currency")
-
-        params = (
-            "simple/token_price/ethereum?contract_addresses="
-            + token_address
-            + "&vs_currencies=eth%2Cusd&include_last_updated_at=true"
-        )
-        r = requests.get(endpoint + params)
-        data = r.json()
-        return data[token_address.lower()][base]
-
+        data = response.json()
+        times = {}
+        for tx in data["result"]:
+            if (
+                web3.toChecksumAddress(tx["to"]) != keeper_acl.address
+                or "input" not in tx
+            ):
+                continue
+            fn, args = keeper_acl.decode_function_input(tx["input"])
+            if (
+                str(fn) == "<Function harvest(address)>"
+                and args["strategy"] not in times
+            ):
+                times[args["strategy"]] = int(tx["timeStamp"])
+        return times
     except (KeyError, requests.HTTPError):
-        raise ValueError("Price could not be fetched")
-
-
-def get_latest_base_fee(web3: Web3, default=int(100e9)):  # default to 100 gwei
-    latest = web3.eth.get_block("latest")
-    raw_base_fee = latest.get("baseFeePerGas", hex(default))
-    if type(raw_base_fee) == str and raw_base_fee.startswith("0x"):
-        base_fee = int(raw_base_fee, 0)
-    else:
-        base_fee = int(raw_base_fee)
-    return base_fee
+        raise ValueError("Last harvest time couldn't be fetched")

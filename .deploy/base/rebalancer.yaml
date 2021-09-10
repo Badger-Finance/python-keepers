@@ -1,24 +1,24 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: general-harvester-keeper
+  name: rebalancer-keeper
   labels:
-    app: general-harvester-keeper
+    app: rebalancer-keeper
 spec:
-  # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "45 */2 * * *"
-  startingDeadlineSeconds: 300
+  # cron to run at 4pm EST every day "0 20 * * *"
+  schedule: "10-59/5 20,21 * * *"
+  startingDeadlineSeconds: 180
   suspend: false
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: general-harvester-keeper
+          serviceAccountName: rebalancer-keeper
           containers:
-          - name: general-harvester-keeper
+          - name: rebalancer-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/general_harvest.py"]
+            command: ["python", "scripts/rebalance.py"]
             env:
               - name: LOG_LEVEL
                 value: 'info'
