@@ -73,9 +73,7 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
         logger.info(res)
 
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(
-        80e9
-    ):
+    if harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(80e9):
         logger.info(f"Been longer than 48 hours and base fee < 100 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
