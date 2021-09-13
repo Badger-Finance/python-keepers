@@ -67,6 +67,7 @@ def get_secret(
     return None
 
 
+# TODO: Don't duplicate common abis for all chains
 def get_abi(chain: str, contract_id: str):
     with open(f"./abi/{chain}/{contract_id}.json") as f:
         return json.load(f)

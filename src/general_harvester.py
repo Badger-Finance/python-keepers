@@ -43,7 +43,7 @@ API_PARAMS = {
 class GeneralHarvester(IHarvester):
     def __init__(
         self,
-        chain: str = "eth",
+        chain: str = "eth",  # TODO: Identify chain from web3.eth.chain_id (single source of truth)
         web3: Web3 = None,
         keeper_acl: str = os.getenv("KEEPER_ACL"),
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
