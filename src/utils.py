@@ -319,7 +319,7 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
         explorer_url = f"https://polygonscan.com/tx/{tx_hash.hex()}"
     elif chain.lower() == "arbitrum":
         explorer_name = "Arbiscan"
-        explorer_url = f"https://arbiscan.com/tx/{tx_hash.hex()}"
+        explorer_url = f"https://arbiscan.io/tx/{tx_hash.hex()}"
 
     return (explorer_name, explorer_url)
 
