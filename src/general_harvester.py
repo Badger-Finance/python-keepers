@@ -226,7 +226,7 @@ class GeneralHarvester(IHarvester):
         currency = API_PARAMS[self.chain]["currency"]
         chain = API_PARAMS[self.chain]["chain"]
         prices = requests.get(
-            f"https://api.badger.finance/v2/prices?currency={currency}?chain={chain}"
+            f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
         ).json()
         # Price of want token in ETH
         price_per_want = prices.get(want.address)
