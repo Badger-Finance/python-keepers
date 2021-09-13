@@ -50,14 +50,13 @@ strategies = {
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    hours_8 = hours(8)
     hours_24 = hours(24)
     hours_48 = hours(48)
     hours_60 = hours(60)
     # separate check for cvx helpers
     if (
         strategy.address == CVX_CRV_HELPER_STRATEGY
-        and harvester.is_time_to_harvest(strategy, hours_8)
+        and harvester.is_time_to_harvest(strategy, hours_24)
         and latest_base_fee < int(100e9)
     ):
         logger.info(f"Been longer than 8 hours and base fee < 100 for {strategy_name}")
@@ -66,7 +65,7 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
 
     if (
         strategy.address == CVX_HELPER_STRATEGY
-        and harvester.is_time_to_harvest(strategy, hours_8)
+        and harvester.is_time_to_harvest(strategy, hours_24)
         and latest_base_fee < int(80e9)
     ):
         logger.info(f"Been longer than 8 hours and base fee < 80 for {strategy_name}")
@@ -74,18 +73,14 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
         logger.info(res)
 
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, hours_24) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 24 hours and base fee < 80 for {strategy_name}")
-        res = safe_harvest(harvester, strategy_name, strategy)
-        logger.info(res)
-    elif harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(
-        100e9
+    if harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(
+        80e9
     ):
         logger.info(f"Been longer than 48 hours and base fee < 100 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
-        120e9
+        100e9
     ):
         logger.info(f"Been longer than 60 hours and base fee < 120 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
