@@ -426,14 +426,13 @@ class GeneralHarvester(IHarvester):
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,
+            "gas": GAS_LIMITS[self.chain],
         }
         if self.chain == "eth":
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
             options["maxFeePerGas"] = self.__get_effective_gas_price()
-            options["gas"] = GAS_LIMITS["eth"]
         else:
             options["gasPrice"] = self.__get_effective_gas_price()
-            options["gas"] = GAS_LIMITS[self.chain]
 
         if function == "harvest":
             self.logger.info(
@@ -498,7 +497,7 @@ class GeneralHarvester(IHarvester):
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "arbitrum":
-            gas_price = self.web3.eth.gas_price
+            gas_price = 1.1 * self.web3.eth.gas_price  # Estimated gas price + buffer
         elif self.chain == "eth":
             # EIP-1559
             gas_price = get_effective_gas_price(self.web3)

@@ -50,7 +50,9 @@ if __name__ == "__main__":
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
     node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
-    discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
+    discord_url = get_secret(
+        "keepers/harvester/arbitrum/info-webhook", "DISCORD_WEBHOOK_URL"
+    )
 
     web3 = Web3(Web3.HTTPProvider(node_url))
 
