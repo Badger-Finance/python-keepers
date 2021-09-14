@@ -3,7 +3,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from web3 import Web3, contract
+from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 sys.path.insert(
