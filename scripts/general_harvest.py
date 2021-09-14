@@ -7,22 +7,17 @@ from web3 import Web3, contract
 from web3.middleware import geth_poa_middleware
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret
+from utils import get_abi, get_secret, get_strategies_from_registry
+from constants import HARVEST_CONFIG
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-CONFIG = {
-    "poly": {
-        "gas_oracle": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
-        "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
-        # TODO: may need to make vault owner a list eventually
-        "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
-        "registry": "0x22765948A3d5048F3644b81792e4E1aA7ea3da4a",
-    },
-}
 
 INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
 
@@ -52,45 +47,8 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
     return "Failure"
 
 
-def get_strategies(node: Web3, chain: str) -> list:
-    strategies = []
-    vault_owner = node.toChecksumAddress(CONFIG.get(chain).get("vault_owner"))
-    registry = node.eth.contract(
-        address=node.toChecksumAddress(CONFIG.get(chain).get("registry")),
-        abi=get_abi(chain, "registry"),
-    )
-
-    for vault_address in registry.functions.fromAuthor(vault_owner).call():
-        strategy = get_strategy_from_vault(node, chain, vault_address)
-        strategies.append(strategy)
-
-    return strategies
-
-
-def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contract:
-    vault_contract = node.eth.contract(
-        address=vault_address, abi=get_abi(chain, "vault")
-    )
-
-    token_address = vault_contract.functions.token().call()
-    controller_address = vault_contract.functions.controller().call()
-
-    controller_contract = node.eth.contract(
-        address=controller_address, abi=get_abi(chain, "controller")
-    )
-
-    strategy_address = controller_contract.functions.strategies(token_address).call()
-
-    # TODO: handle v1 vs v2 strategy abi
-    strategy_contract = node.eth.contract(
-        address=strategy_address, abi=get_abi(chain, "strategy")
-    )
-
-    return strategy_contract
-
-
 if __name__ == "__main__":
-    for chain in CONFIG.keys():
+    for chain in ["poly"]:
         node_url = get_secret(f"quiknode/{chain}-node-url", "NODE_URL")
         node = Web3(Web3.HTTPProvider(node_url))
 
@@ -100,10 +58,10 @@ if __name__ == "__main__":
                     address=node.toChecksumAddress(address),
                     abi=get_abi(chain, "strategy"),
                 )
-                for address in CONFIG.get(chain).get("strategies")
+                for address in HARVEST_CONFIG.get(chain).get("strategies")
             ]
         else:
-            strategies = get_strategies(node, chain)
+            strategies = get_strategies_from_registry(node, chain)
 
         if chain == "poly":
             discord_url = get_secret("keepers/discord/poly-url", "DISCORD_WEBHOOK_URL")
@@ -117,10 +75,10 @@ if __name__ == "__main__":
         harvester = GeneralHarvester(
             chain=chain,
             web3=node,
-            keeper_acl=CONFIG.get(chain).get("keeper_acl"),
+            keeper_acl=HARVEST_CONFIG[chain]["keeper_acl"],
             keeper_address=keeper_address,
             keeper_key=keeper_key,
-            base_oracle_address=CONFIG.get(chain).get("gas_oracle"),
+            base_oracle_address=HARVEST_CONFIG[chain]["gas_oracle"],
             discord_url=discord_url,
         )
 
