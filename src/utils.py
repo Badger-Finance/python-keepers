@@ -385,7 +385,7 @@ def get_last_harvest_times(
     except (KeyError, requests.HTTPError):
         raise ValueError("Last harvest time couldn't be fetched")
 
-
+# TODO: move to own utils func and separate utils.py into directory and sub classes
 def get_strategies_from_registry(node: Web3, chain: str) -> list:
     strategies = []
     vault_owner = node.toChecksumAddress(HARVEST_CONFIG.get(chain).get("vault_owner"))
