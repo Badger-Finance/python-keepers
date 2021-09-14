@@ -58,6 +58,7 @@ if __name__ == "__main__":
 
     harvester = GeneralHarvester(
         web3=web3,
+        chain="arbitrum",
         keeper_acl=HARVEST_CONFIG["arbitrum"]["keeper_acl"],
         keeper_address=keeper_address,
         keeper_key=keeper_key,
