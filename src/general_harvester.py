@@ -28,9 +28,9 @@ MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMITS = {
-    "eth": 6000000,
-    "poly": int(1e6),
-    "arbitrum": 6000000,  # TODO: Arbitrarily high for now
+    "eth": 6_000_000,
+    "poly": 1_000_000,
+    "arbitrum": 3_000_000,
 }
 NUM_FLASHBOTS_BUNDLES = 6
 API_PARAMS = {
