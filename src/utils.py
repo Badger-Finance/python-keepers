@@ -8,6 +8,14 @@ import json
 import logging
 from web3 import Web3, contract, exceptions
 import requests
+import sys
+import os
+
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
+
+from constants import HARVEST_CONFIG
 
 logger = logging.getLogger("utils")
 
@@ -376,3 +384,40 @@ def get_last_harvest_times(
         return times
     except (KeyError, requests.HTTPError):
         raise ValueError("Last harvest time couldn't be fetched")
+
+
+def get_strategies_from_registry(node: Web3, chain: str) -> list:
+    strategies = []
+    vault_owner = node.toChecksumAddress(HARVEST_CONFIG.get(chain).get("vault_owner"))
+    registry = node.eth.contract(
+        address=node.toChecksumAddress(HARVEST_CONFIG.get(chain).get("registry")),
+        abi=get_abi(chain, "registry"),
+    )
+
+    for vault_address in registry.functions.getVaults("v1", vault_owner).call():
+        strategy = get_strategy_from_vault(node, chain, vault_address)
+        strategies.append(strategy)
+
+    return strategies
+
+
+def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contract:
+    vault_contract = node.eth.contract(
+        address=vault_address, abi=get_abi(chain, "vault")
+    )
+
+    token_address = vault_contract.functions.token().call()
+    controller_address = vault_contract.functions.controller().call()
+
+    controller_contract = node.eth.contract(
+        address=controller_address, abi=get_abi(chain, "controller")
+    )
+
+    strategy_address = controller_contract.functions.strategies(token_address).call()
+
+    # TODO: handle v1 vs v2 strategy abi
+    strategy_contract = node.eth.contract(
+        address=strategy_address, abi=get_abi(chain, "strategy")
+    )
+
+    return strategy_contract
