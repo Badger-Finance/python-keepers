@@ -222,14 +222,18 @@ class GeneralHarvester(IHarvester):
         want_gained = self.keeper_acl.functions.harvest(strategy.address).call(
             {"from": self.keeper_address}
         )
+        self.logger.info(f"want_gained: {want_gained}")
+        self.logger.info(f"want address: {want.address}")
         # call badger api to get prices
         currency = API_PARAMS[self.chain]["currency"]
         chain = API_PARAMS[self.chain]["chain"]
         prices = requests.get(
             f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
         ).json()
+        self.logger.info(f"price: {prices}")
         # Price of want token in ETH
         price_per_want = prices.get(want.address)
+        self.logger.info(f"price_per_want: {price_per_want}")
         return price_per_want * want_gained
 
     def is_profitable(self) -> bool:
