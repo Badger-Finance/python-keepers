@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: arb-harvester-keeper
+  labels:
+    app: arb-harvester-keeper
+spec:
+  # cron to run every 30 min every day "*/30 * * * *"
+  schedule: "45 */12 * * *"
+  startingDeadlineSeconds: 300
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: arb-harvester-keeper
+          containers:
+          - name: arb-harvester-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/arbitrum_harvest.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure
