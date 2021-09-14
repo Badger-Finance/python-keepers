@@ -68,11 +68,7 @@ if __name__ == "__main__":
 
     strategies = get_strategies_from_registry(web3, "arbitrum")
 
-    for strategy_address in strategies:
-        strategy = web3.eth.contract(
-            address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("arbitrum", "strategy"),
-        )
+    for strategy in strategies:
         strategy_name = strategy.functions.getName().call()
 
         safe_harvest(harvester, strategy_name, strategy)
