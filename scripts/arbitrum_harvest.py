@@ -3,7 +3,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from web3 import Web3
+from web3 import Web3, contract
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
@@ -14,12 +14,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
 ETH_USD_CHAINLINK = "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612"
-# TODO: Use registry for this (0xfda7eb6f8b7a9e9fcfd348042ae675d1d652454f)
 KEEPER_ACL = "0x265820F3779f652f2a9857133fDEAf115b87db4B"
+REGISTRY = "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f"
 
-strategies = {
-    "0x86f772C82914f5bFD168f99e208d0FC2C371e9C2",  # WETH-SUSHI-SLP
-    "0xA6827f0f14D0B83dB925B616d820434697328c22",  # WBTC-WETH-SLP
+# strategies = {
+#     "0x86f772C82914f5bFD168f99e208d0FC2C371e9C2",  # WETH-SUSHI-SLP
+#     "0xA6827f0f14D0B83dB925B616d820434697328c22",  # WBTC-WETH-SLP
+# }
+
+CONFIG = {
+    "arbitrum": {
+        "gas_oracle": ETH_USD_CHAINLINK,
+        "keeper_acl": KEEPER_ACL,
+        # TODO: may need to make vault owner a list eventually
+        "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
+        "registry": REGISTRY,
+    },
 }
 
 # TODO: Add conditional harvest logic
@@ -45,6 +55,43 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
         logger.error(f"Error running {strategy_name} tend_then_harvest: {e}")
 
 
+def get_strategies(node: Web3, chain: str) -> list:
+    strategies = []
+    vault_owner = node.toChecksumAddress(CONFIG.get(chain).get("vault_owner"))
+    registry = node.eth.contract(
+        address=node.toChecksumAddress(CONFIG.get(chain).get("registry")),
+        abi=get_abi(chain, "registry"),
+    )
+
+    for vault_address in registry.functions.getVaults("v1", vault_owner).call():
+        strategy = get_strategy_from_vault(node, chain, vault_address)
+        strategies.append(strategy)
+
+    return strategies
+
+
+def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contract:
+    vault_contract = node.eth.contract(
+        address=vault_address, abi=get_abi(chain, "vault")
+    )
+
+    token_address = vault_contract.functions.token().call()
+    controller_address = vault_contract.functions.controller().call()
+
+    controller_contract = node.eth.contract(
+        address=controller_address, abi=get_abi(chain, "controller")
+    )
+
+    strategy_address = controller_contract.functions.strategies(token_address).call()
+
+    # TODO: handle v1 vs v2 strategy abi
+    strategy_contract = node.eth.contract(
+        address=strategy_address, abi=get_abi(chain, "strategy")
+    )
+
+    return strategy_contract
+
+
 if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
@@ -66,10 +113,12 @@ if __name__ == "__main__":
         discord_url=discord_url,
     )
 
+    strategies = get_strategies(web3, "arbitrum")
+
     for strategy_address in strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
+            abi=get_abi("arbitrum", "strategy"),
         )
         strategy_name = strategy.functions.getName().call()
 

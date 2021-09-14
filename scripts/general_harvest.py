@@ -20,7 +20,7 @@ CONFIG = {
         "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
         # TODO: may need to make vault owner a list eventually
         "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
-        "registry": "0x22765948A3d5048F3644b81792e4E1aA7ea3da4a",
+        "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
     },
 }
 
@@ -60,7 +60,7 @@ def get_strategies(node: Web3, chain: str) -> list:
         abi=get_abi(chain, "registry"),
     )
 
-    for vault_address in registry.functions.fromAuthor(vault_owner).call():
+    for vault_address in registry.functions.getVaults("v1", vault_owner).call():
         strategy = get_strategy_from_vault(node, chain, vault_address)
         strategies.append(strategy)
 
