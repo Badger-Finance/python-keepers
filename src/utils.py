@@ -67,6 +67,7 @@ def get_secret(
     return None
 
 
+# TODO: Don't duplicate common abis for all chains
 def get_abi(chain: str, contract_id: str):
     with open(f"./abi/{chain}/{contract_id}.json") as f:
         return json.load(f)
@@ -316,6 +317,9 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     elif chain.lower() == "poly":
         explorer_name = "Polygonscan"
         explorer_url = f"https://polygonscan.com/tx/{tx_hash.hex()}"
+    elif chain.lower() == "arbitrum":
+        explorer_name = "Arbiscan"
+        explorer_url = f"https://arbiscan.io/tx/{tx_hash.hex()}"
 
     return (explorer_name, explorer_url)
 

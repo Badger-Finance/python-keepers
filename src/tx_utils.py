@@ -16,7 +16,7 @@ def get_gas_price_of_tx(
         web3 (Web3): web3 node instance
         gas_oracle (contract): web3 contract for chainlink gas unit / usd oracle
         tx_hash (HexBytes): tx id of target transaction
-        chain (str): chain of tx (valid: eth, poly)
+        chain (str): chain of tx (valid: eth, poly, arbitrum)
 
     Returns:
         Decimal: USD value of gas used in tx
