@@ -497,7 +497,9 @@ class GeneralHarvester(IHarvester):
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "arbitrum":
-            gas_price = 1.1 * self.web3.eth.gas_price  # Estimated gas price + buffer
+            gas_price = Decimal(
+                1.1 * self.web3.eth.gas_price
+            )  # Estimated gas price + buffer
         elif self.chain == "eth":
             # EIP-1559
             gas_price = get_effective_gas_price(self.web3)
