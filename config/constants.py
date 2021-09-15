@@ -1,4 +1,4 @@
-HARVEST_CONFIG = {
+MULTICHAIN_CONFIG = {
     "poly": {
         "gas_oracle": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
         "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
@@ -14,3 +14,6 @@ HARVEST_CONFIG = {
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
     },
 }
+
+EARN_PCT_THRESHOLD = 0.01
+EARN_OVERRIDE_THRESHOLD = 2

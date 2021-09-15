@@ -15,7 +15,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import HARVEST_CONFIG
+from constants import MULTICHAIN_CONFIG
 
 logger = logging.getLogger("utils")
 
@@ -385,12 +385,15 @@ def get_last_harvest_times(
     except (KeyError, requests.HTTPError):
         raise ValueError("Last harvest time couldn't be fetched")
 
+
 # TODO: move to own utils func and separate utils.py into directory and sub classes
 def get_strategies_from_registry(node: Web3, chain: str) -> list:
     strategies = []
-    vault_owner = node.toChecksumAddress(HARVEST_CONFIG.get(chain).get("vault_owner"))
+    vault_owner = node.toChecksumAddress(
+        MULTICHAIN_CONFIG.get(chain).get("vault_owner")
+    )
     registry = node.eth.contract(
-        address=node.toChecksumAddress(HARVEST_CONFIG.get(chain).get("registry")),
+        address=node.toChecksumAddress(MULTICHAIN_CONFIG.get(chain).get("registry")),
         abi=get_abi(chain, "registry"),
     )
 
