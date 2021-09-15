@@ -70,8 +70,9 @@ class Earner:
         )
 
         # Pre safety checks
-        self.logger.info(f"{want.address} == {strategy.functions.want().call()}")
-        assert want.address == strategy.functions.want().call()
+        swant_address = strategy.functions.want().call()
+        self.logger.info(f"{want.address} == {swant_address}")
+        assert want.address == swant_address
         assert strategy.functions.controller().call() == controller.address
         assert vault.functions.controller().call() == controller.address
         assert controller.functions.strategies(want.address).call() == strategy.address
