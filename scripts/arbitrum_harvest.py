@@ -12,7 +12,7 @@ sys.path.insert(
 
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret, get_strategies_from_registry
-from constants import HARVEST_CONFIG
+from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
@@ -59,10 +59,10 @@ if __name__ == "__main__":
     harvester = GeneralHarvester(
         web3=web3,
         chain="arbitrum",
-        keeper_acl=HARVEST_CONFIG["arbitrum"]["keeper_acl"],
+        keeper_acl=MULTICHAIN_CONFIG["arbitrum"]["keeper_acl"],
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=HARVEST_CONFIG["arbitrum"]["gas_oracle"],
+        base_oracle_address=MULTICHAIN_CONFIG["arbitrum"]["gas_oracle"],
         use_flashbots=False,
         discord_url=discord_url,
     )

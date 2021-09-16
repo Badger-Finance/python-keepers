@@ -13,7 +13,7 @@ sys.path.insert(
 
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret, get_strategies_from_registry
-from constants import HARVEST_CONFIG
+from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
@@ -58,7 +58,7 @@ if __name__ == "__main__":
                     address=node.toChecksumAddress(address),
                     abi=get_abi(chain, "strategy"),
                 )
-                for address in HARVEST_CONFIG.get(chain).get("strategies")
+                for address in MULTICHAIN_CONFIG.get(chain).get("strategies")
             ]
         else:
             strategies = get_strategies_from_registry(node, chain)
@@ -75,10 +75,10 @@ if __name__ == "__main__":
         harvester = GeneralHarvester(
             chain=chain,
             web3=node,
-            keeper_acl=HARVEST_CONFIG[chain]["keeper_acl"],
+            keeper_acl=MULTICHAIN_CONFIG[chain]["keeper_acl"],
             keeper_address=keeper_address,
             keeper_key=keeper_key,
-            base_oracle_address=HARVEST_CONFIG[chain]["gas_oracle"],
+            base_oracle_address=MULTICHAIN_CONFIG[chain]["gas_oracle"],
             discord_url=discord_url,
         )
 
