@@ -20,7 +20,7 @@ from utils import (
     get_abi,
     get_hash_from_failed_tx_error,
 )
-from tx_utils import get_priority_fee, get_effective_gas_price
+from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
 
 logging.basicConfig(level=logging.INFO)
@@ -144,7 +144,9 @@ class Earner:
             tx_hash = self.__send_earn_tx(vault)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash, self.chain
+                )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Earn {sett_name}",
@@ -202,26 +204,6 @@ class Earner:
             gas_price = int(1.1 * self.web3.eth.gas_price)
 
         return gas_price
-
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        """Gets the actual amount of gas used by the transaction and converts
-        it from gwei to USD value for monitoring.
-
-        Args:
-            tx_hash (HexBytes): tx id of target transaction
-
-        Returns:
-            Decimal: USD value of gas used in tx
-        """
-        tx = self.web3.eth.get_transaction(tx_hash)
-
-        total_gas_used = Decimal(tx.get("gas", 0))
-        gas_price_base = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-        base_usd = Decimal(
-            self.base_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
-        )
-
-        return total_gas_used * gas_price_base * base_usd
 
     def __build_transaction(self, strategy_address: str) -> dict:
         """Builds transaction depending on which chain we're earning. EIP-1559

@@ -222,18 +222,14 @@ class GeneralHarvester(IHarvester):
         want_gained = self.keeper_acl.functions.harvest(strategy.address).call(
             {"from": self.keeper_address}
         )
-        self.logger.info(f"want_gained: {want_gained}")
-        self.logger.info(f"want address: {want.address}")
         # call badger api to get prices
         currency = API_PARAMS[self.chain]["currency"]
         chain = API_PARAMS[self.chain]["chain"]
         prices = requests.get(
             f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
         ).json()
-        self.logger.info(f"price: {prices}")
         # Price of want token in ETH
         price_per_want = prices.get(want.address)
-        self.logger.info(f"price_per_want: {price_per_want}")
         return price_per_want * want_gained
 
     def is_profitable(self) -> bool:
@@ -269,7 +265,7 @@ class GeneralHarvester(IHarvester):
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.base_usd_oracle, tx_hash
+                    self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
@@ -316,7 +312,7 @@ class GeneralHarvester(IHarvester):
                 # If successful, update last harvest harvest time to make sure we don't double harvest
                 self.update_last_harvest_time(strategy.address)
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.base_usd_oracle, tx_hash
+                    self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(

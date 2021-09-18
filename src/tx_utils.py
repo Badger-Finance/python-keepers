@@ -25,20 +25,24 @@ def get_gas_price_of_tx(
         tx_receipt = web3.eth.get_transaction_receipt(tx_hash)
     except exceptions.TransactionNotFound:
         tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+
     total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
     logger.info(f"gas used: {total_gas_used}")
-    if chain == "eth":
-        gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 10 ** 18)
+
+    if chain == "arbitrum":
+        gas_prices = tx_receipt.get("feeStats", {}).get("paid", {})
+        gas_cost_base = Decimal(sum([int(x, 16) for x in gas_prices.values()]) / 1e18)
     else:
-        tx = web3.eth.get_transaction(tx_hash)
-        gas_price_base = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
+        # ETH/Poly
+        gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 1e18)
+        gas_cost_base = total_gas_used * gas_price_base
 
     gas_usd = Decimal(
         gas_oracle.functions.latestAnswer().call()
         / 10 ** gas_oracle.functions.decimals().call()
     )
 
-    gas_price_of_tx = total_gas_used * gas_price_base * gas_usd
+    gas_price_of_tx = gas_cost_base * gas_usd
     logger.info(f"gas price of tx: {gas_price_of_tx}")
 
     return gas_price_of_tx
