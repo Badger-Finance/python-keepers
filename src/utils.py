@@ -398,13 +398,15 @@ def get_strategies_from_registry(node: Web3, chain: str) -> list:
     )
 
     for vault_address in registry.functions.getVaults("v1", vault_owner).call():
-        strategy = get_strategy_from_vault(node, chain, vault_address)
+        strategy, _ = get_strategy_from_vault(node, chain, vault_address)
         strategies.append(strategy)
 
     return strategies
 
 
-def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contract:
+def get_strategy_from_vault(
+    node: Web3, chain: str, vault_address: str
+) -> (contract, contract):
     vault_contract = node.eth.contract(
         address=vault_address, abi=get_abi(chain, "vault")
     )
@@ -423,7 +425,8 @@ def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contr
         address=strategy_address, abi=get_abi(chain, "strategy")
     )
 
-    return strategy_contract
+    return strategy_contract, vault_contract
+
 
 def get_strategies_and_vaults(node: Web3, chain: str) -> list:
     strategies = []
