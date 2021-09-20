@@ -166,3 +166,17 @@ spec:
     - name: http
       port: 9000
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chainlink-forwarder-keeper
+  labels:
+    app: chainlink-forwarder-keeper
+    service: chainlink-forwarder-keeper
+spec:
+  selector:
+    app: chainlink-forwarder-keeper
+  ports:
+    - name: http
+      port: 9000
+---

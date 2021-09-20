@@ -1,4 +1,6 @@
 from brownie import Contract
+from decimal import Decimal
+from hexbytes import HexBytes
 
 from src.utils import get_abi
 
@@ -17,3 +19,15 @@ def get_strategy(
     gov = strategy.governance()
     strategy.setKeeper(test_address, {"from": gov})
     return strategy
+
+
+def mock_send_discord(
+    tx_hash: HexBytes,
+    tx_type: str,
+    gas_cost: Decimal = None,
+    amt: Decimal = None,
+    sett_name: str = None,
+    chain: str = "ETH",
+    url: str = None,
+):
+    print("sent")

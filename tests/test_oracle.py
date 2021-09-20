@@ -3,11 +3,15 @@ import pytest
 from decimal import Decimal
 from brownie import *
 from web3 import Web3
+import logging
 import requests
 import os
 
 from src.oracle import Oracle
-from tests.utils import *
+from src.utils import get_abi
+from tests.utils import test_address, test_key, mock_send_discord
+
+logger = logging.getLogger("test-oracle")
 
 os.environ[
     "DISCORD_WEBHOOK_URL"
@@ -23,45 +27,78 @@ os.environ[
 ] = "https://api.thegraph.com/subgraphs/name/sushiswap/exchange"
 os.environ["SUSHI_PAIR"] = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
 os.environ["CENTRALIZED_ORACLE"] = "0x73083058e0f61D3fc7814eEEDc39F9608B4546d7"
+os.environ["CHAINLINK_FORWARDER"] = "0xB572f69edbfC946af11a1b3ef8D5c2f41D38a642"
 
 
-@pytest.mark.require_network("mainnet-fork")
+def mock_send_error(tx_type: str, error: Exception):
+    logger.error(error)
+
+
+@pytest.mark.require_network("hardhat-fork")
 def test_correct_network():
     pass
 
 
 @pytest.fixture
+def keeper_address() -> str:
+    return test_address
+
+
+@pytest.fixture(autouse=True)
+def setup_centralized_oracle(keeper_address):
+    centralized_oracle = Contract.from_abi(
+        "CentralizedOracle",
+        os.getenv("CENTRALIZED_ORACLE"),
+        get_abi("eth", "digg_centralized_oracle"),
+    )
+    oracle_role = centralized_oracle.ORACLE_ROLE()
+    admin_role = centralized_oracle.getRoleAdmin(oracle_role)
+    admin = centralized_oracle.getRoleMember(admin_role, 0)
+    centralized_oracle.grantRole(oracle_role, keeper_address, {"from": admin})
+    return centralized_oracle
+
+
+@pytest.fixture(autouse=True)
+def setup_chainlink_oracle(keeper_address):
+    chainlink_oracle = Contract.from_abi(
+        "ChainlinkOracle",
+        os.getenv("CHAINLINK_FORWARDER"),
+        get_abi("eth", "chainlink_forwarder"),
+    )
+    owner = chainlink_oracle.owner()
+    chainlink_oracle.transferOwnership(keeper_address, {"from": owner})
+    return chainlink_oracle
+
+
+@pytest.fixture
 def oracle() -> Oracle:
-    return Oracle(
+    oracle = Oracle(
         keeper_address=test_address,
         keeper_key=test_key,
-        web3="http://127.0.0.1:8545",
     )
+    oracle.web3 = web3
+    return oracle
+
+
+@pytest.fixture(autouse=True)
+def mock_fns(monkeypatch):
+    # TODO: Ideally should find a way to mock get_secret
+    monkeypatch.setattr("src.oracle.send_success_to_discord", mock_send_discord)
+    monkeypatch.setattr("src.oracle.send_oracle_error_to_discord", mock_send_error)
 
 
 def test_digg_twap(oracle):
-    assert oracle.get_digg_twap_centralized() / 10 ** 18 >= 0.1
+    accounts[0].transfer(test_address, "1 ether")
+    oracle.get_digg_twap_centralized() / 10 ** 18 >= 0.1
 
 
+@pytest.mark.require_network("hardhat-fork")
 def test_propose_report_centralized(oracle):
-    assert oracle.propose_centralized_report_push()
+    accounts[0].transfer(test_address, "1 ether")
+    oracle.propose_centralized_report_push()
 
 
-# def test_rebase(rebaser):
-#     """
-#     Check if the contract should be harvestable, then call the harvest function
-
-#     If the strategy should be harvested then claimable rewards should be positive before
-#     and 0 after. If not then claimable rewards should be the same before and after
-#     calling harvest
-#     """
-#     accounts[0].transfer(test_address, "1 ether")
-
-#     assert rebaser.rebase() == {}
-
-
-# def test_send_rebase_tx(rebaser):
-#     accounts[0].transfer(test_address, "10 ether")
-
-#     # TODO: mock send discord functions
-#     rebaser._Rebaser__process_rebase() == {}
+@pytest.mark.require_network("hardhat-fork")
+def test_chainlink_forwarder(oracle):
+    accounts[0].transfer(test_address, "1 ether")
+    oracle.publish_chainlink_report()
