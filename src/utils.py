@@ -424,3 +424,22 @@ def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contr
     )
 
     return strategy_contract
+
+def get_strategies_and_vaults(node: Web3, chain: str) -> list:
+    strategies = []
+    vaults = []
+
+    vault_owner = node.toChecksumAddress(
+        MULTICHAIN_CONFIG.get(chain).get("vault_owner")
+    )
+    registry = node.eth.contract(
+        address=node.toChecksumAddress(MULTICHAIN_CONFIG.get(chain).get("registry")),
+        abi=get_abi(chain, "registry"),
+    )
+
+    for vault_address in registry.functions.getVaults("v1", vault_owner).call():
+        strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+        vaults.append(vault)
+        strategies.append(strategy)
+
+    return strategies, vaults
