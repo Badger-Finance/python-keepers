@@ -26,7 +26,11 @@ from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
 
 logging.basicConfig(level=logging.INFO)
 
-GAS_LIMIT = int(1e6)
+GAS_LIMITS = {
+    "eth": 1_000_000,
+    "poly": 1_000_000,
+    "arbitrum": 3_000_000,
+}
 EARN_EXCEPTIONS = {}
 
 
@@ -219,7 +223,7 @@ class Earner:
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,
-            "gas": GAS_LIMIT,
+            "gas": GAS_LIMITS[self.chain],
         }
         if self.chain == "eth":
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
