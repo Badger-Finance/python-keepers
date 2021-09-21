@@ -85,7 +85,7 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
         logger.info(f"Been longer than 60 hours and base fee < 100 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
-    elif harvester.is_time_to_harvest(strategy):
+    elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
         logger.info(
             f"Been longer than 71 hours harvest no matter what for {strategy_name}"
         )
