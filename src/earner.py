@@ -5,6 +5,7 @@ import logging
 import os
 import requests
 import sys
+import traceback
 from time import sleep
 from web3 import Web3, contract, exceptions
 
@@ -189,7 +190,7 @@ class Earner:
             self.logger.info(f"attempted tx_hash: {tx_hash}")
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending earn tx: {e}")
+            self.logger.error(f"Error in sending earn tx: {traceback.format_exc()}")
             tx_hash = get_hash_from_failed_tx_error(e, "Earn")
         finally:
             return tx_hash
