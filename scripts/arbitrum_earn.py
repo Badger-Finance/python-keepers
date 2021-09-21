@@ -76,10 +76,7 @@ def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contr
 
 if __name__ == "__main__":
     for chain in ["arbitrum"]:
-        # node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
-        node_url = (
-            "https://arbitrum-mainnet.infura.io/v3/082c2a02473f4364ae4d53bab11b8b8b"
-        )
+        node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
         node = Web3(Web3.HTTPProvider(node_url))
 
         strategies, vaults = get_strategies_and_vaults(node, chain)
