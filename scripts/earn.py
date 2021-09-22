@@ -8,7 +8,7 @@ from web3 import Web3, contract
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from earner import Earner
-from utils import get_secret
+from utils import get_secret, get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
@@ -19,7 +19,7 @@ CONFIG = {
         "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
         # TODO: may need to make vault owner a list eventually
         "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
-        "registry": "0x22765948A3d5048F3644b81792e4E1aA7ea3da4a",
+        "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
     },
     # "eth": {
     #     "gas_oracle": "eth",
@@ -42,46 +42,6 @@ def safe_earn(earner, sett_name, vault, strategy):
 def get_abi(chain: str, contract_id: str):
     with open(f"./abi/{chain}/{contract_id}.json") as f:
         return json.load(f)
-
-
-def get_strategies_and_vaults(node: Web3, chain: str) -> list:
-    strategies = []
-    vaults = []
-
-    vault_owner = node.toChecksumAddress(CONFIG.get(chain).get("vault_owner"))
-    registry = node.eth.contract(
-        address=node.toChecksumAddress(CONFIG.get(chain).get("registry")),
-        abi=get_abi(chain, "registry"),
-    )
-
-    for vault_address in registry.functions.fromAuthor(vault_owner).call():
-        strategy, vault = get_strategy_from_vault(node, chain, vault_address)
-        vaults.append(vault)
-        strategies.append(strategy)
-
-    return strategies, vaults
-
-
-def get_strategy_from_vault(node: Web3, chain: str, vault_address: str) -> contract:
-    vault_contract = node.eth.contract(
-        address=vault_address, abi=get_abi(chain, "vault")
-    )
-
-    token_address = vault_contract.functions.token().call()
-    controller_address = vault_contract.functions.controller().call()
-
-    controller_contract = node.eth.contract(
-        address=controller_address, abi=get_abi(chain, "controller")
-    )
-
-    strategy_address = controller_contract.functions.strategies(token_address).call()
-
-    # TODO: handle v1 vs v2 strategy abi
-    strategy_contract = node.eth.contract(
-        address=strategy_address, abi=get_abi(chain, "strategy")
-    )
-
-    return strategy_contract, vault_contract
 
 
 if __name__ == "__main__":

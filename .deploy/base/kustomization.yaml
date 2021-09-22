@@ -1,7 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - arb_earner.yaml
+  - arb_harvester.yaml
   - cake_harvester.yaml
+  - chainlink_forwarder.yaml
   - earner.yaml
   - general_harvester.yaml
   - flashbots_harvester.yaml

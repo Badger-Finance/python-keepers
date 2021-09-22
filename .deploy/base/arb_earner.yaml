@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: arb-earner-keeper
+  labels:
+    app: arb-earner-keeper
+spec:
+  # cron to run every 30 min every day "*/30 * * * *"
+  schedule: "7-59/10 * * * *"
+  startingDeadlineSeconds: 300
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: arb-earner-keeper
+          containers:
+          - name: arb-earner-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/arbitrum_earn.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure

@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 from hexbytes import HexBytes
+from traceback import format_exc
 import json
 import logging
 import os
@@ -11,6 +12,7 @@ from web3 import Web3, contract, exceptions
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from utils import (
+    get_abi,
     get_secret,
     hours,
     confirm_transaction,
@@ -24,7 +26,7 @@ from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_pr
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
 WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
-MAX_GAS_PRICE = int(200e9)  # 200 gwei
+GAS_LIMIT = 200_000
 
 
 class Oracle:
@@ -40,16 +42,16 @@ class Oracle:
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
-            abi=self.__get_abi("oracle"),
+            abi=get_abi("eth", "oracle"),
         )
         self.centralized_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("CENTRALIZED_ORACLE")),
-            abi=self.__get_abi("digg_centralized_oracle"),
+            abi=get_abi("eth", "digg_centralized_oracle"),
         )
-
-    def __get_abi(self, contract_id: str):
-        with open(f"./abi/eth/{contract_id}.json") as f:
-            return json.load(f)
+        self.chainlink_forwarder = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(os.getenv("CHAINLINK_FORWARDER")),
+            abi=get_abi("eth", "chainlink_forwarder"),
+        )
 
     def propose_centralized_report_push(self):
         """Gets price using centralized oracle and pushes report to market oracle for use
@@ -82,7 +84,7 @@ class Oracle:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash
+                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
                 )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
@@ -111,13 +113,14 @@ class Oracle:
             HexBytes: Transaction hash for transaction that was sent.
         """
         try:
-            self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
             priority_fee = get_priority_fee(self.web3)
+            self.logger.info(f"priority_fee: {priority_fee}")
             options = {
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                 "from": self.keeper_address,
                 "maxPriorityFeePerGas": priority_fee,
                 "maxFeePerGas": get_effective_gas_price(self.web3),
+                "gas": GAS_LIMIT,
             }
 
             if function == "Propose":
@@ -136,6 +139,9 @@ class Oracle:
 
         except ValueError as e:
             self.logger.error(f"Error in sending oracle tx: {e}")
+            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+        except Exception as e:
+            self.logger.error(format_exc())
             tx_hash = get_hash_from_failed_tx_error(e, self.logger)
         finally:
             return tx_hash
@@ -260,3 +266,64 @@ class Oracle:
 
     def get_digg_twap_uma(self) -> float:
         return 0
+
+    def publish_chainlink_report(self):
+        self.__process_chainlink_tx()
+
+    def __process_chainlink_tx(self):
+        """Private function to create, broadcast, confirm centralized oracle tx on eth and then send
+        transaction to Discord for monitoring
+        """
+        try:
+            tx_hash = self.__send_chainlink_tx()
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
+            if succeeded:
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                )
+                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                send_success_to_discord(
+                    tx_type=f"Chainlink Forwarder",
+                    tx_hash=tx_hash,
+                    gas_cost=gas_price_of_tx,
+                )
+            elif tx_hash != HexBytes(0):
+                send_success_to_discord(tx_type=f"Chainlink Forwarder", tx_hash=tx_hash)
+        except Exception as e:
+            self.logger.error(f"Error processing chainlink tx: {e}")
+            send_oracle_error_to_discord(tx_type=f"Chainlink Forwarder", error=e)
+
+    def __send_chainlink_tx(self) -> HexBytes:
+        """Sends transaction to ETH node for confirmation.
+
+        Raises:
+            Exception: If we have an issue sending transaction (unable to communicate with
+            node, etc.) we log the error and return a tx_hash of 0x00.
+
+        Returns:
+            HexBytes: Transaction hash for transaction that was sent.
+        """
+        try:
+            priority_fee = get_priority_fee(self.web3)
+            self.logger.info(f"priority_fee: {priority_fee}")
+            options = {
+                "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
+                "from": self.keeper_address,
+                "maxPriorityFeePerGas": priority_fee,
+                "maxFeePerGas": get_effective_gas_price(self.web3),
+                "gas": GAS_LIMIT,
+            }
+            tx = self.chainlink_forwarder.functions.getThePrice().buildTransaction(
+                options
+            )
+
+            signed_tx = self.web3.eth.account.sign_transaction(
+                tx, private_key=self.keeper_key
+            )
+            tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+        except ValueError as e:
+            self.logger.error(f"Error in sending chainlink tx: {e}")
+            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+        finally:
+            return tx_hash

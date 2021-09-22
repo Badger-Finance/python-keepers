@@ -105,7 +105,7 @@ class ibBTCFeeCollector:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash
+                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
                 )
                 send_success_to_discord(
                     tx_hash=tx_hash,

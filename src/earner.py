@@ -5,10 +5,14 @@ import logging
 import os
 import requests
 import sys
+import traceback
 from time import sleep
 from web3 import Web3, contract, exceptions
 
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
 
 from utils import (
     confirm_transaction,
@@ -17,12 +21,16 @@ from utils import (
     get_abi,
     get_hash_from_failed_tx_error,
 )
+from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
+from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
 
 logging.basicConfig(level=logging.INFO)
 
-EARN_PCT_THRESHOLD = 0.01
-EARN_OVERRIDE_THRESHOLD = 2
-
+GAS_LIMITS = {
+    "eth": 1_000_000,
+    "poly": 1_000_000,
+    "arbitrum": 3_000_000,
+}
 EARN_EXCEPTIONS = {}
 
 
@@ -35,6 +43,7 @@ class Earner:
         keeper_key: str = os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         web3: Web3 = None,
+        discord_url: str = None,
     ):
         self.logger = logging.getLogger("earner")
         self.chain = chain
@@ -49,6 +58,7 @@ class Earner:
             address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
         )
+        self.discord_url = discord_url
 
     def earn(self, vault: contract, strategy: contract, sett_name: str = None):
         override_threshold = EARN_EXCEPTIONS.get(
@@ -65,7 +75,9 @@ class Earner:
         )
 
         # Pre safety checks
-        assert want.address == strategy.functions.want().call()
+        swant_address = strategy.functions.want().call()
+        self.logger.info(f"{want.address} == {swant_address}")
+        assert want.address == swant_address
         assert strategy.functions.controller().call() == controller.address
         assert vault.functions.controller().call() == controller.address
         assert controller.functions.strategies(want.address).call() == strategy.address
@@ -137,17 +149,23 @@ class Earner:
             tx_hash = self.__send_earn_tx(vault)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
-                gas_price_of_tx = self.__get_gas_price_of_tx(tx_hash)
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash, self.chain
+                )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Earn {sett_name}",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
+                    url=self.discord_url,
                 )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(
-                    tx_type=f"Earn {sett_name}", tx_hash=tx_hash, chain=self.chain
+                    tx_type=f"Earn {sett_name}",
+                    tx_hash=tx_hash,
+                    chain=self.chain,
+                    url=self.discord_url,
                 )
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
@@ -176,49 +194,21 @@ class Earner:
             self.logger.info(f"attempted tx_hash: {tx_hash}")
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending earn tx: {e}")
+            self.logger.error(f"Error in sending earn tx: {traceback.format_exc()}")
             tx_hash = get_hash_from_failed_tx_error(e, "Earn")
         finally:
             return tx_hash
-
-    def estimate_gas_fee(self, strategy_address: str) -> Decimal:
-        current_gas_price = self.__get_gas_price()
-        estimated_gas_to_earn = self.keeper_acl.functions.earn(
-            strategy_address
-        ).estimateGas({"from": self.keeper_address})
-        return Decimal(current_gas_price * estimated_gas_to_earn)
 
     def __get_gas_price(self) -> int:
         if self.chain == "poly":
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == "eth":
-            response = requests.get(
-                "https://www.gasnow.org/api/v3/gas/price?utm_source=BadgerKeeper"
-            ).json()
-            gas_price = int(response.get("data").get("rapid") * 1.1)
+            gas_price = get_effective_gas_price(self.web3)
+        elif self.chain == "arbitrum":
+            gas_price = int(1.1 * self.web3.eth.gas_price)
 
         return gas_price
-
-    def __get_gas_price_of_tx(self, tx_hash: HexBytes) -> Decimal:
-        """Gets the actual amount of gas used by the transaction and converts
-        it from gwei to USD value for monitoring.
-
-        Args:
-            tx_hash (HexBytes): tx id of target transaction
-
-        Returns:
-            Decimal: USD value of gas used in tx
-        """
-        tx = self.web3.eth.get_transaction(tx_hash)
-
-        total_gas_used = Decimal(tx.get("gas", 0))
-        gas_price_base = Decimal(tx.get("gasPrice", 0) / 10 ** 18)
-        base_usd = Decimal(
-            self.base_usd_oracle.functions.latestRoundData().call()[1] / 10 ** 8
-        )
-
-        return total_gas_used * gas_price_base * base_usd
 
     def __build_transaction(self, strategy_address: str) -> dict:
         """Builds transaction depending on which chain we're earning. EIP-1559
@@ -233,9 +223,11 @@ class Earner:
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,
+            "gas": GAS_LIMITS[self.chain],
         }
         if self.chain == "eth":
-            options["maxPriorityFeePerGas"] = 10
+            options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
+            options["maxFeePerGas"] = self.__get_gas_price()
         else:
             options["gasPrice"] = self.__get_gas_price()
         return self.keeper_acl.functions.earn(strategy_address).buildTransaction(

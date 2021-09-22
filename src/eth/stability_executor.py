@@ -114,7 +114,7 @@ class StabilityExecutor:
             )
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.base_usd_oracle, tx_hash
+                    self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
                 send_success_to_discord(
                     tx_type=f"Execute Trade Batch {strategy_name}",
