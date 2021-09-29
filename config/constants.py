@@ -5,6 +5,7 @@ MULTICHAIN_CONFIG = {
         # TODO: may need to make vault owner a list eventually
         "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
+        "earn": {"invalid_strategies": []},
     },
     "arbitrum": {
         "gas_oracle": "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612",
@@ -12,6 +13,15 @@ MULTICHAIN_CONFIG = {
         # TODO: may need to make vault owner a list eventually
         "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
+        "earn": {"invalid_strategies": []},
+    },
+    "eth": {
+        "gas_oracle": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
+        "keeper_acl": "0x711A339c002386f9db409cA55b6A35a604aB6cF6",
+        # TODO: may need to make vault owner a list eventually
+        "vault_owner": "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
+        "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
+        "earn": {"invalid_strategies": ["0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"]},
     },
 }
 
