@@ -5,9 +5,12 @@ import sys
 from time import sleep
 from web3 import Web3, contract
 
-from src.earner import Earner
-from src.utils import get_secret, get_strategies_and_vaults, get_abi
-from config.constants import MULTICHAIN_CONFIG
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config")))
+
+from earner import Earner
+from utils import get_secret, get_strategies_and_vaults, get_abi
+from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
