@@ -44,8 +44,8 @@ strategies = {
     "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
     # "0xA6af1B913E205B8E9B95D3B30768c0989e942316",  # experimental.digg
     "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9",  # locked cvx strategy
-    "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
-    "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
+    # "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
+    # "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
 }
 
 
