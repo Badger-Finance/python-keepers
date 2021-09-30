@@ -6,7 +6,7 @@ metadata:
     app: eth-bvecvx-earner-keeper
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "48 21 * * *"
+  schedule: "56 21 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
@@ -18,7 +18,7 @@ spec:
           - name: eth-bvecvx-earner-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/earn_locked_cvx"]
+            command: ["python", "scripts/earn_locked_cvx.py"]
             env:
               - name: LOG_LEVEL
                 value: 'info'
