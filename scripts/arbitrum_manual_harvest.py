@@ -7,15 +7,16 @@ from pathlib import Path
 from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret
+from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
-
-ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
 strategies = {
     "0x43942cEae98CC7485B48a37fBB1aa5035e1c8B46",  # WBTC WETH SWAPR
@@ -44,10 +45,10 @@ if __name__ == "__main__":
 
     harvester = GeneralHarvester(
         web3=web3,
-        keeper_acl=KEEPER_ACL,
+        keeper_acl=MULTICHAIN_CONFIG["arbitrum"]["keeper_acl"],
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=ETH_USD_CHAINLINK,
+        base_oracle_address=MULTICHAIN_CONFIG["arbitrum"]["gas_oracle"],
         use_flashbots=False,
         discord_url=discord_url,
     )
