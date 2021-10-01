@@ -6,7 +6,7 @@ metadata:
     app: arb-harvester-keeper
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "30 */12 * * *"
+  schedule: "53 16 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
@@ -18,7 +18,7 @@ spec:
           - name: arb-harvester-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/arbitrum_harvest.py"]
+            command: ["python", "scripts/arbitrum_manual_harvest.py"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

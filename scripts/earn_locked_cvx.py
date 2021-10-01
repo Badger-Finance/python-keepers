@@ -6,7 +6,9 @@ from time import sleep
 from web3 import Web3, contract
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
 from earner import Earner
 from utils import get_secret, get_strategies_and_vaults, get_abi
