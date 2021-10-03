@@ -389,17 +389,18 @@ def get_last_harvest_times(
 # TODO: move to own utils func and separate utils.py into directory and sub classes
 def get_strategies_from_registry(node: Web3, chain: str) -> list:
     strategies = []
-    vault_owner = node.toChecksumAddress(
-        MULTICHAIN_CONFIG.get(chain).get("vault_owner")
-    )
+
     registry = node.eth.contract(
-        address=node.toChecksumAddress(MULTICHAIN_CONFIG.get(chain).get("registry")),
+        address=node.toChecksumAddress(MULTICHAIN_CONFIG[chain]["registry"]),
         abi=get_abi(chain, "registry"),
     )
 
-    for vault_address in registry.functions.getVaults("v1", vault_owner).call():
-        strategy, _ = get_strategy_from_vault(node, chain, vault_address)
-        strategies.append(strategy)
+    for vault_owner in MULTICHAIN_CONFIG[chain]["vault_owner"]:
+        vault_owner = node.toChecksumAddress(vault_owner)
+
+        for vault_address in registry.functions.getVaults("v1", vault_owner).call():
+            strategy, _ = get_strategy_from_vault(node, chain, vault_address)
+            strategies.append(strategy)
 
     return strategies
 
@@ -432,17 +433,17 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
     strategies = []
     vaults = []
 
-    vault_owner = node.toChecksumAddress(
-        MULTICHAIN_CONFIG.get(chain).get("vault_owner")
-    )
     registry = node.eth.contract(
         address=node.toChecksumAddress(MULTICHAIN_CONFIG.get(chain).get("registry")),
         abi=get_abi(chain, "registry"),
     )
 
-    for vault_address in registry.functions.getVaults("v1", vault_owner).call():
-        strategy, vault = get_strategy_from_vault(node, chain, vault_address)
-        vaults.append(vault)
-        strategies.append(strategy)
+    for vault_owner in MULTICHAIN_CONFIG[chain]["vault_owner"]:
+        vault_owner = node.toChecksumAddress(vault_owner)
+
+        for vault_address in registry.functions.getVaults("v1", vault_owner).call():
+            strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+            vaults.append(vault)
+            strategies.append(strategy)
 
     return strategies, vaults
