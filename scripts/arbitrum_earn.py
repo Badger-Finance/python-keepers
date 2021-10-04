@@ -20,8 +20,10 @@ logger = logging.getLogger("script")
 INVALID_STRATS = []
 
 
-def safe_earn(earner, sett_name, vault, strategy):
+def safe_earn(earner, vault, strategy):
     try:
+        sett_name = strategy.functions.getName().call()
+        logger.info(f"+-----Earning {sett_name}-----+")
         earner.earn(vault, strategy, sett_name=sett_name)
     except Exception as e:
         logger.error(f"Error running {sett_name} earn: {e}")
@@ -57,7 +59,4 @@ if __name__ == "__main__":
 
         for strategy, vault in zip(strategies, vaults):
             if strategy.address not in INVALID_STRATS:
-                strat_name = strategy.functions.getName().call()
-
-                logger.info(f"+-----Earning {strat_name}-----+")
-                safe_earn(earner, strat_name, vault, strategy)
+                safe_earn(earner, vault, strategy)
