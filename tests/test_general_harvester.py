@@ -5,12 +5,14 @@ from decimal import Decimal
 from hexbytes import HexBytes
 from web3 import contract
 
+from config.constants import MULTICHAIN_CONFIG
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
 from tests.utils import test_address, test_key
 
-ETH_USD_CHAINLINK = web3.toChecksumAddress("0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419")
-KEEPER_ACL = web3.toChecksumAddress("0x711A339c002386f9db409cA55b6A35a604aB6cF6")
+ETH_USD_CHAINLINK = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["gas_oracle"])
+KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["keeper_acl"])
+REWARDS_MANAGER = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["rewards_manager"])
 CVX_HELPER_STRATEGY = web3.toChecksumAddress(
     "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 )
@@ -18,6 +20,8 @@ CVX_CRV_HELPER_STRATEGY = web3.toChecksumAddress(
     "0x826048381d65a65DAa51342C51d464428d301896"
 )
 HBTC_STRATEGY = web3.toChecksumAddress("0xf4146A176b09C664978e03d28d07Db4431525dAd")
+DIGG_STRATEGY = web3.toChecksumAddress("0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a")
+XSUSHI = "0x8798249c2e607446efb7ad49ec89dd1865ff4272"
 
 
 def mock_get_last_harvest_times(web3, keeper_acl, start_block):
@@ -73,10 +77,32 @@ def setup_keeper_acl(keeper_address):
     return keeper_acl
 
 
+@pytest.fixture(autouse=True)
+def setup_rewards_manager(keeper_address):
+    rewards_manager = Contract.from_abi(
+        "BadgerRewardsManager",
+        REWARDS_MANAGER,
+        get_abi("eth", "rewards_manager"),
+    )
+    keeper_role = rewards_manager.KEEPER_ROLE()
+    admin_role = rewards_manager.getRoleAdmin(keeper_role)
+    admin = rewards_manager.getRoleMember(admin_role, 0)
+    rewards_manager.grantRole(keeper_role, keeper_address, {"from": admin})
+    return rewards_manager
+
+
 @pytest.fixture
 def strategy() -> contract:
     return web3.eth.contract(
         address=CVX_CRV_HELPER_STRATEGY,
+        abi=get_abi("eth", "strategy"),
+    )
+
+
+@pytest.fixture
+def rewards_manager_strategy() -> contract:
+    return web3.eth.contract(
+        address=DIGG_STRATEGY,
         abi=get_abi("eth", "strategy"),
     )
 
@@ -95,6 +121,46 @@ def harvester(keeper_address, keeper_key) -> GeneralHarvester:
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
         use_flashbots=False,
+    )
+
+
+@pytest.mark.require_network("hardhat-fork")
+def test_harvest_rewards_manager(keeper_address, harvester, rewards_manager_strategy):
+    """
+    Check if the contract should be harvestable, then call the harvest function
+
+    If the strategy should be harvested then claimable rewards should be positive before
+    and 0 after. If not then claimable rewards should be the same before and after
+    calling harvest
+    """
+    accounts[0].transfer(keeper_address, "10 ether")
+
+    harvester.keeper_acl = harvester.web3.eth.contract(
+        address=harvester.web3.toChecksumAddress(
+            MULTICHAIN_CONFIG["eth"]["rewards_manager"]
+        ),
+        abi=get_abi("eth", "rewards_manager"),
+    )
+
+    xsushi = Contract.from_abi(
+        "ERC20", web3.toChecksumAddress(XSUSHI), get_abi("eth", "erc20")
+    )
+
+    strategy_name = rewards_manager_strategy.functions.getName().call()
+
+    # Hack: For some reason, harvest call() fails without first calling estimateGas()
+    harvester.estimate_gas_fee(rewards_manager_strategy.address)
+
+    before_claimable = xsushi.balanceOf(rewards_manager_strategy.address)
+    harvester.logger.info(f"{strategy_name} before_claimable: {before_claimable}")
+
+    harvester.harvest_rewards_manager(rewards_manager_strategy)
+
+    after_claimable = xsushi.balanceOf(rewards_manager_strategy.address)
+    harvester.logger.info(f"{strategy_name} after_claimable: {after_claimable}")
+
+    assert (before_claimable != 0 and after_claimable == 0) or (
+        before_claimable == after_claimable
     )
 
 

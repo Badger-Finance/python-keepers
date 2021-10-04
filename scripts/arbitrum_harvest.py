@@ -23,26 +23,27 @@ logger = logging.getLogger(Path(__file__).name)
 # }
 
 # TODO: Add conditional harvest logic
-def safe_harvest(harvester, strategy_name, strategy) -> str:
-    logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
+def safe_harvest(harvester, strategy) -> str:
     try:
+        strategy_name = strategy.functions.getName().call()
+        logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         harvester.harvest(strategy)
         return "Success!"
     except Exception as e:
-        logger.error(f"Error running {strategy_name} harvest: {e}")
+        logger.error(f"Error running harvest: {e}")
     logger.info("Trying to run harvestNoReturn")
     try:
         harvester.harvest_no_return(strategy)
         return "Success!"
     except Exception as e:
-        logger.error(f"Error running {strategy_name} harvestNoReturn: {e}")
+        logger.error(f"Error running harvestNoReturn: {e}")
 
     logger.info("Tend first, then harvest")
     try:
         harvester.tend_then_harvest(strategy)
         return "Success!"
     except Exception as e:
-        logger.error(f"Error running {strategy_name} tend_then_harvest: {e}")
+        logger.error(f"Error running tend_then_harvest: {e}")
 
 
 if __name__ == "__main__":
@@ -70,9 +71,7 @@ if __name__ == "__main__":
     strategies = get_strategies_from_registry(web3, "arbitrum")
 
     for strategy in strategies:
-        strategy_name = strategy.functions.getName().call()
-
-        safe_harvest(harvester, strategy_name, strategy)
+        safe_harvest(harvester, strategy)
 
         # Sleep for a few blocks in between harvests
         time.sleep(30)

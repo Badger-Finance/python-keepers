@@ -30,22 +30,25 @@ strategies = {
     "0x2bb864cdb4856ab2d148c5ca52dd7ccec126d138",  # OBTC_CRV_STRATEGY
     "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0",  # BBTC_CRV_STRATEGY
     "0x2eB6479c2f033360C0F4575A88e3b8909Cbc6a03",  # TRICRYPTO_CRV_STRATEGY
-    # "0x75b8E21BD623012Efb3b69E1B562465A68944eE6",  # native.badger
     "0x6582a5b139fc1c6360846efdc4440d51aad4df7b",  # native.renCrv
     "0xf1ded284e891943b3e9c657d7fc376b86164ffc2",  # native.sbtcCrv
     "0x522bb024c339a12be1a47229546f288c40b62d29",  # native.tbtcCrv
-    # "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf",  # native.uniBadgerWbtc
     "0xaaE82E3c89e15E6F26F60724f115d5012363e030",  # harvest.renCrv
     "0x7A56d65254705B4Def63c68488C0182968C452ce",  # native.sushiWbtcEth
     "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # native.sushiBadgerWbtc
-    # "0x4a8651F2edD68850B944AD93f2c67af817F39F62",  # native.digg
-    # "0xadc8d7322f2E284c1d9254170dbe311E9D3356cf",  # native.uniDiggWbtc
-    "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
     "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
     # "0xA6af1B913E205B8E9B95D3B30768c0989e942316",  # experimental.digg
     "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9",  # locked cvx strategy
     # "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
     # "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
+}
+
+rewards_manager_strategies = {
+    "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
+    # "0x4a8651F2edD68850B944AD93f2c67af817F39F62",  # native.digg
+    # "0xadc8d7322f2E284c1d9254170dbe311E9D3356cf",  # native.uniDiggWbtc
+    # "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf",  # native.uniBadgerWbtc
+    # "0x75b8E21BD623012Efb3b69E1B562465A68944eE6",  # native.badger
 }
 
 
@@ -91,6 +94,32 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
         )
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
+
+
+def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> str:
+    latest_base_fee = get_latest_base_fee(harvester.web3)
+
+    hours_60 = hours(60)
+
+    # regular thresholds for rest of vaults
+    if harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
+        100e9
+    ):
+        logger.info(f"Been longer than 60 hours and base fee < 100 for {strategy_name}")
+        logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
+        try:
+            harvester.harvest_rewards_manager(strategy)
+        except Exception as e:
+            logger.error(f"Error running {strategy_name} harvest: {e}")
+    elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
+        logger.info(
+            f"Been longer than 71 hours harvest no matter what for {strategy_name}"
+        )
+        logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
+        try:
+            harvester.harvest_rewards_manager(strategy)
+        except Exception as e:
+            logger.error(f"Error running {strategy_name} harvest: {e}")
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
@@ -149,6 +178,18 @@ if __name__ == "__main__":
         strategy_name = strategy.functions.getName().call()
 
         conditional_harvest(harvester, strategy_name, strategy)
+
+        # Sleep for 2 blocks in between harvests
+        time.sleep(30)
+
+    for strategy_address in rewards_manager_strategies:
+        strategy = web3.eth.contract(
+            address=web3.toChecksumAddress(strategy_address),
+            abi=get_abi("eth", "strategy"),
+        )
+        strategy_name = strategy.functions.getName().call()
+
+        conditional_harvest_rewards_manager(harvester, strategy_name, strategy)
 
         # Sleep for 2 blocks in between harvests
         time.sleep(30)
