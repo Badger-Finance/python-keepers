@@ -26,7 +26,7 @@ def safe_earn(earner, vault, strategy):
         logger.info(f"+-----Earning {sett_name}-----+")
         earner.earn(vault, strategy, sett_name=sett_name)
     except Exception as e:
-        logger.error(f"Error running {sett_name} earn: {e}")
+        logger.error(f"Error running earn: {e}")
 
 
 def get_abi(chain: str, contract_id: str):
