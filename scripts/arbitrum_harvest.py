@@ -71,7 +71,11 @@ if __name__ == "__main__":
     strategies = get_strategies_from_registry(web3, "arbitrum")
 
     for strategy in strategies:
-        safe_harvest(harvester, strategy)
+        if (
+            strategy.address
+            not in MULTICHAIN_CONFIG["arbitrum"]["harvest"]["invalid_strategies"]
+        ):
+            safe_harvest(harvester, strategy)
 
-        # Sleep for a few blocks in between harvests
-        time.sleep(30)
+            # Sleep for a few blocks in between harvests
+            time.sleep(30)

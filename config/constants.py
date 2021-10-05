@@ -14,18 +14,8 @@ MULTICHAIN_CONFIG = {
             "0xbb2281ca5b4d07263112604d1f182ad0ab26a252",
         ],
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
-        "earn": {
-            "invalid_strategies": [
-                "0x85386C3cE0679b035a9F8F17f531C076d0b35954",
-                "0x43942cEae98CC7485B48a37fBB1aa5035e1c8B46",
-            ]
-        },
-        "harvest": {
-            "invalid_strategies": [
-                "0x85386C3cE0679b035a9F8F17f531C076d0b35954",
-                "0x43942cEae98CC7485B48a37fBB1aa5035e1c8B46",
-            ]
-        },
+        "earn": {"invalid_strategies": []},
+        "harvest": {"invalid_strategies": []},
     },
     "eth": {
         "gas_oracle": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",

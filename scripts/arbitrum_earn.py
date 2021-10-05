@@ -17,8 +17,6 @@ from constants import MULTICHAIN_CONFIG
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-INVALID_STRATS = []
-
 
 def safe_earn(earner, vault, strategy):
     try:
@@ -58,5 +56,8 @@ if __name__ == "__main__":
         )
 
         for strategy, vault in zip(strategies, vaults):
-            if strategy.address not in INVALID_STRATS:
+            if (
+                strategy.address
+                not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
+            ):
                 safe_earn(earner, vault, strategy)
