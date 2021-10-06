@@ -12,6 +12,7 @@ MULTICHAIN_CONFIG = {
         "vault_owner": [
             "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
             "0xbb2281ca5b4d07263112604d1f182ad0ab26a252",
+            "0x283c857ba940a61828d9f4c09e3fcee2e7aef3f7",
         ],
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
         "earn": {"invalid_strategies": []},
