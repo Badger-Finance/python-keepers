@@ -24,6 +24,24 @@ MULTICHAIN_CONFIG = {
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
         "rewards_manager": "0x5B60952481Eb42B66bdfFC3E049025AC5b91c127",
         "earn": {"invalid_strategies": ["0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"]},
+        "external_harvest": {
+            "single_asset": {
+                "strategies": [
+                    "0x4a8651F2edD68850B944AD93f2c67af817F39F62",  # bdigg
+                    "0x75b8E21BD623012Efb3b69E1B562465A68944eE6",  # bbadger
+                ]
+            },
+            "liquidity_pool": {
+                "strategies": [
+                    "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # digg / wbtc sushi
+                    "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # badger / wbtc sushi
+                    "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf",  # badger / wbtc uni
+                ]
+            },
+            "invalid_strategies": [
+                "0xadc8d7322f2E284c1d9254170dbe311E9D3356cf"  # digg / wbtc uni
+            ],
+        },
     },
 }
 

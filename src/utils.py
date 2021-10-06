@@ -348,7 +348,6 @@ def get_last_harvest_times(
     """
     if etherscan_key is None:
         etherscan_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
-
     endpoint = "https://api.etherscan.io/api"
     payload = {
         "module": "account",
@@ -362,12 +361,12 @@ def get_last_harvest_times(
     try:
         response = requests.get(endpoint, params=payload)
         response.raise_for_status()  # Raise HTTP errors
-
         data = response.json()
         times = {}
         for tx in data["result"]:
             if (
-                web3.toChecksumAddress(tx["to"]) != keeper_acl.address
+                tx["to"] == ""
+                or web3.toChecksumAddress(tx["to"]) != keeper_acl.address
                 or "input" not in tx
             ):
                 continue
@@ -447,3 +446,75 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
             strategies.append(strategy)
 
     return strategies, vaults
+
+
+def get_rewards_schedule() -> dict:
+    github_token = os.getenv("GITHUB_TOKEN")
+    url = (
+        "https://raw.githubusercontent.com/Badger-Finance/badger-ape/"
+        "main/scripts/dev_multisig/emissions/emissions_info.json?"
+        f"token={github_token}"
+    )
+    schedule = requests.get(url)
+    return schedule.json()
+
+
+def get_last_external_harvest_times(
+    web3: Web3,
+    rewards_manager: contract,
+    start_block: int = 0,
+    etherscan_key: str = None,
+):
+    """Fetches the latest external harvest timestamps of strategies from Etherscan API which occur after `start_block`.
+    NOTE: Temporary function until Harvested events are emitted from all strategies.
+
+    Args:
+        web3 (Web3): Web3 node instance.
+        rewards_manager (contract): Rewards manager web3 contract instance.
+        start_block (int, optional): Minimum block number to start fetching external harvest timestamps from. Defaults to 0.
+
+    Returns:
+        dict: Dictionary of strategy addresses and their latest external harvest timestamps.
+    """
+    if etherscan_key is None:
+        etherscan_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
+    endpoint = "https://api.etherscan.io/api"
+    payload = {
+        "module": "account",
+        "action": "txlist",
+        "address": rewards_manager.address,
+        "startblock": start_block,
+        "endblock": web3.eth.block_number,
+        "sort": "desc",
+        "apikey": etherscan_key,
+    }
+    try:
+        response = requests.get(endpoint, params=payload)
+        response.raise_for_status()  # Raise HTTP errors
+        data = response.json()
+        times = {}
+        for tx in data["result"]:
+            if (
+                tx["to"] == ""
+                or web3.toChecksumAddress(tx["to"]) != rewards_manager.address
+                or "input" not in tx
+            ):
+                continue
+            fn, args = rewards_manager.decode_function_input(tx["input"])
+            if (
+                str(fn)
+                in [
+                    "<Function transferWant(address,address,uint256)>",
+                ]
+                and args["strategy"] not in times
+                and args["strategy"]
+                not in MULTICHAIN_CONFIG["eth"]["external_harvest"][
+                    "invalid_strategies"
+                ]
+            ):
+                times[args["strategy"]] = int(tx["timeStamp"])
+        return times
+    except (KeyError, requests.HTTPError):
+        raise ValueError("Last harvest time couldn't be fetched")
+    except (ValueError):
+        logger.error(f"Weird tx format: {tx}")
