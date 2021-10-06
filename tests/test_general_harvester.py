@@ -225,3 +225,26 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
+
+
+@pytest.mark.require_network("hardhat-fork")
+def test_is_time_to_harvest_rewards_manager(
+    web3, chain, keeper_address, harvester, rewards_manager_strategy
+):
+    strategy_name = rewards_manager_strategy.functions.getName().call()
+    accounts[0].transfer(keeper_address, "10 ether")
+
+    # Strategy should be harvestable at this point
+    chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
+    harvester.harvest_rewards_manager(rewards_manager_strategy)
+
+    # Strategy shouldn't be harvestable
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
+
+    # Strategy should be harvestable again after 72 hours
+    chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
+    harvester.harvest_rewards_manager(rewards_manager_strategy)

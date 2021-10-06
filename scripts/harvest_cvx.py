@@ -8,9 +8,13 @@ from pathlib import Path
 from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from constants import MULTICHAIN_CONFIG, THREE_DAYS_OF_BLOCKS
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, hours
+from utils import get_abi, get_secret, hours, get_last_harvest_times
 from tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
@@ -181,6 +185,19 @@ if __name__ == "__main__":
 
         # Sleep for 2 blocks in between harvests
         time.sleep(30)
+
+    rewards_manager = harvester.web3.eth.contract(
+        address=harvester.web3.toChecksumAddress(
+            MULTICHAIN_CONFIG[harvester.chain]["rewards_manager"]
+        ),
+        abi=get_abi(harvester.chain, "rewards_manager"),
+    )
+
+    harvester.last_harvest_times = get_last_harvest_times(
+        harvester.web3,
+        rewards_manager,
+        start_block=harvester.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
+    )
 
     for strategy_address in rewards_manager_strategies:
         strategy = web3.eth.contract(
