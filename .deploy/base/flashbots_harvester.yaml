@@ -8,7 +8,7 @@ spec:
   schedule: "*/30 21-23,0-12 * * *"
   # schedule: "55 19 * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
