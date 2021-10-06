@@ -367,7 +367,8 @@ def get_last_harvest_times(
         times = {}
         for tx in data["result"]:
             if (
-                web3.toChecksumAddress(tx["to"]) != keeper_acl.address
+                tx["to"] == ""
+                or web3.toChecksumAddress(tx["to"]) != keeper_acl.address
                 or "input" not in tx
             ):
                 continue
