@@ -6,7 +6,7 @@ metadata:
     app: eth-bvecvx-earner-keeper
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "5 12 * * *"
+  schedule: "55 13 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
