@@ -1,0 +1,1658 @@
+{
+  "1629997200": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 3429,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1715,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1715,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 3429,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 3429,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1715,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1715,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 3429,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x53C8E199eb2Cb7c01543C137078a038937a68E40": {
+      "name": "convex-helper-CVX",
+      "badger_allocation": 358,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 358,
+      "digg_allocation": 0
+    },
+    "0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28": {
+      "name": "native-sett-bBadger",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 3.22
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 25.32
+    }
+  },
+  "1630602000": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 3104,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1552,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1552,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 3104,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 3104,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1552,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1552,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 3104,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x53C8E199eb2Cb7c01543C137078a038937a68E40": {
+      "name": "convex-helper-CVX",
+      "badger_allocation": 381,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 381,
+      "digg_allocation": 0
+    },
+    "0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28": {
+      "name": "native-sett-bBadger",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 3.02
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 18.31
+    }
+  },
+  "1631206800": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2809,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1404,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1404,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 2809,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 2809,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1404,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1404,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2809,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x53C8E199eb2Cb7c01543C137078a038937a68E40": {
+      "name": "convex-helper-CVX",
+      "badger_allocation": 406,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 406,
+      "digg_allocation": 0
+    },
+    "0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28": {
+      "name": "native-sett-bBadger",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.84
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 13.42
+    }
+  },
+  "1631811600": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2542,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1271,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1271,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1271,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1271,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1271,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1271,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2542,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x53C8E199eb2Cb7c01543C137078a038937a68E40": {
+      "name": "convex-helper-CVX",
+      "badger_allocation": 432,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 432,
+      "digg_allocation": 0
+    },
+    "0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28": {
+      "name": "native-sett-bBadger",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.66
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10.65
+    }
+  },
+  "1632416400": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x53C8E199eb2Cb7c01543C137078a038937a68E40": {
+      "name": "convex-helper-CVX",
+      "badger_allocation": 460,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 460,
+      "digg_allocation": 0
+    },
+    "0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28": {
+      "name": "native-sett-bBadger",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1633021200": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 5084,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1150,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1633626000": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2283,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2283,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4565,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2283,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 2810,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 4600,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1141,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4565,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4565,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1634230800": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2265,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2265,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 4531,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2265,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 2231,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1133,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4531,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4531,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1634835600": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2248,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2248,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 450,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2248,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1661,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1124,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4497,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4497,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1635440400": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2231,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2231,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 446,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2231,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1116,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 4463,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4463,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1636045200": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2214,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2214,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 443,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2214,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1107,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4429,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1636650000": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2198,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2198,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 440,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2198,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1099,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4395,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1637254800": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2181,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2181,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 436,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2181,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1091,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4362,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1637859600": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2165,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2165,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 433,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2165,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1082,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4329,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1638464400": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2148,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2148,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 430,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2148,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1074,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4297,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1639069200": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2132,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2132,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 426,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2132,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1066,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4264,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1639674000": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2116,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2116,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 423,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2116,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1058,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4232,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  },
+  "1640278800": {
+    "0x6dEf55d2e18486B9dDfaA075bc4e4EE0B28c1545": {
+      "name": "renBTC",
+      "badger_allocation": 2100,
+      "digg_allocation": 0
+    },
+    "0xd04c48A53c111300aD41190D63681ed3dAd998eC": {
+      "name": "sBTC",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0xb9D076fDe463dbc9f915E5392F807315Bf940334": {
+      "name": "tBTC",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0x8c76970747afd5398e958bdfada4cf0b9fca16c4": {
+      "name": "hBTC",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9": {
+      "name": "bBTC",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0xf349c0faA80fC1870306Ac093f75934078e28991": {
+      "name": "oBTC",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0x55912D0Cf83B75c492E761932ABc4DB4a5CB1b17": {
+      "name": "pBTC",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5": {
+      "name": "Tricrypto",
+      "badger_allocation": 2100,
+      "digg_allocation": 0
+    },
+    "0x758A43EE2BFf8230eeb784879CdcFF4828F2544D": {
+      "name": "sushi-eth/WBTC",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0x8a8FFec8f4A0C8c9585Da95D9D97e8Cd6de273DE": {
+      "name": "sushi-ibBTC/WBTC",
+      "badger_allocation": 420,
+      "digg_allocation": 0
+    },
+    "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5": {
+      "name": "yearn-byWBTC",
+      "badger_allocation": 2100,
+      "digg_allocation": 0
+    },
+    "0x599D92B453C010b1050d31C364f6ee17E819f193": {
+      "name": "mStable",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305": {
+      "name": "blCVX",
+      "badger_allocation": 2300,
+      "digg_allocation": 0
+    },
+    "0x2B5455aac8d64C14786c3a29858E43b5945819C0": {
+      "name": "convex-helper-cvxCRV",
+      "badger_allocation": 1050,
+      "digg_allocation": 0
+    },
+    "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1": {
+      "name": "native-sett-Badger-LP-Uni",
+      "badger_allocation": 0,
+      "digg_allocation": 0
+    },
+    "0x1862A18181346EBd9EdAf800804f89190DeF24a5": {
+      "name": "native-sett-Badger-SLP",
+      "badger_allocation": 4200,
+      "digg_allocation": 0
+    },
+    "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a": {
+      "name": "bDIGG",
+      "badger_allocation": 0,
+      "digg_allocation": 2.5
+    },
+    "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6": {
+      "name": "sett-DIGG-LP-Sushi",
+      "badger_allocation": 0,
+      "digg_allocation": 10
+    }
+  }
+}

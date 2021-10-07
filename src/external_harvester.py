@@ -116,6 +116,12 @@ class ExternalHarvester:
 
         return round((current_time - last_harvest) / SECONDS_IN_A_DAY)
 
+    def get_badger_amount_owed(self, last_timestamp: int, strategy_addr: str) -> int:
+        return 1
+
+    def get_digg_amount_owed(self, last_timestamp: int, strategy_addr: str) -> int:
+        return 1
+
     def get_amount_to_transfer(self, strategy_addr: str, days_since_last: int) -> int:
 
         return 1
@@ -126,6 +132,27 @@ class ExternalHarvester:
         for strategy_addr in self.config["single_asset"]["strategies"]:
             days_since_last = self.days_since_last_harvest(strategy_addr)
             if days_since_last > 0:
+                # get last harvest timestamp
+                last_timestamp = self.last_harvest_times[strategy_addr]
+
+                # calculate amount of badger owed since last harvest
+                amount_badger_owed = self.get_amount_badger_owed(
+                    last_timestamp, strategy_addr
+                )
+                # calculate amount of digg owed since last harvest
+                amount_digg_owed = self.get_amount_digg_owed(
+                    last_timestamp, strategy_addr
+                )
+
+                if amount_badger_owed > 0:
+                    # distribue
+                    sleep(30)
+
+                if amount_digg_owed > 0:
+                    # distribute
+                    sleep(30)
+                # if lp, swap and distribute
+                # else just distribute
                 strategy = self.keeper_acl = self.web3.eth.contract(
                     address=strategy_addr,
                     abi=get_abi(self.chain, "strategy"),

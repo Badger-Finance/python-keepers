@@ -448,8 +448,9 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
     return strategies, vaults
 
 
-def get_rewards_schedule() -> dict:
-    github_token = os.getenv("GITHUB_TOKEN")
+def get_rewards_schedule(github_token: str = os.getenv("GITHUB_TOKEN")) -> dict:
+    if not github_token:
+        github_token = get_secret("github_token/path", "GITHUB_TOKEN")
     url = (
         "https://raw.githubusercontent.com/Badger-Finance/badger-ape/"
         "main/scripts/dev_multisig/emissions/emissions_info.json?"
