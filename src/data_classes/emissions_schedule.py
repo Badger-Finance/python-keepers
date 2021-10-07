@@ -10,13 +10,13 @@ class EmissionsSchedule:
     def get_start_times(self) -> list:
         start_times = []
         for date in self.dates:
-            start_times.append(self.schedule_json[date]["timerange"]["starttime"])
+            start_times.append(str(self.schedule_json[date]["timerange"]["starttime"]))
         return start_times
 
     def get_end_times(self) -> list:
         end_times = []
         for date in self.dates:
-            end_times.append(self.schedule_json[date]["timerange"]["endtime"])
+            end_times.append(str(self.schedule_json[date]["timerange"]["endtime"]))
         return end_times
 
     def format_setts(self, setts_list: list) -> dict:

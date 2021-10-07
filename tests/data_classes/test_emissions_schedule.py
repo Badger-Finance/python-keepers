@@ -49,7 +49,12 @@ def schedule_json():
     with open("./tests/data_classes/mock_emissions_schedule.json") as f:
         mock_schedule_json = json.load(f)
         return mock_schedule_json
-
+    
+@pytest.fixture
+def formatted_schedule():
+    with open("./tests/data_classes/mock_formatted_schedule.json") as f:
+        mock_formatted_schedule = json.load(f)
+        return mock_formatted_schedule
 
 @pytest.fixture
 def emissions_schedule(schedule_json):
@@ -59,48 +64,48 @@ def emissions_schedule(schedule_json):
 def test_get_start_times(emissions_schedule):
     start_times = emissions_schedule.get_start_times()
     assert start_times == [
-        1629997200,
-        1630602000,
-        1631206800,
-        1631811600,
-        1632416400,
-        1633021200,
-        1633626000,
-        1634230800,
-        1634835600,
-        1635440400,
-        1636045200,
-        1636650000,
-        1637254800,
-        1637859600,
-        1638464400,
-        1639069200,
-        1639674000,
-        1640278800,
+        "1629997200",
+        "1630602000",
+        "1631206800",
+        "1631811600",
+        "1632416400",
+        "1633021200",
+        "1633626000",
+        "1634230800",
+        "1634835600",
+        "1635440400",
+        "1636045200",
+        "1636650000",
+        "1637254800",
+        "1637859600",
+        "1638464400",
+        "1639069200",
+        "1639674000",
+        "1640278800",
     ]
 
 
 def test_get_end_times(emissions_schedule):
     start_times = emissions_schedule.get_end_times()
     assert start_times == [
-        1630602000,
-        1631206800,
-        1631811600,
-        1632416400,
-        1633021200,
-        1633626000,
-        1634230800,
-        1634835600,
-        1635440400,
-        1636045200,
-        1636650000,
-        1637254800,
-        1637859600,
-        1638464400,
-        1639069200,
-        1639674000,
-        1640278800,
-        1640883600,
+        "1630602000",
+        "1631206800",
+        "1631811600",
+        "1632416400",
+        "1633021200",
+        "1633626000",
+        "1634230800",
+        "1634835600",
+        "1635440400",
+        "1636045200",
+        "1636650000",
+        "1637254800",
+        "1637859600",
+        "1638464400",
+        "1639069200",
+        "1639674000",
+        "1640278800",
+        "1640883600",
     ]
 
 
@@ -108,5 +113,8 @@ def test_format_setts(emissions_schedule, mock_sett_list, mock_sett_formatted):
     assert emissions_schedule.format_setts(mock_sett_list) == mock_sett_formatted
 
 
-def test_get_schedule(emissions_schedule):
-    logger.info(emissions_schedule.get_schedule())
+def test_get_schedule(emissions_schedule, formatted_schedule):
+    calc_schedule = emissions_schedule.get_schedule()
+    for key in formatted_schedule.keys():
+        assert key in calc_schedule.keys()
+        assert calc_schedule[key] == formatted_schedule[key]
