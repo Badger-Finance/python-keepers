@@ -9,9 +9,13 @@ from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
 sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./data_classes"))
+)
+sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
+from emissions_schedule import EmissionsSchedule
 from constants import MULTICHAIN_CONFIG, THREE_DAYS_OF_BLOCKS
 from utils import (
     confirm_transaction,
@@ -77,7 +81,9 @@ class ExternalHarvester:
             self.keeper_acl,
             start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
         )
-        self.rewards_schedule = get_rewards_schedule()
+        schedule_json = get_rewards_schedule()
+        self.emissions = EmissionsSchedule(schedule_json)
+        self.schedule = self.emissions.get_schedule()
 
         self.use_flashbots = use_flashbots
         self.discord_url = discord_url
@@ -173,6 +179,116 @@ class ExternalHarvester:
                     strategy=strategy,
                     strategy_name=strategy_name,
                 )
+
+    def get_amount_badger_owed(self, last_timestamp: int, strategy_address: str) -> int:
+        current_time = self.web3.eth.get_block("latest")["timestamp"]
+
+        days_elapsed = (current_time - last_timestamp) // SECONDS_IN_A_DAY
+        if days_elapsed == 0:
+            return 0
+
+        self.logger.info(f"Getting badger owed over last {days_elapsed} days")
+        weeks_to_check = self._get_weekly_start_times(last_timestamp, current_time)
+
+        week_and_days_elapsed = self._num_days_per_week(
+            weeks_to_check, last_timestamp, current_time
+        )
+
+        days_in_prev = (int(schedules_to_use[0]) - last_harvest) // SECONDS_IN_A_DAY
+
+        # if days_in_prev > 0:
+        previous = schedules_to_use[0]
+        for start_time in schedule.keys():
+            if start_time == schedules_to_use[0]:
+                break
+            previous = str(start_time)
+        previous_schedule_time = previous
+        assert previous_schedule_time == "1630602000"
+
+        distribution = []
+        schedule_start_and_time_elapsed = (previous_schedule_time, days_in_prev)
+
+        distribution.append(schedule_start_and_time_elapsed)
+        for week in schedules_to_use:
+            duration = (int(current_time) - int(week)) // SECONDS_IN_A_DAY
+            weekly_rewards = (week, min(7, duration))
+            distribution.append(weekly_rewards)
+
+        assert distribution == [
+            ("1630602000", 2),
+            ("1631206800", 7),
+            ("1631811600", 7),
+            ("1632416400", 7),
+            ("1633021200", 7),
+            ("1633626000", 0),
+        ]
+
+        sum_of_days = sum([x[1] for x in distribution])
+        assert sum_of_days == days_elapsed - 1
+
+    def _get_weekly_start_times(self, last_timestamp: int, current_time: int) -> list:
+        """[summary]
+
+        Args:
+            last_timestamp (int): timestamp of last distribution
+            current_time (int): current timestamp
+
+        Returns:
+            list: keys to self.schedule of the rewards schedules to be used in distribution
+        """
+        weeks = []
+        for start_time in self.schedule.keys():
+            start_time = int(start_time)
+            if start_time > last_timestamp and start_time <= current_time:
+                weeks.append(str(start_time))
+
+        return weeks
+
+    def _num_days_per_week(
+        self, weeks_to_check: list, last_timestamp: int, current_time: int
+    ) -> list:
+        """Returns a list of all of the weekly emissions schedules' dictionary keys that need to be
+        used to calculate how many rewards should be distributed alongside how many days of that week's
+        schedule need to be accounted for.
+
+        Args:
+            weeks_to_check (list): timestamp keys of schedule dict that need to be looked at for rewards
+            last_timestamp (int): the last timestamp a distribution occurred
+            current_time (int): the current timestamp
+
+        Returns:
+            list: tuples representing the key for that weeks schedule and the number of days to distribute
+
+            Ex. the list [("1630602000", 2), ("1631206800", 3)] would mean we need to distribute 2 days
+            of rewards using the emissions schedule starting at 1630602000 and 3 days of rewards using
+            the emissions schedule starting at 1631206800.
+        """
+        if weeks_to_check == []:
+            days_elapsed_previous = (current_time - last_timestamp) // SECONDS_IN_A_DAY
+        else:
+            days_elapsed_previous = (
+                int(weeks_to_check[0]) - last_timestamp
+            ) // SECONDS_IN_A_DAY
+
+        # need to check the previous weeks schedule in case we haven't distributed for all 7 days yet
+        previous_time = 0
+        for start_time in self.schedule.keys():
+            if current_time < int(start_time) and current_time >= int(previous_time):
+                break
+            previous_time = start_time
+        previous_schedule_start = previous_time
+
+        distribution = []
+        weekly_rewards = (previous_schedule_start, days_elapsed_previous)
+        distribution.append(weekly_rewards)
+
+        # for each week get num of days to distribute, can max distribute 7 days
+        for week in weeks_to_check:
+            duration = (int(current_time) - int(week)) // SECONDS_IN_A_DAY
+            weekly_rewards = (week, min(7, duration))
+            distribution.append(weekly_rewards)
+
+        return distribution
 
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.

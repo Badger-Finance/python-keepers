@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("eth-external-harvest")
 
 DIGG_TOKEN = "0x798D1bE841a82a273720CE31c822C61a67a601C3"
+BADGER_TOKEN = "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
 WBTC_TOKEN = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
 
 
@@ -99,6 +100,15 @@ if __name__ == "__main__":
     logger.info("slp wbtc / digg")
     full_amount = calculate_retroactive_digg(10, 12)
     logger.info(f"amount to swap: {full_amount // 2}")
+
+    logger.info("lp wbtc / badger")
+    amount_badger = node.toWei(4600, "ether")
+    emitted_badger1 = calculate_retroactive_badger(amount_badger, 9)
+    amount_badger = node.toWei(4565, "ether")
+    emitted_badger2 = calculate_retroactive_badger(amount_badger, 1)
+    logger.info(
+        f"amount to swap: {Decimal(Decimal(emitted_badger1 + emitted_badger2) // 2)}"
+    )
 
 {
     "want": "0x798d1be841a82a273720ce31c822c61a67a601c3",

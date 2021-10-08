@@ -6,6 +6,7 @@ from decimal import Decimal
 from hexbytes import HexBytes
 
 from src.data_classes.emissions_schedule import EmissionsSchedule
+from tests.utils import schedule_json
 
 logger = logging.getLogger()
 
@@ -42,13 +43,6 @@ def mock_sett_list():
             "digg_allocation": 0,
         },
     ]
-
-
-@pytest.fixture
-def schedule_json():
-    with open("./tests/data_classes/mock_emissions_schedule.json") as f:
-        mock_schedule_json = json.load(f)
-        return mock_schedule_json
 
 
 @pytest.fixture
