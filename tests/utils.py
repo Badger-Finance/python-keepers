@@ -1,6 +1,8 @@
 from brownie import Contract
 from decimal import Decimal
 from hexbytes import HexBytes
+import json
+import pytest
 
 from src.utils import get_abi
 
@@ -31,3 +33,10 @@ def mock_send_discord(
     url: str = None,
 ):
     print("sent")
+
+
+@pytest.fixture
+def schedule_json():
+    with open("tests/data_classes/mock_emissions_schedule.json") as f:
+        mock_schedule_json = json.load(f)
+        return mock_schedule_json

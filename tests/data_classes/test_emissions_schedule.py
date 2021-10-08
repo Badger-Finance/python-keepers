@@ -49,12 +49,14 @@ def schedule_json():
     with open("./tests/data_classes/mock_emissions_schedule.json") as f:
         mock_schedule_json = json.load(f)
         return mock_schedule_json
-    
+
+
 @pytest.fixture
 def formatted_schedule():
     with open("./tests/data_classes/mock_formatted_schedule.json") as f:
         mock_formatted_schedule = json.load(f)
         return mock_formatted_schedule
+
 
 @pytest.fixture
 def emissions_schedule(schedule_json):
@@ -118,3 +120,12 @@ def test_get_schedule(emissions_schedule, formatted_schedule):
     for key in formatted_schedule.keys():
         assert key in calc_schedule.keys()
         assert calc_schedule[key] == formatted_schedule[key]
+
+
+def test_schedule_keys_ascending_order(emissions_schedule):
+    schedule = emissions_schedule.get_schedule()
+    prev = 0
+    for key in schedule.keys():
+        cur = int(key)
+        assert cur > prev
+        prev = cur
