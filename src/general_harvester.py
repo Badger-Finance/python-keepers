@@ -8,7 +8,11 @@ from time import sleep
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from constants import MULTICHAIN_CONFIG, THREE_DAYS_OF_BLOCKS
 from harvester import IHarvester
 from utils import (
     confirm_transaction,
@@ -23,7 +27,6 @@ from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of
 
 logging.basicConfig(level=logging.INFO)
 
-THREE_DAYS_OF_BLOCKS = 21_000
 MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
@@ -191,6 +194,38 @@ class GeneralHarvester(IHarvester):
                 strategy_name=strategy_name,
             )
 
+    def harvest_rewards_manager(
+        self,
+        strategy: contract,
+    ):
+        strategy_name = strategy.functions.getName().call()
+
+        self.keeper_acl = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(
+                MULTICHAIN_CONFIG[self.chain]["rewards_manager"]
+            ),
+            abi=get_abi(self.chain, "rewards_manager"),
+        )
+
+        if not self.__is_keeper_whitelisted(strategy, "rewards_manager"):
+            raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
+
+        want_address = strategy.functions.want().call()
+        want = self.web3.eth.contract(
+            address=want_address,
+            abi=get_abi(self.chain, "erc20"),
+        )
+        vault_balance = want.functions.balanceOf(strategy.address).call()
+        self.logger.info(f"vault balance: {vault_balance}")
+
+        gas_fee = self.estimate_gas_fee(strategy.address)
+        self.logger.info(f"estimated gas cost: {gas_fee}")
+
+        self.__process_harvest(
+            strategy=strategy,
+            strategy_name=strategy_name,
+        )
+
     def tend(self, strategy: contract):
         strategy_name = strategy.functions.getName().call()
         # TODO: update for ACL
@@ -230,6 +265,10 @@ class GeneralHarvester(IHarvester):
         ).json()
         # Price of want token in ETH
         price_per_want = prices.get(want.address)
+        self.logger.info(f"price per want: {price_per_want}")
+        self.logger.info(f"want gained: {want_gained}")
+        if type(want_gained) is list:
+            want_gained = 0
         return price_per_want * want_gained
 
     def is_profitable(self) -> bool:
@@ -253,6 +292,8 @@ class GeneralHarvester(IHarvester):
             key = self.keeper_acl.functions.HARVESTER_ROLE().call()
         elif function == "tend":
             key = self.keeper_acl.functions.TENDER_ROLE().call()
+        elif function == "rewards_manager":
+            key = self.keeper_acl.functions.KEEPER_ROLE().call()
         return self.keeper_acl.functions.hasRole(key, self.keeper_address).call()
 
     def __process_tend(

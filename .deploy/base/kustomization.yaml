@@ -6,6 +6,7 @@ resources:
   - cake_harvester.yaml
   - chainlink_forwarder.yaml
   - earner.yaml
+  - eth_bvecvx_earner.yaml
   - general_harvester.yaml
   - flashbots_harvester.yaml
   - ibbtc_fee_collector.yaml
