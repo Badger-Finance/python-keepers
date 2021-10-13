@@ -303,14 +303,12 @@ class GeneralHarvester(IHarvester):
         Returns:
             bool: True if our bot is whitelisted to make function calls, False otherwise.
         """
-        if function == "harvest":
+        if function in ["harvest", "harvestMta"]:
             key = self.keeper_acl.functions.HARVESTER_ROLE().call()
         elif function == "tend":
             key = self.keeper_acl.functions.TENDER_ROLE().call()
         elif function == "rewards_manager":
             key = self.keeper_acl.functions.KEEPER_ROLE().call()
-        elif function == "harvestMta":
-            key = self.keeper_acl.functions.HARVESTER_ROLE().call()
         return self.keeper_acl.functions.hasRole(key, self.keeper_address).call()
 
     def __process_tend(
