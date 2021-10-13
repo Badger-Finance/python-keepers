@@ -125,8 +125,8 @@ class GeneralHarvester(IHarvester):
         strategy_name = strategy.functions.getName().call()
 
         # TODO: update for ACL
-        if not self.__is_keeper_whitelisted(strategy, "harvest"):
-            raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
+        if not self.__is_keeper_whitelisted("harvest"):
+            raise ValueError(f"Keeper ACL is not whitelisted for calling harvest")
 
         want_address = strategy.functions.want().call()
         want = self.web3.eth.contract(
@@ -166,8 +166,10 @@ class GeneralHarvester(IHarvester):
         strategy_name = strategy.functions.getName().call()
 
         # TODO: update for ACL
-        if not self.__is_keeper_whitelisted(strategy, "harvest"):
-            raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
+        if not self.__is_keeper_whitelisted("harvestNoReturn"):
+            raise ValueError(
+                f"Keeper ACL is not whitelisted for calling harvestNoReturn"
+            )
 
         want_address = strategy.functions.want().call()
         want = self.web3.eth.contract(
@@ -207,7 +209,7 @@ class GeneralHarvester(IHarvester):
             abi=get_abi(self.chain, "rewards_manager"),
         )
 
-        if not self.__is_keeper_whitelisted(strategy, "rewards_manager"):
+        if not self.__is_keeper_whitelisted("rewards_manager"):
             raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
 
         want_address = strategy.functions.want().call()
@@ -226,11 +228,28 @@ class GeneralHarvester(IHarvester):
             strategy_name=strategy_name,
         )
 
+    def harvest_mta(
+        self,
+        voter_proxy: contract,
+    ):
+        # TODO: update for ACL
+        if not self.__is_keeper_whitelisted("harvestMta"):
+            raise ValueError(f"Keeper ACL is not whitelisted for calling harvestMta")
+
+        gas_fee = self.estimate_gas_fee(voter_proxy.address, function="harvestMta")
+        self.logger.info(f"estimated gas cost: {gas_fee}")
+
+        should_harvest_mta = self.is_profitable()
+        self.logger.info(f"Should we call harvestMta: {should_harvest_mta}")
+
+        if should_harvest_mta:
+            self.__process_harvest_mta(voter_proxy)
+
     def tend(self, strategy: contract):
         strategy_name = strategy.functions.getName().call()
         # TODO: update for ACL
-        if not self.__is_keeper_whitelisted(strategy, "tend"):
-            raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
+        if not self.__is_keeper_whitelisted("tend"):
+            raise ValueError(f"Keeper ACL is not whitelisted for calling tend")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
@@ -278,17 +297,13 @@ class GeneralHarvester(IHarvester):
         # should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
         return True
 
-    def __is_keeper_whitelisted(self, strategy: contract, function: str) -> bool:
+    def __is_keeper_whitelisted(self, function: str) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
 
-        Args:
-            strategy (contract)
-
         Returns:
-            bool: True if our bot is whitelisted to make function calls to strategy,
-            False otherwise.
+            bool: True if our bot is whitelisted to make function calls, False otherwise.
         """
-        if function == "harvest":
+        if function in ["harvest", "harvestMta"]:
             key = self.keeper_acl.functions.HARVESTER_ROLE().call()
         elif function == "tend":
             key = self.keeper_acl.functions.TENDER_ROLE().call()
@@ -381,6 +396,42 @@ class GeneralHarvester(IHarvester):
             self.logger.error(f"Error processing harvest tx: {e}")
             send_error_to_discord(strategy_name, "Harvest", error=e)
 
+    def __process_harvest_mta(
+        self,
+        voter_proxy: contract,
+    ):
+        """Private function to create, broadcast, confirm tx on eth and then send
+        transaction to Discord for monitoring
+
+        Args:
+            voter_proxy (contract): Mstable voter proxy contract
+        """
+        try:
+            tx_hash = self.__send_harvest_mta_tx(voter_proxy)
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
+            if succeeded:
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash, self.chain
+                )
+                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
+                send_success_to_discord(
+                    tx_type=f"Harvest MTA",
+                    tx_hash=tx_hash,
+                    gas_cost=gas_price_of_tx,
+                    chain=self.chain,
+                    url=self.discord_url,
+                )
+            elif tx_hash != HexBytes(0):
+                send_success_to_discord(
+                    tx_type=f"Harvest MTA",
+                    tx_hash=tx_hash,
+                    chain=self.chain,
+                    url=self.discord_url,
+                )
+        except Exception as e:
+            self.logger.error(f"Error processing harvestMta tx: {e}")
+            send_error_to_discord("", "Harvest MTA", error=e)
+
     def __send_harvest_tx(self, strategy: contract, returns: bool = True) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
@@ -452,8 +503,36 @@ class GeneralHarvester(IHarvester):
         finally:
             return tx_hash
 
+    def __send_harvest_mta_tx(self, voter_proxy: contract) -> HexBytes:
+        """Sends transaction to ETH node for confirmation.
+
+        Args:
+            voter_proxy (contract)
+
+        Raises:
+            Exception: If we have an issue sending transaction (unable to communicate with
+            node, etc.) we log the error and return a tx_hash of 0x00.
+
+        Returns:
+            HexBytes: Transaction hash for transaction that was sent.
+        """
+        tx_hash = HexBytes(0)
+        try:
+            tx = self.__build_transaction(voter_proxy.address, function="harvestMta")
+            signed_tx = self.web3.eth.account.sign_transaction(
+                tx, private_key=self.keeper_key
+            )
+            tx_hash = signed_tx.hash
+
+            self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        except ValueError as e:
+            self.logger.error(f"Error in sending harvestMta tx: {e}")
+            tx_hash = get_hash_from_failed_tx_error(e, "Harvest MTA")
+        finally:
+            return tx_hash
+
     def __build_transaction(
-        self, strategy_address: str, returns: bool = True, function: str = "harvest"
+        self, address: str, returns: bool = True, function: str = "harvest"
     ) -> dict:
         """Builds transaction depending on which chain we're harvesting. EIP-1559
         requires different handling for ETH txs than the other EVM chains.
@@ -477,14 +556,17 @@ class GeneralHarvester(IHarvester):
 
         if function == "harvest":
             self.logger.info(
-                f"estimated gas fee: {self.__estimate_harvest_gas(strategy_address, returns)}"
+                f"estimated gas fee: {self.__estimate_harvest_gas(address, returns)}"
             )
-            return self.__build_harvest_transaction(strategy_address, returns, options)
+            return self.__build_harvest_transaction(address, returns, options)
         elif function == "tend":
+            self.logger.info(f"estimated gas fee: {self.__estimate_tend_gas(address)}")
+            return self.__build_tend_transaction(address, options)
+        elif function == "harvestMta":
             self.logger.info(
-                f"estimated gas fee: {self.__estimate_tend_gas(strategy_address)}"
+                f"estimated gas fee: {self.__estimate_harvest_mta_gas(address)}"
             )
-            return self.__build_tend_transaction(strategy_address, options)
+            return self.__build_harvest_mta_transaction(address, options)
 
     def __build_harvest_transaction(
         self, strategy_address: str, returns: bool, options: dict
@@ -503,14 +585,23 @@ class GeneralHarvester(IHarvester):
             options
         )
 
+    def __build_harvest_mta_transaction(
+        self, voter_proxy_address: str, options: dict
+    ) -> dict:
+        return self.keeper_acl.functions.harvestMta(
+            voter_proxy_address
+        ).buildTransaction(options)
+
     def estimate_gas_fee(
-        self, strategy_address: str, returns: bool = True, function: str = "harvest"
+        self, address: str, returns: bool = True, function: str = "harvest"
     ) -> Decimal:
         current_gas_price = self.__get_effective_gas_price()
         if function == "harvest":
-            estimated_gas = self.__estimate_harvest_gas(strategy_address, returns)
+            estimated_gas = self.__estimate_harvest_gas(address, returns)
         elif function == "tend":
-            estimated_gas = self.__estimate_tend_gas(strategy_address)
+            estimated_gas = self.__estimate_tend_gas(address)
+        elif function == "harvestMta":
+            estimated_gas = self.__estimate_harvest_mta_gas(address)
 
         return Decimal(current_gas_price * estimated_gas)
 
@@ -529,6 +620,13 @@ class GeneralHarvester(IHarvester):
     def __estimate_tend_gas(self, strategy_address: str) -> Decimal:
         return Decimal(
             self.keeper_acl.functions.tend(strategy_address).estimateGas(
+                {"from": self.keeper_address}
+            )
+        )
+
+    def __estimate_harvest_mta_gas(self, voter_proxy_address: str) -> Decimal:
+        return Decimal(
+            self.keeper_acl.functions.harvestMta(voter_proxy_address).estimateGas(
                 {"from": self.keeper_address}
             )
         )
