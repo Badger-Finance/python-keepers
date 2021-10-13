@@ -136,19 +136,6 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
     logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
-    if strategy.address in mstable_strategies:
-        try:
-            # Mstable harvests
-            # Call harvestMta before harvesting strategies
-            voter_proxy = web3.eth.contract(
-                address=web3.toChecksumAddress(MSTABLE_VOTER_PROXY),
-                abi=get_abi("eth", "mstable_voter_proxy"),
-            )
-            harvester.harvest_mta(voter_proxy)
-            # Sleep for 2 blocks before harvesting
-            time.sleep(30)
-        except Exception as e:
-            logger.error(f"Error running {strategy_name} harvestMta: {e}")
 
     try:
         harvester.harvest(strategy)
@@ -168,6 +155,16 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
         return "Success!"
     except Exception as e:
         logger.error(f"Error running {strategy_name} tend_then_harvest: {e}")
+
+
+def safe_harvest_mta(harvester, voter_proxy) -> str:
+    logger.info(f"+-----Calling harvestMta {voter_proxy}-----+")
+
+    try:
+        harvester.harvest_mta(voter_proxy)
+        return "Success!"
+    except Exception as e:
+        logger.error(f"Error running {voter_proxy} harvestMta: {e}")
 
 
 if __name__ == "__main__":
@@ -232,6 +229,17 @@ if __name__ == "__main__":
 
         # Sleep for 2 blocks in between harvests
         time.sleep(30)
+
+    # TODO: write get_last_harvest_times func for harvestMta
+    # Mstable harvests
+    # Call harvestMta before harvesting strategies
+    voter_proxy = web3.eth.contract(
+        address=web3.toChecksumAddress(MSTABLE_VOTER_PROXY),
+        abi=get_abi("eth", "mstable_voter_proxy"),
+    )
+    safe_harvest_mta(harvester, voter_proxy)
+    # Sleep for 2 blocks before harvesting
+    time.sleep(30)
 
     for strategy_address in mstable_strategies:
         strategy = web3.eth.contract(
