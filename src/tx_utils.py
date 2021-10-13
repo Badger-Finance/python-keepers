@@ -74,7 +74,7 @@ def get_effective_gas_price(web3: Web3) -> int:
 
 def get_priority_fee(
     web3: Web3,
-    num_blocks: str = "0x4",
+    num_blocks: int = 4,
     percentile: int = 70,
     default_reward: int = int(10e9),
 ) -> int:
@@ -83,16 +83,23 @@ def get_priority_fee(
 
     Args:
         web3 (Web3): Web3 object
-        num_blocks (str, optional): Number of historic blocks to look at in hex form (no leading 0s). Defaults to "0x4".
+        num_blocks (int, optional): Number of historic blocks to look at. Defaults to 4.
         percentiles (int, optional): Percentile of transactions in blocks to use to analyze fees. Defaults to 70.
         default_reward (int, optional): If call fails, what default reward to use in gwei. Defaults to 10e9.
 
     Returns:
         int: [description]
     """
-    gas_data = web3.eth.fee_history(num_blocks, "latest", [percentile])
+    try:
+        gas_data = web3.eth.fee_history(num_blocks, "latest", [percentile])
+    except ValueError:
+        # Sometimes times out on hardhat-fork
+        logger.warning(
+            f"Couldn't fetch fee history, using default priority fee of {default_reward}"
+        )
+        gas_data = {}
     rewards = gas_data.get("reward", [[default_reward]])
     priority_fee = int(sum([r[0] for r in rewards]) / len(rewards))
 
-    logger.info(f"piority fee: {priority_fee}")
+    logger.info(f"priority fee: {priority_fee}")
     return priority_fee
