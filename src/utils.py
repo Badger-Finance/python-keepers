@@ -378,11 +378,15 @@ def get_last_harvest_times(
                 in [
                     "<Function harvest(address)>",
                     "<Function harvestNoReturn(address)>",
-                    "<Function harvestMta(address)>",
                 ]
                 and args["strategy"] not in times
             ):
                 times[args["strategy"]] = int(tx["timeStamp"])
+            elif (
+                str(fn) == "<Function harvestMta(address)>"
+                and args["voterProxy"] not in times
+            ):
+                times[args["voterProxy"]] = int(tx["timeStamp"])
         return times
     except (KeyError, requests.HTTPError):
         raise ValueError("Last harvest time couldn't be fetched")

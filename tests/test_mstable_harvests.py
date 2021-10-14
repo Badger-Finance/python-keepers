@@ -7,7 +7,7 @@ from web3 import contract
 
 from config.constants import MULTICHAIN_CONFIG
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi, get_last_harvest_times
+from src.utils import get_abi, get_last_harvest_times, hours
 from tests.utils import test_address, test_key
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["gas_oracle"])
@@ -37,6 +37,22 @@ def mock_send_discord(
     url: str = None,
 ):
     print("sent")
+
+
+def get_mstable_strategies():
+    strategies = []
+    for strategy_address in MSTABLE_STRATEGIES:
+        strategy = web3.eth.contract(
+            address=web3.toChecksumAddress(strategy_address),
+            abi=get_abi("eth", "strategy"),
+        )
+        strategies.append(
+            {
+                "name": strategy.functions.getName().call(),
+                "contract": strategy,
+            }
+        )
+    return strategies
 
 
 @pytest.fixture(autouse=True)
@@ -113,18 +129,7 @@ def test_mstable_harvest(keeper_address, harvester, voter_proxy, mta):
     """
     accounts[0].transfer(keeper_address, "10 ether")
 
-    strategies = []
-    for strategy_address in MSTABLE_STRATEGIES:
-        strategy = web3.eth.contract(
-            address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
-        )
-        strategies.append(
-            {
-                "name": strategy.functions.getName().call(),
-                "contract": strategy,
-            }
-        )
+    strategies = get_mstable_strategies()
 
     before_mta = {
         strategy["name"]: mta.functions.balanceOf(strategy["contract"].address).call()
@@ -133,7 +138,9 @@ def test_mstable_harvest(keeper_address, harvester, voter_proxy, mta):
 
     for strategy in strategies:
         strategy_name = strategy["name"]
-        print(f"{strategy_name} before_mta: {before_mta[strategy_name]}")
+        harvester.logger.info(
+            f"{strategy_name} before_mta: {before_mta[strategy_name]}"
+        )
 
     # Hack: For some reason, harvest call() fails without first calling estimateGas()
     harvester.estimate_gas_fee(voter_proxy.address, function="harvestMta")
@@ -147,7 +154,7 @@ def test_mstable_harvest(keeper_address, harvester, voter_proxy, mta):
 
     for strategy in strategies:
         strategy_name = strategy["name"]
-        print(f"{strategy_name} after_mta: {after_mta[strategy_name]}")
+        harvester.logger.info(f"{strategy_name} after_mta: {after_mta[strategy_name]}")
 
     assert all(
         [
@@ -163,19 +170,46 @@ def test_mstable_harvest(keeper_address, harvester, voter_proxy, mta):
         harvester.estimate_gas_fee(strategy["contract"].address)
 
         before_claimable = harvester.estimate_harvest_amount(strategy["contract"])
-        print(f"{strategy_name} before_claimable: {before_claimable}")
+        harvester.logger.info(f"{strategy_name} before_claimable: {before_claimable}")
 
         # current_price_eth = harvester.get_current_rewards_price()
         # gas_fee = harvester.estimate_gas_fee(strategy.address)
 
         should_harvest = harvester.is_profitable()
-        print(strategy_name, "should_harvest:", should_harvest)
+        harvester.logger.info(f"{strategy_name} should_harvest: {should_harvest}")
 
         harvester.harvest(strategy["contract"])
 
         after_claimable = harvester.estimate_harvest_amount(strategy["contract"])
-        print(f"{strategy_name} after_claimable: {after_claimable}")
+        harvester.logger.info(f"{strategy_name} after_claimable: {after_claimable}")
 
         assert (should_harvest and before_claimable != 0 and after_claimable == 0) or (
             before_claimable == after_claimable and not should_harvest
         )
+
+
+@pytest.mark.require_network("hardhat-fork")
+def test_conditional_mstable_harvest(
+    chain, keeper_address, harvester, voter_proxy, mta
+):
+    strategies = get_mstable_strategies()
+    accounts[0].transfer(keeper_address, "10 ether")
+
+    # Strategy should be harvestable at this point
+    chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(voter_proxy) == True
+    harvester.harvest_mta(voter_proxy)
+    for strategy in strategies:
+        harvester.harvest(strategy["contract"])
+
+    # Strategy shouldn't be harvestable
+    assert harvester.is_time_to_harvest(voter_proxy) == False
+
+    # Strategy should be harvestable again after 72 hours
+    chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(voter_proxy) == True
+    harvester.harvest_mta(voter_proxy)
+    for strategy in strategies:
+        harvester.harvest(strategy["contract"])
