@@ -49,6 +49,7 @@ strategies = {
 
 rewards_manager_strategies = {
     "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
+    "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # native.sushiBadgerWbtc
     # "0x4a8651F2edD68850B944AD93f2c67af817F39F62",  # native.digg
     # "0xadc8d7322f2E284c1d9254170dbe311E9D3356cf",  # native.uniDiggWbtc
     # "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf",  # native.uniBadgerWbtc
