@@ -15,7 +15,7 @@ MULTICHAIN_CONFIG = {
             "0x283c857ba940a61828d9f4c09e3fcee2e7aef3f7",
         ],
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
-        "earn": {"invalid_strategies": []},
+        "earn": {"invalid_strategies": ["0x85386C3cE0679b035a9F8F17f531C076d0b35954"]},
         "harvest": {"invalid_strategies": []},
     },
     "eth": {
