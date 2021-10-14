@@ -378,6 +378,7 @@ def get_last_harvest_times(
                 in [
                     "<Function harvest(address)>",
                     "<Function harvestNoReturn(address)>",
+                    "<Function harvestMta(address)>",
                 ]
                 and args["strategy"] not in times
             ):
