@@ -544,7 +544,9 @@ class GeneralHarvester(IHarvester):
             dict: tx dictionary
         """
         options = {
-            "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
+            "nonce": self.web3.eth.get_transaction_count(
+                self.keeper_address, "pending"
+            ),
             "from": self.keeper_address,
             "gas": GAS_LIMITS[self.chain],
         }
