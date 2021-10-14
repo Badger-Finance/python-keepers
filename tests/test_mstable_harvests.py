@@ -195,21 +195,29 @@ def test_conditional_mstable_harvest(
     strategies = get_mstable_strategies()
     accounts[0].transfer(keeper_address, "10 ether")
 
-    # Strategy should be harvestable at this point
     chain.sleep(hours(72))
     chain.mine(1)
+    # Strategy should be harvestable at this point
     assert harvester.is_time_to_harvest(voter_proxy) == True
+    for strategy in strategies:
+        assert harvester.is_time_to_harvest(strategy["contract"]) == True
+
     harvester.harvest_mta(voter_proxy)
     for strategy in strategies:
         harvester.harvest(strategy["contract"])
 
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(voter_proxy) == False
+    for strategy in strategies:
+        assert harvester.is_time_to_harvest(strategy["contract"]) == False
 
-    # Strategy should be harvestable again after 72 hours
     chain.sleep(hours(72))
     chain.mine(1)
+    # Strategy should be harvestable again after 72 hours
     assert harvester.is_time_to_harvest(voter_proxy) == True
+    for strategy in strategies:
+        assert harvester.is_time_to_harvest(strategy["contract"]) == True
+
     harvester.harvest_mta(voter_proxy)
     for strategy in strategies:
         harvester.harvest(strategy["contract"])
