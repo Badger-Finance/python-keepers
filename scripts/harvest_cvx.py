@@ -134,6 +134,32 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
             logger.error(f"Error running {strategy_name} harvest: {e}")
 
 
+def conditional_harvest_mta(harvester, voter_proxy) -> str:
+    latest_base_fee = get_latest_base_fee(harvester.web3)
+
+    hours_48 = hours(48)
+    hours_60 = hours(60)
+
+    if harvester.is_time_to_harvest(voter_proxy, hours_48) and latest_base_fee < int(
+        80e9
+    ):
+        logger.info(f"Been longer than 48 hours and base fee < 80 since harvestMta")
+        res = safe_harvest_mta(harvester, voter_proxy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(voter_proxy, hours_60) and latest_base_fee < int(
+        100e9
+    ):
+        logger.info(f"Been longer than 60 hours and base fee < 100 since harvestMta")
+        res = safe_harvest_mta(harvester, voter_proxy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(voter_proxy) and latest_base_fee < int(150e9):
+        logger.info(
+            f"Been longer than 71 hours harvest no matter what since harvestMta"
+        )
+        res = safe_harvest_mta(harvester, voter_proxy)
+        logger.info(res)
+
+
 def safe_harvest(harvester, strategy_name, strategy) -> str:
     logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
 
@@ -212,6 +238,30 @@ if __name__ == "__main__":
         abi=get_abi(harvester.chain, "rewards_manager"),
     )
 
+    # Mstable harvests
+    # Call harvestMta before harvesting strategies
+    voter_proxy = web3.eth.contract(
+        address=web3.toChecksumAddress(MSTABLE_VOTER_PROXY),
+        abi=get_abi("eth", "mstable_voter_proxy"),
+    )
+    conditional_harvest_mta(harvester, voter_proxy)
+    # Sleep for 2 blocks before harvesting
+    time.sleep(30)
+
+    # TODO: Check if it's fine if harvestMta and harvests go out of sync
+    for strategy_address in mstable_strategies:
+        strategy = web3.eth.contract(
+            address=web3.toChecksumAddress(strategy_address),
+            abi=get_abi("eth", "strategy"),
+        )
+        strategy_name = strategy.functions.getName().call()
+
+        conditional_harvest(harvester, strategy_name, strategy)
+
+        # Sleep for 2 blocks in between harvests
+        time.sleep(30)
+
+    # This should be done after mstable since it removes keeper acl harvest times
     harvester.last_harvest_times = get_last_harvest_times(
         harvester.web3,
         rewards_manager,
@@ -226,29 +276,6 @@ if __name__ == "__main__":
         strategy_name = strategy.functions.getName().call()
 
         conditional_harvest_rewards_manager(harvester, strategy_name, strategy)
-
-        # Sleep for 2 blocks in between harvests
-        time.sleep(30)
-
-    # TODO: write get_last_harvest_times func for harvestMta
-    # Mstable harvests
-    # Call harvestMta before harvesting strategies
-    voter_proxy = web3.eth.contract(
-        address=web3.toChecksumAddress(MSTABLE_VOTER_PROXY),
-        abi=get_abi("eth", "mstable_voter_proxy"),
-    )
-    safe_harvest_mta(harvester, voter_proxy)
-    # Sleep for 2 blocks before harvesting
-    time.sleep(30)
-
-    for strategy_address in mstable_strategies:
-        strategy = web3.eth.contract(
-            address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
-        )
-        strategy_name = strategy.functions.getName().call()
-
-        conditional_harvest(harvester, strategy_name, strategy)
 
         # Sleep for 2 blocks in between harvests
         time.sleep(30)

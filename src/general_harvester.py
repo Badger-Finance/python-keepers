@@ -410,6 +410,8 @@ class GeneralHarvester(IHarvester):
             tx_hash = self.__send_harvest_mta_tx(voter_proxy)
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
+                # If successful, update last harvest harvest time
+                self.update_last_harvest_time(voter_proxy.address)
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
