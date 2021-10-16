@@ -14,14 +14,10 @@ sys.path.insert(
 
 from earner import Earner
 from utils import get_secret, get_strategies_and_vaults, get_abi
-from constants import MULTICHAIN_CONFIG
+from constants import MULTICHAIN_CONFIG, DIGG_TOKEN, BADGER_TOKEN, WBTC_TOKEN
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("eth-external-harvest")
-
-DIGG_TOKEN = "0x798D1bE841a82a273720CE31c822C61a67a601C3"
-BADGER_TOKEN = "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
-WBTC_TOKEN = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
 
 
 def to_digg_shares_and_fragments(node, gdigg: float) -> Tuple[float, float]:

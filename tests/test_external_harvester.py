@@ -4,13 +4,48 @@ import os
 import pytest
 from decimal import Decimal
 from hexbytes import HexBytes
+from brownie import web3
 
 from src.data_classes.emissions_schedule import EmissionsSchedule
+from src.external_harvester import ExternalHarvester
+from src.utils import (
+    get_last_external_harvest_times,
+    get_rewards_schedule,
+    to_digg_shares_and_fragments,
+)
 from tests.utils import schedule_json
+from config.constants import (
+    ETH_BDIGG_VAULT,
+    ETH_BDIGG_STRATEGY,
+    ETH_DIGG_SUSHI_LP_VAULT,
+    ETH_DIGG_SUSHI_LP_STRATEGY,
+    MULTICHAIN_CONFIG,
+)
 
 logger = logging.getLogger()
 
 SECONDS_IN_A_DAY = 60 * 60 * 24
+
+
+def mock_get_last_external_harvest_times(web3, keeper_acl, start_block):
+    return get_last_external_harvest_times(
+        web3, keeper_acl, start_block, etherscan_key=os.getenv("ETHERSCAN_TOKEN")
+    )
+
+
+@pytest.fixture(autouse=True)
+def mock_fns(monkeypatch):
+    monkeypatch.setattr(
+        "src.external_harvester.get_last_external_harvest_times",
+        mock_get_last_external_harvest_times,
+    )
+
+
+@pytest.fixture
+def external_harvester():
+    return ExternalHarvester(
+        web3, base_oracle_address=MULTICHAIN_CONFIG["eth"]["gas_oracle"]
+    )
 
 
 def test_days_in_schedule(schedule_json):
@@ -72,7 +107,7 @@ def test_days_in_schedule(schedule_json):
 
 def test_alt(schedule_json):
     last_harvest = 1631008800  # 9/7/21 at 10AM
-    current_time = 1631095200  # 10/8/21 at 10AM
+    current_time = 1631095200  # 9/8/21 at 10AM
 
     emissions = EmissionsSchedule(schedule_json)
     schedule = emissions.get_schedule()
@@ -113,4 +148,31 @@ def test_alt(schedule_json):
     ]
 
     sum_of_days = sum([x[1] for x in distribution])
-    assert sum_of_days == days_elapsed - 1
+    assert sum_of_days == days_elapsed
+
+
+def test_external_harvester_bdigg(external_harvester):
+
+    last_harvest = external_harvester.last_harvest_times[ETH_BDIGG_STRATEGY]
+
+    amount_digg = external_harvester.get_amount_digg_owed(last_harvest, ETH_BDIGG_VAULT)
+
+    assert to_digg_shares_and_fragments(external_harvester.web3, amount_digg)
+
+
+def test_external_harvester_digg_lp(external_harvester):
+
+    last_harvest = external_harvester.last_harvest_times[ETH_DIGG_SUSHI_LP_STRATEGY]
+
+    amount_digg = external_harvester.get_amount_digg_owed(
+        last_harvest, ETH_DIGG_SUSHI_LP_VAULT
+    )
+
+    assert to_digg_shares_and_fragments(external_harvester.web3, amount_digg)
+
+
+def test_transfer_want_single_assets(external_harvester):
+    last_harvest = external_harvester.last_harvest_times[ETH_BDIGG_STRATEGY]
+    amount_digg = external_harvester.get_amount_digg_owed(last_harvest, ETH_BDIGG_VAULT)
+
+    external_harvester.harvest_single_assets()

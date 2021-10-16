@@ -16,7 +16,13 @@ sys.path.insert(
 )
 
 from emissions_schedule import EmissionsSchedule
-from constants import MULTICHAIN_CONFIG, THREE_DAYS_OF_BLOCKS
+from constants import (
+    MULTICHAIN_CONFIG,
+    THREE_DAYS_OF_BLOCKS,
+    DAYS_IN_WEEK,
+    BADGER_TOKEN,
+    DIGG_TOKEN,
+)
 from utils import (
     confirm_transaction,
     hours,
@@ -27,6 +33,7 @@ from utils import (
     get_last_harvest_times,
     get_rewards_schedule,
     get_last_external_harvest_times,
+    to_digg_shares_and_fragments,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
@@ -79,7 +86,7 @@ class ExternalHarvester:
         self.last_harvest_times = get_last_external_harvest_times(
             self.web3,
             self.keeper_acl,
-            start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
+            start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS * 10,
         )
         schedule_json = get_rewards_schedule()
         self.emissions = EmissionsSchedule(schedule_json)
@@ -122,109 +129,99 @@ class ExternalHarvester:
 
         return round((current_time - last_harvest) / SECONDS_IN_A_DAY)
 
-    def get_badger_amount_owed(self, last_timestamp: int, strategy_addr: str) -> int:
-        return 1
-
-    def get_digg_amount_owed(self, last_timestamp: int, strategy_addr: str) -> int:
-        return 1
-
-    def get_amount_to_transfer(self, strategy_addr: str, days_since_last: int) -> int:
-
-        return 1
-
     def harvest_single_assets(
         self,
     ):
         for strategy_addr in self.config["single_asset"]["strategies"]:
+            strategy = self.web3.eth.contract(
+                address=strategy_addr,
+                abi=get_abi(self.chain, "strategy"),
+            )
+            strategy_name = strategy.functions.getName().call()
+
+            if not self.__is_keeper_whitelisted(strategy):
+                raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
+
             days_since_last = self.days_since_last_harvest(strategy_addr)
             if days_since_last > 0:
-                # get last harvest timestamp
                 last_timestamp = self.last_harvest_times[strategy_addr]
 
-                # calculate amount of badger owed since last harvest
                 amount_badger_owed = self.get_amount_badger_owed(
                     last_timestamp, strategy_addr
                 )
-                # calculate amount of digg owed since last harvest
                 amount_digg_owed = self.get_amount_digg_owed(
                     last_timestamp, strategy_addr
                 )
-
                 if amount_badger_owed > 0:
                     # distribue
+                    self.__process_transfer_want(
+                        strategy=strategy,
+                        strategy_name=strategy_name,
+                        token_address=BADGER_TOKEN,
+                        amount=amount_badger_owed,
+                    )
                     sleep(30)
-
                 if amount_digg_owed > 0:
                     # distribute
+                    self.__process_transfer_want(
+                        strategy=strategy,
+                        strategy_name=strategy_name,
+                        token_address=DIGG_TOKEN,
+                        amount=amount_badger_owed,
+                    )
                     sleep(30)
-                # if lp, swap and distribute
-                # else just distribute
-                strategy = self.keeper_acl = self.web3.eth.contract(
-                    address=strategy_addr,
-                    abi=get_abi(self.chain, "strategy"),
-                )
-                strategy_name = strategy.functions.getName().call()
 
-                if not self.__is_keeper_whitelisted(strategy):
-                    raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
-
-                amount_to_transfer = self.get_amount_to_transfer(
-                    strategy_addr, days_since_last
-                )
-
-                gas_fee = self.estimate_gas_fee(strategy.address)
-                self.logger.info(f"estimated gas cost: {gas_fee}")
-
-                self.__process_harvest(
-                    strategy=strategy,
-                    strategy_name=strategy_name,
-                )
-
-    def get_amount_badger_owed(self, last_timestamp: int, strategy_address: str) -> int:
+    def get_amount_badger_owed(self, last_timestamp: int, vault_address: str) -> int:
+        total_amount = 0
         current_time = self.web3.eth.get_block("latest")["timestamp"]
 
         days_elapsed = (current_time - last_timestamp) // SECONDS_IN_A_DAY
         if days_elapsed == 0:
-            return 0
+            return total_amount
 
         self.logger.info(f"Getting badger owed over last {days_elapsed} days")
         weeks_to_check = self._get_weekly_start_times(last_timestamp, current_time)
 
-        week_and_days_elapsed = self._num_days_per_week(
+        schedules_and_days_elapsed = self._num_days_per_week(
             weeks_to_check, last_timestamp, current_time
         )
+        # [(key_for_schedule, days_to_distribute)]
 
-        days_in_prev = (int(schedules_to_use[0]) - last_harvest) // SECONDS_IN_A_DAY
+        for week in schedules_and_days_elapsed:
+            key = week[0]
+            days = week[1]
+            self.logger.info(f"schedule {key} distribute for {days} days")
+            total_amount += self._get_amount_badger(key, days, vault_address)
 
-        # if days_in_prev > 0:
-        previous = schedules_to_use[0]
-        for start_time in schedule.keys():
-            if start_time == schedules_to_use[0]:
-                break
-            previous = str(start_time)
-        previous_schedule_time = previous
-        assert previous_schedule_time == "1630602000"
+        sum_of_days = sum([x[1] for x in schedules_and_days_elapsed])
+        self.logger.info(f"distributing rewards over {sum_of_days}")
+        return total_amount
 
-        distribution = []
-        schedule_start_and_time_elapsed = (previous_schedule_time, days_in_prev)
+    def get_amount_digg_owed(self, last_timestamp: int, vault_address: str) -> int:
+        total_amount = 0
+        current_time = self.web3.eth.get_block("latest")["timestamp"]
 
-        distribution.append(schedule_start_and_time_elapsed)
-        for week in schedules_to_use:
-            duration = (int(current_time) - int(week)) // SECONDS_IN_A_DAY
-            weekly_rewards = (week, min(7, duration))
-            distribution.append(weekly_rewards)
+        days_elapsed = (current_time - last_timestamp) // SECONDS_IN_A_DAY
+        if days_elapsed == 0:
+            return total_amount
 
-        assert distribution == [
-            ("1630602000", 2),
-            ("1631206800", 7),
-            ("1631811600", 7),
-            ("1632416400", 7),
-            ("1633021200", 7),
-            ("1633626000", 0),
-        ]
+        self.logger.info(f"Getting digg owed over last {days_elapsed} days")
+        weeks_to_check = self._get_weekly_start_times(last_timestamp, current_time)
 
-        sum_of_days = sum([x[1] for x in distribution])
-        assert sum_of_days == days_elapsed - 1
+        schedules_and_days_elapsed = self._num_days_per_week(
+            weeks_to_check, last_timestamp, current_time
+        )
+        # [(key_for_schedule, days_to_distribute)]
+
+        for week in schedules_and_days_elapsed:
+            key = week[0]
+            days = week[1]
+            self.logger.info(f"in {key} distribute for {days} days")
+            total_amount += self._get_amount_digg(key, days, vault_address)
+
+        sum_of_days = sum([x[1] for x in schedules_and_days_elapsed])
+        self.logger.info(f"distributing rewards over {sum_of_days}")
+        return total_amount
 
     def _get_weekly_start_times(self, last_timestamp: int, current_time: int) -> list:
         """[summary]
@@ -290,6 +287,27 @@ class ExternalHarvester:
 
         return distribution
 
+    def _get_amount_badger(self, key: str, days: int, address: str) -> int:
+        emissions_for_week = self.schedule[key]
+
+        amount_per_week = emissions_for_week[address]["badger_allocation"]
+        self.logger.info(f"weekly allotment badger: {amount_per_week}")
+
+        amount_badger = amount_per_week * days / DAYS_IN_WEEK
+        self.logger.info(f"amount badger: {amount_badger}")
+        return amount_badger
+
+    def _get_amount_digg(self, key: str, days: int, address: str) -> int:
+        emissions_for_week = self.schedule[key]
+
+        amount_per_week = emissions_for_week[address]["digg_allocation"]
+        self.logger.info(f"weekly allotment digg: {amount_per_week}")
+
+        amount_digg = amount_per_week * days / DAYS_IN_WEEK
+        self.logger.info(f"amount digg: {amount_digg}")
+
+        return amount_digg
+
     def __is_keeper_whitelisted(self, strategy: contract) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
 
@@ -303,12 +321,12 @@ class ExternalHarvester:
         key = self.keeper_acl.functions.KEEPER_ROLE().call()
         return self.keeper_acl.functions.hasRole(key, self.keeper_address).call()
 
-    def __process_harvest(
+    def __process_transfer_want(
         self,
         strategy: contract = None,
         strategy_name: str = None,
-        harvested: Decimal = None,
-        returns: bool = True,
+        token_address: str = None,
+        amount: int = 0,
     ):
         """Private function to create, broadcast, confirm tx on eth and then send
         transaction to Discord for monitoring
@@ -319,8 +337,8 @@ class ExternalHarvester:
             harvested (Decimal, optional): Amount of Sushi harvested. Defaults to None.
         """
         try:
-            tx_hash, max_target_block = self.__send_harvest_tx(
-                strategy, returns=returns
+            tx_hash, max_target_block = self.__send_transfer_want_tx(
+                strategy, token_address=token_address, amount=amount
             )
             succeeded, msg = confirm_transaction(
                 self.web3, tx_hash, max_block=max_target_block
@@ -333,7 +351,7 @@ class ExternalHarvester:
                 )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
-                    tx_type=f"Harvest {strategy_name}",
+                    tx_type=f"Transfer Want {strategy_name}",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
@@ -344,20 +362,22 @@ class ExternalHarvester:
                     # And if pending
                     self.update_last_harvest_time(strategy.address)
                     send_success_to_discord(
-                        tx_type=f"Harvest {strategy_name}",
+                        tx_type=f"Transfer Want {strategy_name}",
                         tx_hash=tx_hash,
                         chain=self.chain,
                         url=self.discord_url,
                     )
                 else:
                     send_error_to_discord(
-                        strategy_name, "Harvest", tx_hash=tx_hash, message=msg
+                        strategy_name, "Transfer Want", tx_hash=tx_hash, message=msg
                     )
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
-            send_error_to_discord(strategy_name, "Harvest", error=e)
+            send_error_to_discord(strategy_name, "Transfer Want", error=e)
 
-    def __send_harvest_tx(self, strategy: contract, returns: bool = True) -> HexBytes:
+    def __send_transfer_want_tx(
+        self, strategy: contract, token_address: str = None, amount: int = 0
+    ) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Args:
@@ -373,7 +393,9 @@ class ExternalHarvester:
         max_target_block = None
         tx_hash = HexBytes(0)
         try:
-            tx = self.__build_transaction(strategy.address, returns=returns)
+            tx = self.__build_transfer_want_tx(
+                strategy.address, token_address=token_address, amount=amount
+            )
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
@@ -400,14 +422,17 @@ class ExternalHarvester:
         finally:
             return tx_hash, max_target_block
 
-    def __build_transaction(
-        self, strategy_address: str, returns: bool = True, function: str = "harvest"
+    def __build_transfer_want_tx(
+        self,
+        strategy_address: str,
+        token_address: str,
+        amount: int,
     ) -> dict:
         """Builds transaction depending on which chain we're harvesting. EIP-1559
         requires different handling for ETH txs than the other EVM chains.
 
         Args:
-            contract (contract): contract to use to build harvest tx
+            contract (contract): contract to use to build tx
 
         Returns:
             dict: tx dictionary
@@ -419,69 +444,25 @@ class ExternalHarvester:
         }
         if self.chain == "eth":
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
-            options["maxFeePerGas"] = self.__get_effective_gas_price()
+            options["maxFeePerGas"] = get_effective_gas_price(self.web3)
         else:
-            options["gasPrice"] = self.__get_effective_gas_price()
+            options["gasPrice"] = get_effective_gas_price(self.web3)
 
-        if function == "harvest":
-            self.logger.info(
-                f"estimated gas fee: {self.__estimate_harvest_gas(strategy_address, returns)}"
-            )
-            return self.__build_harvest_transaction(strategy_address, returns, options)
-
-    def __build_harvest_transaction(
-        self, strategy_address: str, returns: bool, options: dict
-    ) -> dict:
-        if returns:
-            return self.keeper_acl.functions.harvest(strategy_address).buildTransaction(
-                options
-            )
-        else:
-            return self.keeper_acl.functions.harvestNoReturn(
-                strategy_address
-            ).buildTransaction(options)
-
-    def estimate_gas_fee(
-        self, strategy_address: str, returns: bool = True, function: str = "harvest"
-    ) -> Decimal:
-        current_gas_price = self.__get_effective_gas_price()
-        if function == "harvest":
-            estimated_gas = self.__estimate_harvest_gas(strategy_address, returns)
-        elif function == "tend":
-            estimated_gas = self.__estimate_tend_gas(strategy_address)
-
-        return Decimal(current_gas_price * estimated_gas)
-
-    def __estimate_harvest_gas(self, strategy_address: str, returns: bool) -> Decimal:
-        if returns:
-            estimated_gas_to_harvest = self.keeper_acl.functions.harvest(
-                strategy_address
-            ).estimateGas({"from": self.keeper_address})
-        else:
-            estimated_gas_to_harvest = self.keeper_acl.functions.harvestNoReturn(
-                strategy_address
-            ).estimateGas({"from": self.keeper_address})
-
-        return Decimal(estimated_gas_to_harvest)
-
-    def __estimate_tend_gas(self, strategy_address: str) -> Decimal:
-        return Decimal(
-            self.keeper_acl.functions.tend(strategy_address).estimateGas(
-                {"from": self.keeper_address}
-            )
+        self.logger.info(
+            f"estimated gas fee: {self.__estimate_transfer_want_gas(strategy_address, token_address, amount)}"
         )
+        return self.keeper_acl.functions.transferWant(
+            token_address, strategy_address, amount
+        ).buildTransaction(options)
 
-    def __get_effective_gas_price(self) -> int:
-        if self.chain == "poly":
-            response = requests.get("https://gasstation-mainnet.matic.network").json()
-            gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
-        elif self.chain == "arbitrum":
-            gas_price = int(1.1 * self.web3.eth.gas_price)
-            # Estimated gas price + buffer
-        elif self.chain == "eth":
-            # EIP-1559
-            gas_price = get_effective_gas_price(self.web3)
-        return gas_price
+    def __estimate_transfer_want_gas(
+        self, strategy_address: str, token_address: str, amount: int
+    ) -> Decimal:
+        estimated_gas = self.keeper_acl.functions.transferWant(
+            token_address, strategy_address, amount
+        ).estimateGas({"from": self.keeper_address})
+
+        return Decimal(estimated_gas)
 
     def update_last_harvest_time(self, strategy_address: str):
         self.last_harvest_times[strategy_address] = self.web3.eth.get_block("latest")[

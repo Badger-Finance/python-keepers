@@ -7,6 +7,7 @@ from hexbytes import HexBytes
 import json
 import logging
 from web3 import Web3, contract, exceptions
+from typing import Tuple
 import requests
 import sys
 import os
@@ -15,7 +16,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG
+from constants import MULTICHAIN_CONFIG, DIGG_TOKEN
 
 logger = logging.getLogger("utils")
 
@@ -519,3 +520,32 @@ def get_last_external_harvest_times(
         raise ValueError("Last harvest time couldn't be fetched")
     except (ValueError):
         logger.error(f"Weird tx format: {tx}")
+
+
+def to_digg_shares_and_fragments(node: Web3, gdigg: float) -> Tuple[float, float]:
+    if gdigg == 0:
+        return 0
+    digg_contract = node.eth.contract(
+        address=node.toChecksumAddress(DIGG_TOKEN),
+        abi=get_abi("eth", "digg_token"),
+    )
+    initial_fragments = int(gdigg * 10 ** 9)
+    shares = (
+        initial_fragments * digg_contract.functions._initialSharesPerFragment().call()
+    )
+    current_fragments = digg_contract.functions.sharesToFragments(shares).call()
+
+    logger.info(
+        (
+            "Digg Conversion",
+            {
+                "input": gdigg,
+                "scaledInput": initial_fragments,
+                "shares": shares,
+                "fragments": current_fragments,
+                "fragmentsScaled": current_fragments / 10 ** 9,
+                "ratio": current_fragments / initial_fragments,
+            },
+        )
+    )
+    return shares, current_fragments
