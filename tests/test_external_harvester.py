@@ -4,7 +4,7 @@ import os
 import pytest
 from decimal import Decimal
 from hexbytes import HexBytes
-from brownie import web3
+from brownie import accounts, web3
 
 from src.data_classes.emissions_schedule import EmissionsSchedule
 from src.external_harvester import ExternalHarvester
@@ -13,12 +13,16 @@ from src.utils import (
     get_rewards_schedule,
     to_digg_shares_and_fragments,
 )
-from tests.utils import schedule_json
+from tests.utils import schedule_json, mock_send_discord
 from config.constants import (
     ETH_BDIGG_VAULT,
     ETH_BDIGG_STRATEGY,
     ETH_DIGG_SUSHI_LP_VAULT,
     ETH_DIGG_SUSHI_LP_STRATEGY,
+    ETH_BADGER_SUSHI_LP_STRATEGY,
+    ETH_BADGER_SUSHI_LP_VAULT,
+    ETH_BADGER_UNI_LP_STRATEGY,
+    ETH_BADGER_UNI_LP_VAULT,
     MULTICHAIN_CONFIG,
 )
 
@@ -38,6 +42,9 @@ def mock_fns(monkeypatch):
     monkeypatch.setattr(
         "src.external_harvester.get_last_external_harvest_times",
         mock_get_last_external_harvest_times,
+    )
+    monkeypatch.setattr(
+        "src.external_harvester.send_success_to_discord", mock_send_discord
     )
 
 
@@ -157,7 +164,11 @@ def test_external_harvester_bdigg(external_harvester):
 
     amount_digg = external_harvester.get_amount_digg_owed(last_harvest, ETH_BDIGG_VAULT)
 
-    assert to_digg_shares_and_fragments(external_harvester.web3, amount_digg)
+    shares, fragments = to_digg_shares_and_fragments(
+        external_harvester.web3, amount_digg
+    )
+
+    assert fragments >= 0
 
 
 def test_external_harvester_digg_lp(external_harvester):
@@ -167,11 +178,29 @@ def test_external_harvester_digg_lp(external_harvester):
     amount_digg = external_harvester.get_amount_digg_owed(
         last_harvest, ETH_DIGG_SUSHI_LP_VAULT
     )
+    shares, fragments = to_digg_shares_and_fragments(
+        external_harvester.web3, amount_digg
+    )
 
-    assert to_digg_shares_and_fragments(external_harvester.web3, amount_digg)
+    assert fragments >= 0
+
+
+def test_external_harvester_badger_lp(external_harvester):
+    strategies = [ETH_BADGER_SUSHI_LP_STRATEGY, ETH_BADGER_UNI_LP_STRATEGY]
+    vaults = [ETH_BADGER_SUSHI_LP_VAULT, ETH_BADGER_UNI_LP_VAULT]
+
+    for strategy, vault in zip(strategies, vaults):
+        last_harvest = external_harvester.last_harvest_times[strategy]
+
+        amount_badger = external_harvester.get_amount_badger_owed(last_harvest, vault)
+        log = {"strategy": strategy, "vault": vault, "amount": amount_badger}
+        logger.info(log)
+
+        assert amount_badger >= 0
 
 
 def test_transfer_want_single_assets(external_harvester):
+    accounts[0].transfer(external_harvester.keeper_address, "10 ether")
     last_harvest = external_harvester.last_harvest_times[ETH_BDIGG_STRATEGY]
     amount_digg = external_harvester.get_amount_digg_owed(last_harvest, ETH_BDIGG_VAULT)
 

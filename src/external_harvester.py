@@ -132,10 +132,16 @@ class ExternalHarvester:
     def harvest_single_assets(
         self,
     ):
-        for strategy_addr in self.config["single_asset"]["strategies"]:
+        strategies = self.config["single_asset"]["strategies"]
+        vaults = self.config["single_asset"]["vaults"]
+        for strategy_addr, vault_addr in zip(strategies, vaults):
             strategy = self.web3.eth.contract(
                 address=strategy_addr,
                 abi=get_abi(self.chain, "strategy"),
+            )
+            vault = self.web3.eth.contract(
+                address=vault_addr,
+                abi=get_abi(self.chain, "vault"),
             )
             strategy_name = strategy.functions.getName().call()
 
@@ -147,10 +153,13 @@ class ExternalHarvester:
                 last_timestamp = self.last_harvest_times[strategy_addr]
 
                 amount_badger_owed = self.get_amount_badger_owed(
-                    last_timestamp, strategy_addr
+                    last_timestamp, vault_addr
                 )
-                amount_digg_owed = self.get_amount_digg_owed(
-                    last_timestamp, strategy_addr
+                amount_gdigg_owed = self.get_amount_digg_owed(
+                    last_timestamp, vault_addr
+                )
+                _, digg_fragments_owed = to_digg_shares_and_fragments(
+                    self.web3, amount_gdigg_owed
                 )
                 if amount_badger_owed > 0:
                     # distribue
@@ -161,13 +170,13 @@ class ExternalHarvester:
                         amount=amount_badger_owed,
                     )
                     sleep(30)
-                if amount_digg_owed > 0:
+                if digg_fragments_owed > 0:
                     # distribute
                     self.__process_transfer_want(
                         strategy=strategy,
                         strategy_name=strategy_name,
                         token_address=DIGG_TOKEN,
-                        amount=amount_badger_owed,
+                        amount=digg_fragments_owed,
                     )
                     sleep(30)
 
@@ -287,20 +296,20 @@ class ExternalHarvester:
 
         return distribution
 
-    def _get_amount_badger(self, key: str, days: int, address: str) -> int:
+    def _get_amount_badger(self, key: str, days: int, vault_address: str) -> int:
         emissions_for_week = self.schedule[key]
 
-        amount_per_week = emissions_for_week[address]["badger_allocation"]
+        amount_per_week = emissions_for_week[vault_address]["badger_allocation"]
         self.logger.info(f"weekly allotment badger: {amount_per_week}")
 
         amount_badger = amount_per_week * days / DAYS_IN_WEEK
         self.logger.info(f"amount badger: {amount_badger}")
         return amount_badger
 
-    def _get_amount_digg(self, key: str, days: int, address: str) -> int:
+    def _get_amount_digg(self, key: str, days: int, vault_address: str) -> int:
         emissions_for_week = self.schedule[key]
 
-        amount_per_week = emissions_for_week[address]["digg_allocation"]
+        amount_per_week = emissions_for_week[vault_address]["digg_allocation"]
         self.logger.info(f"weekly allotment digg: {amount_per_week}")
 
         amount_digg = amount_per_week * days / DAYS_IN_WEEK
@@ -349,7 +358,7 @@ class ExternalHarvester:
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
-                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
+                self.logger.info(f"got gas price of tx: ${round(gas_price_of_tx, 2)}")
                 send_success_to_discord(
                     tx_type=f"Transfer Want {strategy_name}",
                     tx_hash=tx_hash,
@@ -396,6 +405,7 @@ class ExternalHarvester:
             tx = self.__build_transfer_want_tx(
                 strategy.address, token_address=token_address, amount=amount
             )
+            self.logger.info(tx)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )
@@ -437,6 +447,7 @@ class ExternalHarvester:
         Returns:
             dict: tx dictionary
         """
+        assert type(amount) is int
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,

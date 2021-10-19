@@ -43,7 +43,7 @@ def get_gas_price_of_tx(
     )
 
     gas_price_of_tx = gas_cost_base * gas_usd
-    logger.info(f"gas price of tx: {gas_price_of_tx}")
+    logger.info(f"gas price of tx: ${round(gas_price_of_tx)}")
 
     return gas_price_of_tx
 

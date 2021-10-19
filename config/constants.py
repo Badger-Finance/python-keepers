@@ -15,11 +15,20 @@ ETH_KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 ETH_REGISTRY = "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f"
 ETH_REWARDS_MANAGER = "0x5B60952481Eb42B66bdfFC3E049025AC5b91c127"
 
+
+ETH_BVECVX_STRATEGY = "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"
 ETH_BDIGG_STRATEGY = "0x4a8651F2edD68850B944AD93f2c67af817F39F62"
-ETH_BDIGG_VAULT = "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a"
-ETH_BBADGER = "0x75b8E21BD623012Efb3b69E1B562465A68944eE6"
+ETH_BBADGER_STRATEGY = "0x75b8E21BD623012Efb3b69E1B562465A68944eE6"
 ETH_DIGG_SUSHI_LP_STRATEGY = "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a"
+ETH_DIGG_UNI_LP_STRATEGY = "0xadc8d7322f2E284c1d9254170dbe311E9D3356cf"
+ETH_BADGER_SUSHI_LP_STRATEGY = "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1"
+ETH_BADGER_UNI_LP_STRATEGY = "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf"
+
+ETH_BDIGG_VAULT = "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a"
+ETH_BBADGER_VAULT = "0x19D97D8fA813EE2f51aD4B4e04EA08bAf4DFfC28"
 ETH_DIGG_SUSHI_LP_VAULT = "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6"
+ETH_BADGER_SUSHI_LP_VAULT = "0x1862A18181346EBd9EdAf800804f89190DeF24a5"
+ETH_BADGER_UNI_LP_VAULT = "0x235c9e24D3FB2FAFd58a2E49D454Fdcd2DBf7FF1"
 
 DIGG_TOKEN = "0x798D1bE841a82a273720CE31c822C61a67a601C3"
 BADGER_TOKEN = "0x3472A5A71965499acd81997a54BBA8D852C6E53d"
@@ -53,24 +62,25 @@ MULTICHAIN_CONFIG = {
         "vault_owner": ["0xeE8b29AA52dD5fF2559da2C50b1887ADee257556"],
         "registry": ETH_REGISTRY,
         "rewards_manager": ETH_REWARDS_MANAGER,
-        "earn": {"invalid_strategies": ["0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"]},
+        "earn": {"invalid_strategies": [ETH_BVECVX_STRATEGY]},
         "external_harvest": {
             "single_asset": {
-                "strategies": [
-                    ETH_BDIGG_STRATEGY,  # bdigg
-                    ETH_BBADGER,  # bbadger
-                ]
+                "strategies": [ETH_BDIGG_STRATEGY],
+                "vaults": [ETH_BDIGG_VAULT],
             },
             "liquidity_pool": {
                 "strategies": [
                     ETH_DIGG_SUSHI_LP_STRATEGY,
-                    "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # badger / wbtc sushi
-                    "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf",  # badger / wbtc uni
-                ]
+                    ETH_BADGER_SUSHI_LP_STRATEGY,
+                    ETH_BADGER_UNI_LP_STRATEGY,
+                ],
+                "vaults": [
+                    ETH_DIGG_SUSHI_LP_VAULT,
+                    ETH_BADGER_SUSHI_LP_VAULT,
+                    ETH_BADGER_UNI_LP_VAULT,
+                ],
             },
-            "invalid_strategies": [
-                "0xadc8d7322f2E284c1d9254170dbe311E9D3356cf"  # digg / wbtc uni
-            ],
+            "invalid_strategies": [ETH_DIGG_UNI_LP_STRATEGY],
         },
     },
 }
