@@ -134,8 +134,6 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
             logger.error(f"Error running {strategy_name} harvest: {e}")
 
 
-<<<<<<< HEAD
-=======
 def conditional_harvest_mta(harvester, voter_proxy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
@@ -162,7 +160,6 @@ def conditional_harvest_mta(harvester, voter_proxy) -> str:
         logger.info(res)
 
 
->>>>>>> origin/develop
 def safe_harvest(harvester, strategy_name, strategy) -> str:
     logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
 
@@ -241,8 +238,6 @@ if __name__ == "__main__":
         abi=get_abi(harvester.chain, "rewards_manager"),
     )
 
-<<<<<<< HEAD
-=======
     # Mstable harvests
     # Call harvestMta before harvesting strategies
     voter_proxy = web3.eth.contract(
@@ -267,7 +262,6 @@ if __name__ == "__main__":
         time.sleep(30)
 
     # This should be done after mstable since it removes keeper acl harvest times
->>>>>>> origin/develop
     harvester.last_harvest_times = get_last_harvest_times(
         harvester.web3,
         rewards_manager,
