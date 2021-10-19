@@ -169,6 +169,15 @@
   },
   {
     "inputs": [
+      { "internalType": "address", "name": "voterProxy", "type": "address" }
+    ],
+    "name": "harvestMta",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "address", "name": "strategy", "type": "address" }
     ],
     "name": "harvestNoReturn",

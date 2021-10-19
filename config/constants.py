@@ -9,6 +9,8 @@ ARBITRUM_GAS_ORACLE = "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612"
 ARBITRUM_KEEPER_ACL = "0x265820F3779f652f2a9857133fDEAf115b87db4B"
 ARBITRUM_REGISTRY = "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f"
 
+ARBITRUM_SWAPR_WETH_STRATEGY = "0x85386C3cE0679b035a9F8F17f531C076d0b35954"
+
 # ETH
 ETH_GAS_ORACLE = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 ETH_KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
@@ -53,7 +55,7 @@ MULTICHAIN_CONFIG = {
             "0x283c857ba940a61828d9f4c09e3fcee2e7aef3f7",
         ],
         "registry": ARBITRUM_REGISTRY,
-        "earn": {"invalid_strategies": []},
+        "earn": {"invalid_strategies": [ARBITRUM_SWAPR_WETH_STRATEGY]},
         "harvest": {"invalid_strategies": []},
     },
     "eth": {

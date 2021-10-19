@@ -17,8 +17,6 @@ from constants import MULTICHAIN_CONFIG
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-INVALID_STRATS = []
-
 
 def safe_earn(earner, sett_name, vault, strategy):
     try:
@@ -45,16 +43,19 @@ if __name__ == "__main__":
 
         earner = Earner(
             chain=chain,
-            keeper_acl=MULTICHAIN_CONFIG.get(chain).get("keeper_acl"),
+            keeper_acl=MULTICHAIN_CONFIG[chain]["keeper_acl"],
             keeper_address=keeper_address,
             keeper_key=keeper_key,
             web3=node,
-            base_oracle_address=MULTICHAIN_CONFIG.get(chain).get("gas_oracle"),
+            base_oracle_address=MULTICHAIN_CONFIG[chain]["gas_oracle"],
             discord_url=discord_url,
         )
 
         for strategy, vault in zip(strategies, vaults):
-            if strategy.address not in INVALID_STRATS:
+            if (
+                strategy.address
+                not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
+            ):
                 strat_name = strategy.functions.getName().call()
 
                 logger.info(f"+-----Earning {strat_name}-----+")
