@@ -27,7 +27,7 @@ from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of
 
 logging.basicConfig(level=logging.INFO)
 
-MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
+MAX_TIME_BETWEEN_HARVESTS = hours(120)
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMITS = {

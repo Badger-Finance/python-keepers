@@ -20,6 +20,8 @@ from tx_utils import get_latest_base_fee
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
+HOURS_72 = hours(72)
+
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
@@ -67,42 +69,14 @@ mstable_strategies = {
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    hours_24 = hours(24)
-    hours_48 = hours(48)
-    hours_60 = hours(60)
-    # separate check for cvx helpers
-    if (
-        strategy.address == CVX_CRV_HELPER_STRATEGY
-        and harvester.is_time_to_harvest(strategy, hours_24)
-        and latest_base_fee < int(100e9)
-    ):
-        logger.info(f"Been longer than 24 hours and base fee < 100 for {strategy_name}")
-        res = safe_harvest(harvester, strategy_name, strategy)
-        logger.info(res)
-
-    if (
-        strategy.address == CVX_HELPER_STRATEGY
-        and harvester.is_time_to_harvest(strategy, hours_24)
-        and latest_base_fee < int(80e9)
-    ):
-        logger.info(f"Been longer than 24 hours and base fee < 80 for {strategy_name}")
-        res = safe_harvest(harvester, strategy_name, strategy)
-        logger.info(res)
-
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 48 hours and base fee < 80 for {strategy_name}")
-        res = safe_harvest(harvester, strategy_name, strategy)
-        logger.info(res)
-    elif harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
-        100e9
-    ):
-        logger.info(f"Been longer than 60 hours and base fee < 100 for {strategy_name}")
+    if harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(80e9):
+        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
         logger.info(
-            f"Been longer than 71 hours harvest no matter what for {strategy_name}"
+            f"Been longer than 120 hours harvest no matter what for {strategy_name}"
         )
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
@@ -111,12 +85,8 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
 def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    hours_60 = hours(60)
-
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
-        100e9
-    ):
+    if harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(80e9):
         logger.info(f"Been longer than 60 hours and base fee < 100 for {strategy_name}")
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
@@ -137,24 +107,15 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
 def conditional_harvest_mta(harvester, voter_proxy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    hours_48 = hours(48)
-    hours_60 = hours(60)
-
-    if harvester.is_time_to_harvest(voter_proxy, hours_48) and latest_base_fee < int(
+    if harvester.is_time_to_harvest(voter_proxy, HOURS_72) and latest_base_fee < int(
         80e9
     ):
-        logger.info(f"Been longer than 48 hours and base fee < 80 since harvestMta")
-        res = safe_harvest_mta(harvester, voter_proxy)
-        logger.info(res)
-    elif harvester.is_time_to_harvest(voter_proxy, hours_60) and latest_base_fee < int(
-        100e9
-    ):
-        logger.info(f"Been longer than 60 hours and base fee < 100 since harvestMta")
+        logger.info(f"Been longer than 72 hours and base fee < 80 since harvestMta")
         res = safe_harvest_mta(harvester, voter_proxy)
         logger.info(res)
     elif harvester.is_time_to_harvest(voter_proxy) and latest_base_fee < int(150e9):
         logger.info(
-            f"Been longer than 71 hours harvest no matter what since harvestMta"
+            f"Been longer than 120 hours harvest no matter what since harvestMta"
         )
         res = safe_harvest_mta(harvester, voter_proxy)
         logger.info(res)
