@@ -11,7 +11,7 @@ sys.path.insert(
 )
 
 from earner import Earner
-from utils import get_secret, get_strategies_and_vaults
+from utils import get_secret, get_strategies_and_vaults, get_strategy_from_vault
 from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
@@ -35,7 +35,21 @@ if __name__ == "__main__":
         node_url = get_secret(f"quiknode/{chain}-node-url", "NODE_URL")
         node = Web3(Web3.HTTPProvider(node_url))
 
-        strategies, vaults = get_strategies_and_vaults(node, chain)
+        registry = node.eth.contract(
+            address=node.toChecksumAddress(MULTICHAIN_CONFIG[chain]["registry"]),
+            abi=get_abi(chain, "registry"),
+        )
+
+        vaults = []
+        strategies = []
+        vault_addresses = registry.functions.getFilteredProductionVaults("v1", 1).call()
+        vault_addresses.extend(
+            registry.functions.getFilteredProductionVaults("v1", 2).call()
+        )
+        for address in vault_addresses:
+            strategy, vault = get_strategy_from_vault(node, chain, address)
+            strategies.append(strategy)
+            vaults.append(vault)
 
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
         keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
