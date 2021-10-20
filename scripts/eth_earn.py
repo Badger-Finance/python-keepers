@@ -47,7 +47,7 @@ if __name__ == "__main__":
             registry.functions.getFilteredProductionVaults("v1", 2).call()
         )
         for address in vault_addresses:
-            logger.inof(f"address: {address}")
+            logger.info(f"address: {address}")
             strategy, vault = get_strategy_from_vault(node, chain, address)
             strategies.append(strategy)
             vaults.append(vault)
