@@ -47,6 +47,17 @@ strategies = {
     "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9",  # locked cvx strategy
     # "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
     # "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
+    ####################### New Strategies #########################
+    "0xe66dB6Eb807e6DAE8BD48793E9ad0140a2DEE22A",  # renBTC/wBTC
+    "0x2f278515425c8eE754300e158116930B8EcCBBE1",  # renBTC/wBTC/sBTC
+    "0x9e0742EE7BECde52A5494310f09aad639AA4790B",  # tBTC/sbtcCrv
+    "0x7354D5119bD42a77E7162c8Afa8A1D18d5Da9cF8",  # hBTC/wBTC
+    "0x3f98F3a21B125414e4740316bd6Ef14718764a22",  # pBTC/sbtcCRV
+    "0x50Dd8A61Bdd11Cf5539DAA83Bc8E0F581eD8110a",  # oBTC/sbtcCRV
+    "0xf92660E0fdAfE945aa13616428c9fB4BE19f4d34",  # bBTC/sbtcCRV
+    "0xf3202Aa2783F3DEE24a35853C6471db065B05D37",  # USD-BTC-ETH
+    "0xf6D442Aead5960b283281A794B3e7d3605601247",  # Convex CRV
+    "0xc67129cf19BB00d60CC5CF62398fcA3A4Dc02a14",  # Convex Token
 }
 
 rewards_manager_strategies = {
