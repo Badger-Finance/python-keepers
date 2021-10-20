@@ -12,12 +12,12 @@ sys.path.insert(
 
 from earner import Earner
 from utils import get_secret, get_strategies_and_vaults, get_strategy_from_vault
-from constants import MULTICHAIN_CONFIG, ETH_YVWBTC_VAULT
+from constants import MULTICHAIN_CONFIG, ETH_YVWBTC_VAULT, ETH_TRICRYPTO_VAULT
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-INVALID_VAULTS = [ETH_YVWBTC_VAULT]
+INVALID_VAULTS = [ETH_YVWBTC_VAULT, ETH_TRICRYPTO_VAULT]
 
 
 def safe_earn(earner, sett_name, vault, strategy):
