@@ -470,7 +470,7 @@ def get_last_external_harvest_times(
     web3: Web3,
     rewards_manager: contract,
     start_block: int = 0,
-    etherscan_key: str = None,
+    etherscan_key: str = os.getenv("ETHERSCAN_TOKEN"),
 ):
     """Fetches the latest external harvest timestamps of strategies from Etherscan API which occur after `start_block`.
     NOTE: Temporary function until Harvested events are emitted from all strategies.
