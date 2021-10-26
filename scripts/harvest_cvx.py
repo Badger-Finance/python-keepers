@@ -87,7 +87,7 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
 
     # regular thresholds for rest of vaults
     if harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 60 hours and base fee < 100 for {strategy_name}")
+        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
             harvester.harvest_rewards_manager(strategy)
@@ -95,7 +95,7 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
             logger.error(f"Error running {strategy_name} harvest: {e}")
     elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
         logger.info(
-            f"Been longer than 71 hours harvest no matter what for {strategy_name}"
+            f"Been longer than 120 hours harvest no matter what for {strategy_name}"
         )
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
