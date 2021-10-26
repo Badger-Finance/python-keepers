@@ -18,7 +18,6 @@ from utils import (
     confirm_transaction,
     get_hash_from_failed_tx_error,
     send_success_to_discord,
-    send_error_to_discord,
     send_oracle_error_to_discord,
 )
 from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
