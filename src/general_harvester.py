@@ -390,7 +390,11 @@ class GeneralHarvester(IHarvester):
                     )
                 else:
                     send_error_to_discord(
-                        strategy_name, "Harvest", tx_hash=tx_hash, message=msg, chain=self.chain
+                        strategy_name,
+                        "Harvest",
+                        tx_hash=tx_hash,
+                        message=msg,
+                        chain=self.chain,
                     )
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")

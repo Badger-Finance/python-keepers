@@ -99,7 +99,7 @@ def send_error_to_discord(
     tx_hash: HexBytes = None,
     error: Exception = None,
     message: str = "Transaction timed out.",
-    chain: str = "eth"
+    chain: str = None,
 ):
     try:
         webhook = Webhook.from_url(
@@ -111,7 +111,8 @@ def send_error_to_discord(
             title=f"**{tx_type} Failed for {sett_name}**",
             description=f"{sett_name} Sett {tx_type} Details",
         )
-        embed.add_field(name="Chain", value=chain, inline=True)
+        if chain:
+            embed.add_field(name="Chain", value=chain, inline=True)
         if error:
             message = str(error)
         embed.add_field(name="Failure information", value=message, inline=True)
