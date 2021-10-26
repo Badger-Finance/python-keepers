@@ -340,7 +340,7 @@ class GeneralHarvester(IHarvester):
                 )
         except Exception as e:
             self.logger.error(f"Error processing tend tx: {e}")
-            send_error_to_discord(strategy_name, "Tend", error=e)
+            send_error_to_discord(strategy_name, "Tend", error=e, chain=self.chain)
 
     def __process_harvest(
         self,
@@ -390,11 +390,11 @@ class GeneralHarvester(IHarvester):
                     )
                 else:
                     send_error_to_discord(
-                        strategy_name, "Harvest", tx_hash=tx_hash, message=msg
+                        strategy_name, "Harvest", tx_hash=tx_hash, message=msg, chain=self.chain
                     )
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
-            send_error_to_discord(strategy_name, "Harvest", error=e)
+            send_error_to_discord(strategy_name, "Harvest", error=e, chain=self.chain)
 
     def __process_harvest_mta(
         self,
