@@ -340,7 +340,13 @@ class GeneralHarvester(IHarvester):
                 )
         except Exception as e:
             self.logger.error(f"Error processing tend tx: {e}")
-            send_error_to_discord(strategy_name, "Tend", error=e, chain=self.chain)
+            send_error_to_discord(
+                strategy_name,
+                "Tend",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __process_harvest(
         self,
@@ -395,10 +401,17 @@ class GeneralHarvester(IHarvester):
                         tx_hash=tx_hash,
                         message=msg,
                         chain=self.chain,
+                        keeper_address=self.keeper_address,
                     )
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
-            send_error_to_discord(strategy_name, "Harvest", error=e, chain=self.chain)
+            send_error_to_discord(
+                strategy_name,
+                "Harvest",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __process_harvest_mta(
         self,
@@ -436,7 +449,13 @@ class GeneralHarvester(IHarvester):
                 )
         except Exception as e:
             self.logger.error(f"Error processing harvestMta tx: {e}")
-            send_error_to_discord("", "Harvest MTA", error=e)
+            send_error_to_discord(
+                "",
+                "Harvest MTA",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __send_harvest_tx(self, strategy: contract, returns: bool = True) -> HexBytes:
         """Sends transaction to ETH node for confirmation.

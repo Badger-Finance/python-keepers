@@ -100,6 +100,7 @@ def send_error_to_discord(
     error: Exception = None,
     message: str = "Transaction timed out.",
     chain: str = None,
+    keeper_address: str = None,
 ):
     try:
         webhook = Webhook.from_url(
@@ -113,6 +114,8 @@ def send_error_to_discord(
         )
         if chain:
             embed.add_field(name="Chain", value=chain, inline=True)
+        if keeper_address:
+            embed.add_field(name="Keeper", value=keeper_address, inline=True)
         if error:
             message = str(error)
         embed.add_field(name="Failure information", value=message, inline=True)
