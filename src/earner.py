@@ -169,7 +169,13 @@ class Earner:
                 )
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
-            send_error_to_discord(sett_name, "Earn", error=e)
+            send_error_to_discord(
+                sett_name,
+                "Earn",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __send_earn_tx(self, vault: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.

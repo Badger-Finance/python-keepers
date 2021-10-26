@@ -27,7 +27,7 @@ from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of
 
 logging.basicConfig(level=logging.INFO)
 
-MAX_TIME_BETWEEN_HARVESTS = hours(71)  # 71 hours
+MAX_TIME_BETWEEN_HARVESTS = hours(120)
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMITS = {
@@ -340,7 +340,13 @@ class GeneralHarvester(IHarvester):
                 )
         except Exception as e:
             self.logger.error(f"Error processing tend tx: {e}")
-            send_error_to_discord(strategy_name, "Tend", error=e)
+            send_error_to_discord(
+                strategy_name,
+                "Tend",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __process_harvest(
         self,
@@ -390,11 +396,22 @@ class GeneralHarvester(IHarvester):
                     )
                 else:
                     send_error_to_discord(
-                        strategy_name, "Harvest", tx_hash=tx_hash, message=msg
+                        strategy_name,
+                        "Harvest",
+                        tx_hash=tx_hash,
+                        message=msg,
+                        chain=self.chain,
+                        keeper_address=self.keeper_address,
                     )
         except Exception as e:
             self.logger.error(f"Error processing harvest tx: {e}")
-            send_error_to_discord(strategy_name, "Harvest", error=e)
+            send_error_to_discord(
+                strategy_name,
+                "Harvest",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __process_harvest_mta(
         self,
@@ -432,7 +449,13 @@ class GeneralHarvester(IHarvester):
                 )
         except Exception as e:
             self.logger.error(f"Error processing harvestMta tx: {e}")
-            send_error_to_discord("", "Harvest MTA", error=e)
+            send_error_to_discord(
+                "",
+                "Harvest MTA",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __send_harvest_tx(self, strategy: contract, returns: bool = True) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
