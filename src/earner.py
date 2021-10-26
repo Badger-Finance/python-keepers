@@ -27,7 +27,7 @@ from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
 logging.basicConfig(level=logging.INFO)
 
 GAS_LIMITS = {
-    "eth": 1_000_000,
+    "eth": 1_500_000,
     "poly": 1_000_000,
     "arbitrum": 3_000_000,
 }
