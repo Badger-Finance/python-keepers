@@ -308,11 +308,21 @@ def confirm_transaction(
 
 
 def get_hash_from_failed_tx_error(
-    error: ValueError, tx_type: str, sett_name: str = None
+    error: ValueError,
+    tx_type: str,
+    sett_name: str = None,
+    chain: str = None,
+    keeper_address: str = None,
 ) -> HexBytes:
     try:
         error_obj = json.loads(str(error).replace("'", '"'))
-        send_error_to_discord(tx_type=tx_type, sett_name=sett_name, error=error_obj)
+        send_error_to_discord(
+            tx_type=tx_type,
+            sett_name=sett_name,
+            error=error_obj,
+            chain=chain,
+            keeper_address=keeper_address,
+        )
         tx_hash = list(error_obj.get("data").keys())[0]
     except Exception as x:
         logger.error(f"exception when trying to get tx_hash: {x}")

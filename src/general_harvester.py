@@ -496,7 +496,9 @@ class GeneralHarvester(IHarvester):
 
         except ValueError as e:
             self.logger.error(f"Error in sending harvest tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, "Harvest")
+            tx_hash = get_hash_from_failed_tx_error(
+                e, "Harvest", chain=self.chain, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash, max_target_block
 
@@ -524,7 +526,9 @@ class GeneralHarvester(IHarvester):
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending tend tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, "Tend")
+            tx_hash = get_hash_from_failed_tx_error(
+                e, "Tend", chain=self.chain, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
 
@@ -552,7 +556,9 @@ class GeneralHarvester(IHarvester):
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending harvestMta tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, "Harvest MTA")
+            tx_hash = get_hash_from_failed_tx_error(
+                e, "Harvest MTA", chain=self.chain, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
 

@@ -201,7 +201,9 @@ class Earner:
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending earn tx: {traceback.format_exc()}")
-            tx_hash = get_hash_from_failed_tx_error(e, "Earn")
+            tx_hash = get_hash_from_failed_tx_error(
+                e, "Earn", chain=self.chain, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
 

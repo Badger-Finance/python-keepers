@@ -178,6 +178,8 @@ class Rebaser:
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending rebase tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash

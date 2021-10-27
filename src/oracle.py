@@ -138,10 +138,14 @@ class Oracle:
 
         except ValueError as e:
             self.logger.error(f"Error in sending oracle tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         except Exception as e:
             self.logger.error(format_exc())
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
 
@@ -323,6 +327,8 @@ class Oracle:
 
         except ValueError as e:
             self.logger.error(f"Error in sending chainlink tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
