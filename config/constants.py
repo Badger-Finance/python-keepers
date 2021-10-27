@@ -24,6 +24,7 @@ MULTICHAIN_CONFIG = {
             "0xbb2281ca5b4d07263112604d1f182ad0ab26a252",
             "0x283c857ba940a61828d9f4c09e3fcee2e7aef3f7",
             "0xc388750A661cC0B99784bAB2c55e1F38ff91643b",
+            "0x7c1D678685B9d2F65F1909b9f2E544786807d46C",
         ],
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
         "earn": {"invalid_strategies": ["0x85386C3cE0679b035a9F8F17f531C076d0b35954"]},
