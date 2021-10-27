@@ -8,6 +8,8 @@ ETH_BBADGER_STRATEGY = "0x75b8E21BD623012Efb3b69E1B562465A68944eE6"
 ETH_YVWBTC_VAULT = "0x4b92d19c11435614CD49Af1b589001b7c08cD4D5"
 ETH_TRICRYPTO_VAULT = "0x27E98fC7d05f54E544d16F58C194C2D7ba71e3B5"
 
+ARB_SWAPR_WETH_STRATEGY = "0x85386C3cE0679b035a9F8F17f531C076d0b35954"
+
 MULTICHAIN_CONFIG = {
     "poly": {
         "gas_oracle": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
@@ -26,7 +28,7 @@ MULTICHAIN_CONFIG = {
             "0xc388750A661cC0B99784bAB2c55e1F38ff91643b",
         ],
         "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
-        "earn": {"invalid_strategies": ["0x85386C3cE0679b035a9F8F17f531C076d0b35954"]},
+        "earn": {"invalid_strategies": []},
         "harvest": {"invalid_strategies": []},
     },
     "eth": {
