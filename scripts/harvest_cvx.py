@@ -20,11 +20,15 @@ from tx_utils import get_latest_base_fee
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
+HOURS_72 = hours(72)
+
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
 CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
+
+MSTABLE_VOTER_PROXY = "0x10D96b1Fd46Ce7cE092aA905274B8eD9d4585A6E"
 
 strategies = {
     "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
@@ -56,46 +60,23 @@ rewards_manager_strategies = {
     # "0x75b8E21BD623012Efb3b69E1B562465A68944eE6",  # native.badger
 }
 
+mstable_strategies = {
+    "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
+    "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
+}
+
 
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    hours_24 = hours(24)
-    hours_48 = hours(48)
-    hours_60 = hours(60)
-    # separate check for cvx helpers
-    if (
-        strategy.address == CVX_CRV_HELPER_STRATEGY
-        and harvester.is_time_to_harvest(strategy, hours_24)
-        and latest_base_fee < int(100e9)
-    ):
-        logger.info(f"Been longer than 24 hours and base fee < 100 for {strategy_name}")
-        res = safe_harvest(harvester, strategy_name, strategy)
-        logger.info(res)
-
-    if (
-        strategy.address == CVX_HELPER_STRATEGY
-        and harvester.is_time_to_harvest(strategy, hours_24)
-        and latest_base_fee < int(80e9)
-    ):
-        logger.info(f"Been longer than 24 hours and base fee < 80 for {strategy_name}")
-        res = safe_harvest(harvester, strategy_name, strategy)
-        logger.info(res)
-
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, hours_48) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 48 hours and base fee < 80 for {strategy_name}")
-        res = safe_harvest(harvester, strategy_name, strategy)
-        logger.info(res)
-    elif harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
-        100e9
-    ):
-        logger.info(f"Been longer than 60 hours and base fee < 100 for {strategy_name}")
+    if harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(80e9):
+        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
         logger.info(
-            f"Been longer than 71 hours harvest no matter what for {strategy_name}"
+            f"Been longer than 120 hours harvest no matter what for {strategy_name}"
         )
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
@@ -104,13 +85,9 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
 def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    hours_60 = hours(60)
-
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, hours_60) and latest_base_fee < int(
-        100e9
-    ):
-        logger.info(f"Been longer than 60 hours and base fee < 100 for {strategy_name}")
+    if harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(80e9):
+        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
             harvester.harvest_rewards_manager(strategy)
@@ -118,7 +95,7 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
             logger.error(f"Error running {strategy_name} harvest: {e}")
     elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
         logger.info(
-            f"Been longer than 71 hours harvest no matter what for {strategy_name}"
+            f"Been longer than 120 hours harvest no matter what for {strategy_name}"
         )
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
@@ -127,8 +104,26 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
             logger.error(f"Error running {strategy_name} harvest: {e}")
 
 
+def conditional_harvest_mta(harvester, voter_proxy) -> str:
+    latest_base_fee = get_latest_base_fee(harvester.web3)
+
+    if harvester.is_time_to_harvest(voter_proxy, HOURS_72) and latest_base_fee < int(
+        80e9
+    ):
+        logger.info(f"Been longer than 72 hours and base fee < 80 since harvestMta")
+        res = safe_harvest_mta(harvester, voter_proxy)
+        logger.info(res)
+    elif harvester.is_time_to_harvest(voter_proxy) and latest_base_fee < int(150e9):
+        logger.info(
+            f"Been longer than 120 hours harvest no matter what since harvestMta"
+        )
+        res = safe_harvest_mta(harvester, voter_proxy)
+        logger.info(res)
+
+
 def safe_harvest(harvester, strategy_name, strategy) -> str:
     logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
+
     try:
         harvester.harvest(strategy)
         return "Success!"
@@ -147,6 +142,16 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
         return "Success!"
     except Exception as e:
         logger.error(f"Error running {strategy_name} tend_then_harvest: {e}")
+
+
+def safe_harvest_mta(harvester, voter_proxy) -> str:
+    logger.info(f"+-----Calling harvestMta {voter_proxy}-----+")
+
+    try:
+        harvester.harvest_mta(voter_proxy)
+        return "Success!"
+    except Exception as e:
+        logger.error(f"Error running {voter_proxy} harvestMta: {e}")
 
 
 if __name__ == "__main__":
@@ -194,6 +199,30 @@ if __name__ == "__main__":
         abi=get_abi(harvester.chain, "rewards_manager"),
     )
 
+    # Mstable harvests
+    # Call harvestMta before harvesting strategies
+    voter_proxy = web3.eth.contract(
+        address=web3.toChecksumAddress(MSTABLE_VOTER_PROXY),
+        abi=get_abi("eth", "mstable_voter_proxy"),
+    )
+    conditional_harvest_mta(harvester, voter_proxy)
+    # Sleep for 2 blocks before harvesting
+    time.sleep(30)
+
+    # TODO: Check if it's fine if harvestMta and harvests go out of sync
+    for strategy_address in mstable_strategies:
+        strategy = web3.eth.contract(
+            address=web3.toChecksumAddress(strategy_address),
+            abi=get_abi("eth", "strategy"),
+        )
+        strategy_name = strategy.functions.getName().call()
+
+        conditional_harvest(harvester, strategy_name, strategy)
+
+        # Sleep for 2 blocks in between harvests
+        time.sleep(30)
+
+    # This should be done after mstable since it removes keeper acl harvest times
     harvester.last_harvest_times = get_last_harvest_times(
         harvester.web3,
         rewards_manager,

@@ -27,7 +27,7 @@ from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
 logging.basicConfig(level=logging.INFO)
 
 GAS_LIMITS = {
-    "eth": 1_000_000,
+    "eth": 1_500_000,
     "poly": 1_000_000,
     "arbitrum": 3_000_000,
 }
@@ -169,7 +169,13 @@ class Earner:
                 )
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
-            send_error_to_discord(sett_name, "Earn", error=e)
+            send_error_to_discord(
+                sett_name,
+                "Earn",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )
 
     def __send_earn_tx(self, vault: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
@@ -195,7 +201,9 @@ class Earner:
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending earn tx: {traceback.format_exc()}")
-            tx_hash = get_hash_from_failed_tx_error(e, "Earn")
+            tx_hash = get_hash_from_failed_tx_error(
+                e, "Earn", chain=self.chain, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
 

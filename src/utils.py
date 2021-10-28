@@ -98,7 +98,9 @@ def send_error_to_discord(
     tx_type: str,
     tx_hash: HexBytes = None,
     error: Exception = None,
-    message="Transaction timed out.",
+    message: str = "Transaction timed out.",
+    chain: str = None,
+    keeper_address: str = None,
 ):
     try:
         webhook = Webhook.from_url(
@@ -110,6 +112,10 @@ def send_error_to_discord(
             title=f"**{tx_type} Failed for {sett_name}**",
             description=f"{sett_name} Sett {tx_type} Details",
         )
+        if chain:
+            embed.add_field(name="Chain", value=chain, inline=True)
+        if keeper_address:
+            embed.add_field(name="Keeper", value=keeper_address, inline=True)
         if error:
             message = str(error)
         embed.add_field(name="Failure information", value=message, inline=True)
@@ -302,11 +308,21 @@ def confirm_transaction(
 
 
 def get_hash_from_failed_tx_error(
-    error: ValueError, tx_type: str, sett_name: str = None
+    error: ValueError,
+    tx_type: str,
+    sett_name: str = None,
+    chain: str = None,
+    keeper_address: str = None,
 ) -> HexBytes:
     try:
         error_obj = json.loads(str(error).replace("'", '"'))
-        send_error_to_discord(tx_type=tx_type, sett_name=sett_name, error=error_obj)
+        send_error_to_discord(
+            tx_type=tx_type,
+            sett_name=sett_name,
+            error=error_obj,
+            chain=chain,
+            keeper_address=keeper_address,
+        )
         tx_hash = list(error_obj.get("data").keys())[0]
     except Exception as x:
         logger.error(f"exception when trying to get tx_hash: {x}")
@@ -382,6 +398,11 @@ def get_last_harvest_times(
                 and args["strategy"] not in times
             ):
                 times[args["strategy"]] = int(tx["timeStamp"])
+            elif (
+                str(fn) == "<Function harvestMta(address)>"
+                and args["voterProxy"] not in times
+            ):
+                times[args["voterProxy"]] = int(tx["timeStamp"])
         return times
     except (KeyError, requests.HTTPError):
         raise ValueError("Last harvest time couldn't be fetched")

@@ -1,23 +1,24 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: eth-bvecvx-earner-keeper
+  name: eth-earner-keeper
   labels:
-    app: eth-bvecvx-earner-keeper
+    app: eth-earner-keeper
 spec:
-  schedule: "0 23 * * 3"
+  # cron to run every 30 min every day "*/30 * * * *"
+  schedule: "20 * * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: eth-bvecvx-earner-keeper
+          serviceAccountName: eth-earner-keeper
           containers:
-          - name: eth-bvecvx-earner-keeper
+          - name: eth-earner-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/earn_locked_cvx.py"]
+            command: ["python", "scripts/eth_earn.py"]
             env:
               - name: LOG_LEVEL
                 value: 'info'
