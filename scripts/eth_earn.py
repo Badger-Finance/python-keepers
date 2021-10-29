@@ -53,7 +53,7 @@ if __name__ == "__main__":
         vault_addresses.extend(
             registry.functions.getFilteredProductionVaults("v1", 2).call()
         )
-        # vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
+        vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
         for address in vault_addresses:
             if address not in INVALID_VAULTS:
                 logger.info(f"address: {address}")
