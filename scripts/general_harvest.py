@@ -69,15 +69,18 @@ if __name__ == "__main__":
         else:
             discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
 
-        keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
-        keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
+        # should this be a secret?
+        keeper_kms_key_id = "alias/poly-harvester"
+        # will be computed by kms signer
+        keeper_address = ""
 
         harvester = GeneralHarvester(
             chain=chain,
             web3=node,
             keeper_acl=MULTICHAIN_CONFIG[chain]["keeper_acl"],
             keeper_address=keeper_address,
-            keeper_key=keeper_key,
+            keeper_kms_key_id=keeper_kms_key_id,
+            signing_method="kms",
             base_oracle_address=MULTICHAIN_CONFIG[chain]["gas_oracle"],
             discord_url=discord_url,
         )
