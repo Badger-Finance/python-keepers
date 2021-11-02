@@ -5,7 +5,7 @@ from decimal import Decimal
 from hexbytes import HexBytes
 from web3 import contract
 
-from config.constants import MULTICHAIN_CONFIG, SEVEN_DAYS_OF_BLOCKS
+from config.constants import MULTICHAIN_CONFIG
 from src.general_harvester import GeneralHarvester
 from src.utils import (
     get_abi,
@@ -226,7 +226,7 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(strategy) == False
 
-    # Should only be able to ahrvest after 120 hours
+    # Should only be able to harvest after 120 hours
     chain.sleep(hours(72))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == False

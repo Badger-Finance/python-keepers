@@ -12,15 +12,16 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, SEVEN_DAYS_OF_BLOCKS
+from constants import MULTICHAIN_CONFIG
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, hours, get_last_harvest_times
+from utils import get_abi, get_secret, hours, get_last_harvest_times, seconds_to_blocks
 from tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
 HOURS_96 = hours(96)
+HOURS_120 = hours(120)
 
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
@@ -226,7 +227,7 @@ if __name__ == "__main__":
     harvester.last_harvest_times = get_last_harvest_times(
         harvester.web3,
         rewards_manager,
-        start_block=harvester.web3.eth.block_number - SEVEN_DAYS_OF_BLOCKS,
+        start_block=harvester.web3.eth.block_number - seconds_to_blocks(HOURS_120),
     )
 
     for strategy_address in rewards_manager_strategies:
