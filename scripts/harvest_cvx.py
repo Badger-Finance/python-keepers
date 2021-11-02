@@ -72,7 +72,7 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
 
     # regular thresholds for rest of vaults
     if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
+        logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
@@ -88,7 +88,7 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
 
     # regular thresholds for rest of vaults
     if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
+        logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
             harvester.harvest_rewards_manager(strategy)
@@ -111,7 +111,7 @@ def conditional_harvest_mta(harvester, voter_proxy) -> str:
     if harvester.is_time_to_harvest(voter_proxy, HOURS_96) and latest_base_fee < int(
         80e9
     ):
-        logger.info(f"Been longer than 72 hours and base fee < 80 since harvestMta")
+        logger.info(f"Been longer than 96 hours and base fee < 80 since harvestMta")
         res = safe_harvest_mta(harvester, voter_proxy)
         logger.info(res)
     elif harvester.is_time_to_harvest(voter_proxy) and latest_base_fee < int(150e9):
