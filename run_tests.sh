@@ -26,6 +26,7 @@ done
 
 if [ "$failing_tests" != "failures:" ]; then
     echo "$failing_tests"
+    exit 1
 else
     echo "ETH TESTS PASSED"
 fi
