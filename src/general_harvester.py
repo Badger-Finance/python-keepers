@@ -12,7 +12,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, SEVEN_DAYS_OF_BLOCKS
+from constants import MULTICHAIN_CONFIG
 from harvester import IHarvester
 from utils import (
     confirm_transaction,
