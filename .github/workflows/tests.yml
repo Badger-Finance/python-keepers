@@ -1,0 +1,33 @@
+name: Tests
+
+on: push
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      WEB3_INFURA_PROJECT_ID: e8b107f3f27c4073a5ef4a4f7e32d6eb
+    steps:
+      - name: Checkout Service
+        uses: actions/checkout@main
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          cache: 'npm'
+      - name: Install node dependencies
+        run: npm i
+      - name: Install python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install eth-brownie
+      - name: Setup brownie
+        run: |
+          # fails if .env is not found
+          touch .env
+      - name: Run general_harvester tests
+        run: ./run_tests.sh
+

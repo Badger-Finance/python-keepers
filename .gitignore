@@ -131,7 +131,7 @@ dmypy.json
 
 # Node and hardhat files
 node_modules
-package.json
-package-lock.json
-hardhat.config.js
+# package.json
+# package-lock.json
+# hardhat.config.js
 yarn.lock

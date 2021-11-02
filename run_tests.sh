@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 declare -a eth_tests=(
-    "test_general_harvester" 
-    "test_oracle" 
+    "test_general_harvester"
+    "test_oracle"
     "test_rebase"
     "test_rebalance"
     "test_ibbtc_fee_collect"
     )
 
 declare -a arb_tests=(
-    "test_arbitrum_earner" 
+    "test_arbitrum_earner"
     "test_arbitrum_harvester"
     )
 

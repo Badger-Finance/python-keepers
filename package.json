@@ -1,0 +1,26 @@
+{
+  "name": "python-keepers",
+  "version": "1.0.0",
+  "description": "Python based keeper bots for Badger setts.",
+  "main": "hardhat.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Badger-Finance/python-keepers.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Badger-Finance/python-keepers/issues"
+  },
+  "homepage": "https://github.com/Badger-Finance/python-keepers#readme",
+  "devDependencies": {
+    "hardhat": "^2.6.7"
+  }
+}
