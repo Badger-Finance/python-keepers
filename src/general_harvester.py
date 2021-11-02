@@ -12,7 +12,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, THREE_DAYS_OF_BLOCKS
+from constants import MULTICHAIN_CONFIG, SEVEN_DAYS_OF_BLOCKS
 from harvester import IHarvester
 from utils import (
     confirm_transaction,
@@ -73,7 +73,7 @@ class GeneralHarvester(IHarvester):
             self.last_harvest_times = get_last_harvest_times(
                 self.web3,
                 self.keeper_acl,
-                start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
+                start_block=self.web3.eth.block_number - SEVEN_DAYS_OF_BLOCKS,
             )
         else:
             # Don't care about poly/arbitrum

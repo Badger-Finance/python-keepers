@@ -5,7 +5,7 @@ from decimal import Decimal
 from hexbytes import HexBytes
 from web3 import contract
 
-from config.constants import MULTICHAIN_CONFIG
+from config.constants import MULTICHAIN_CONFIG, SEVEN_DAYS_OF_BLOCKS
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
 from tests.utils import test_address, test_key
@@ -211,8 +211,8 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     strategy_name = strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")
 
-    # Strategy should be harvestable at this point
-    chain.sleep(hours(72))
+    # Strategy still shouldn't be harvestable at this point
+    chain.sleep(hours(121))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
@@ -220,8 +220,11 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(strategy) == False
 
-    # Strategy should be harvestable again after 72 hours
     chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(strategy) == False
+    # Strategy should be harvestable again after 120 hours
+    chain.sleep(hours(49))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
@@ -229,22 +232,44 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
 
 @pytest.mark.require_network("hardhat-fork")
 def test_is_time_to_harvest_rewards_manager(
-    web3, chain, keeper_address, harvester, rewards_manager_strategy
+    web3,
+    chain,
+    keeper_address,
+    harvester,
+    rewards_manager_strategy,
+    setup_rewards_manager,
 ):
+    harvester.keeper_acl = harvester.web3.eth.contract(
+        address=harvester.web3.toChecksumAddress(
+            MULTICHAIN_CONFIG["eth"]["rewards_manager"]
+        ),
+        abi=get_abi("eth", "rewards_manager"),
+    )
+    harvester.last_harvest_times = get_last_harvest_times(
+        harvester.web3,
+        harvester.keeper_acl,
+        start_block=harvester.web3.eth.block_number - SEVEN_DAYS_OF_BLOCKS,
+        etherscan_key=os.getenv("ETHERSCAN_TOKEN"),
+    )
     strategy_name = rewards_manager_strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")
 
     # Strategy should be harvestable at this point
-    chain.sleep(hours(72))
+    chain.sleep(hours(121))
     chain.mine(1)
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
     harvester.harvest_rewards_manager(rewards_manager_strategy)
 
+    assert harvester.last_harvest_times[rewards_manager_strategy.address]
+
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
 
-    # Strategy should be harvestable again after 72 hours
     chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
+    # Strategy should be harvestable again after 120 hours
+    chain.sleep(hours(49))
     chain.mine(1)
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
     harvester.harvest_rewards_manager(rewards_manager_strategy)

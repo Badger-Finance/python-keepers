@@ -12,7 +12,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, THREE_DAYS_OF_BLOCKS
+from constants import MULTICHAIN_CONFIG, SEVEN_DAYS_OF_BLOCKS
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret, hours, get_last_harvest_times
 from tx_utils import get_latest_base_fee
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     harvester.last_harvest_times = get_last_harvest_times(
         harvester.web3,
         rewards_manager,
-        start_block=harvester.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
+        start_block=harvester.web3.eth.block_number - SEVEN_DAYS_OF_BLOCKS,
     )
 
     for strategy_address in rewards_manager_strategies:
