@@ -22,6 +22,7 @@ from utils import (
     get_abi,
     get_hash_from_failed_tx_error,
     get_last_harvest_times,
+    seconds_to_blocks,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
@@ -73,7 +74,8 @@ class GeneralHarvester(IHarvester):
             self.last_harvest_times = get_last_harvest_times(
                 self.web3,
                 self.keeper_acl,
-                start_block=self.web3.eth.block_number - SEVEN_DAYS_OF_BLOCKS,
+                start_block=self.web3.eth.block_number
+                - seconds_to_blocks(MAX_TIME_BETWEEN_HARVESTS),
             )
         else:
             # Don't care about poly/arbitrum
@@ -93,7 +95,7 @@ class GeneralHarvester(IHarvester):
         Args:
             strategy (contract): Vault strategy web3 contract object
             harvest_interval_threshold (int, optional): Amount of time in seconds that is acceptable to not
-                have harvested within. Defaults to MAX_TIME_BETWEEN_HARVESTS (71 hours in seconds).
+                have harvested within. Defaults to MAX_TIME_BETWEEN_HARVESTS.
 
         Returns:
             bool: True if time since last harvest is > harvest_interval_threshold, else False
