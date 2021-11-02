@@ -107,5 +107,13 @@ def test_chainlink_forwarder(oracle):
 
 @pytest.mark.require_network("hardhat-fork")
 def test_is_negative_rebase(oracle):
-    assert 98943670 / 10 ** 8 > 0.95
-    assert 94943670 / 10 ** 8 < 0.95
+    digg_btc_oracle = Contract.from_abi(
+        "DiggBtcOracle",
+        os.getenv("DIGG_BTC_CHAINLINK"),
+        get_abi("eth", "oracle"),
+    )
+    price = digg_btc_oracle.latestAnswer()
+    if price < 95000000:
+        assert oracle.is_negative_rebase() == True
+    else:
+        assert oracle.is_negative_rebase() == False

@@ -58,7 +58,7 @@ class Oracle:
         )
 
     def is_negative_rebase(self):
-        price = self.digg_btc_chainlink.functions.lastestAnswer().call()
+        price = self.digg_btc_chainlink.functions.latestAnswer().call()
         self.logger.info(f"price: [{price} - {price / 10**8}]")
         return price / 10 ** 8 < NEGATIVE_THRESHOLD
 
