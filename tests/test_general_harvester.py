@@ -211,7 +211,7 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     strategy_name = strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")
 
-    # Strategy still shouldn't be harvestable at this point
+    # Strategy should be harvestable at this point
     chain.sleep(hours(121))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
@@ -220,10 +220,10 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(strategy) == False
 
+    # Should only be able to ahrvest after 120 hours
     chain.sleep(hours(72))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == False
-    # Strategy should be harvestable again after 120 hours
     chain.sleep(hours(49))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
@@ -265,10 +265,10 @@ def test_is_time_to_harvest_rewards_manager(
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
 
+    # Should only be able to ahrvest after 120 hours
     chain.sleep(hours(72))
     chain.mine(1)
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
-    # Strategy should be harvestable again after 120 hours
     chain.sleep(hours(49))
     chain.mine(1)
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
