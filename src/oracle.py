@@ -26,6 +26,7 @@ from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_pr
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
 WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 GAS_LIMIT = 200_000
+NEGATIVE_THRESHOLD = 0.95
 
 
 class Oracle:
@@ -51,6 +52,15 @@ class Oracle:
             address=self.web3.toChecksumAddress(os.getenv("CHAINLINK_FORWARDER")),
             abi=get_abi("eth", "chainlink_forwarder"),
         )
+        self.digg_btc_chainlink = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(os.getenv("DIGG_BTC_CHAINLINK")),
+            abi=get_abi("eth", "oracle"),
+        )
+
+    def is_negative_rebase(self):
+        price = self.digg_btc_chainlink.functions.lastestAnswer().call()
+        self.logger.info(f"price: [{price} - {price / 10**8}]")
+        return price / 10 ** 8 < NEGATIVE_THRESHOLD
 
     def propose_centralized_report_push(self):
         """Gets price using centralized oracle and pushes report to market oracle for use
