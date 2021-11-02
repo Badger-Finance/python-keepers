@@ -28,6 +28,7 @@ os.environ[
 os.environ["SUSHI_PAIR"] = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
 os.environ["CENTRALIZED_ORACLE"] = "0x73083058e0f61D3fc7814eEEDc39F9608B4546d7"
 os.environ["CHAINLINK_FORWARDER"] = "0xB572f69edbfC946af11a1b3ef8D5c2f41D38a642"
+os.environ["DIGG_BTC_CHAINLINK"] = "0x418a6c98cd5b8275955f08f0b8c1c6838c8b1685"
 
 
 def mock_send_error(tx_type: str, error: Exception):
@@ -102,3 +103,17 @@ def test_propose_report_centralized(oracle):
 def test_chainlink_forwarder(oracle):
     accounts[0].transfer(test_address, "1 ether")
     oracle.publish_chainlink_report()
+
+
+@pytest.mark.require_network("hardhat-fork")
+def test_is_negative_rebase(oracle):
+    digg_btc_oracle = Contract.from_abi(
+        "DiggBtcOracle",
+        os.getenv("DIGG_BTC_CHAINLINK"),
+        get_abi("eth", "oracle"),
+    )
+    price = digg_btc_oracle.latestAnswer()
+    if price < 95000000:
+        assert oracle.is_negative_rebase() == True
+    else:
+        assert oracle.is_negative_rebase() == False

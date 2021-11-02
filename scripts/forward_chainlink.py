@@ -22,5 +22,8 @@ if __name__ == "__main__":
 
     oracle = Oracle(keeper_address=keeper_address, keeper_key=keeper_key, web3=node_url)
 
-    logger.info("+-----Forwarding ChainLink price to market oracle-----+")
-    oracle.publish_chainlink_report()
+    if not oracle.is_negative_rebase():
+        logger.info("+-----Forwarding ChainLink price to market oracle-----+")
+        oracle.publish_chainlink_report()
+    else:
+        logger.info("SKIPPING: negative rebase")
