@@ -14,10 +14,12 @@ declare -a arb_tests=(
     )
 
 failing_tests="failures:"
+passing_tests="passed:"
 
 for i in "${eth_tests[@]}"
 do
     if brownie test tests/"$i".py --network=hardhat-fork; then
+        passing_tests="$passing_tests $i"
         continue
     else
         failing_tests="$failing_tests $i"
@@ -26,6 +28,7 @@ done
 
 if [ "$failing_tests" != "failures:" ]; then
     echo "$failing_tests"
+    echo "$passing_tests"
     exit 1
 else
     echo "ETH TESTS PASSED"
