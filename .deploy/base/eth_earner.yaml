@@ -5,8 +5,8 @@ metadata:
   labels:
     app: eth-earner-keeper
 spec:
-  # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "20 * * * *"
+  # cron to run every hour
+  schedule: "10 * * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:

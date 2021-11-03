@@ -12,15 +12,16 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, THREE_DAYS_OF_BLOCKS
+from constants import MULTICHAIN_CONFIG
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, hours, get_last_harvest_times
+from utils import get_abi, get_secret, hours, get_last_harvest_times, seconds_to_blocks
 from tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
-HOURS_72 = hours(72)
+HOURS_96 = hours(96)
+HOURS_120 = hours(120)
 
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
@@ -70,8 +71,8 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
+    if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
+        logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
@@ -86,8 +87,8 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(80e9):
-        logger.info(f"Been longer than 72 hours and base fee < 80 for {strategy_name}")
+    if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
+        logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
             harvester.harvest_rewards_manager(strategy)
@@ -107,10 +108,10 @@ def conditional_harvest_rewards_manager(harvester, strategy_name, strategy) -> s
 def conditional_harvest_mta(harvester, voter_proxy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
-    if harvester.is_time_to_harvest(voter_proxy, HOURS_72) and latest_base_fee < int(
+    if harvester.is_time_to_harvest(voter_proxy, HOURS_96) and latest_base_fee < int(
         80e9
     ):
-        logger.info(f"Been longer than 72 hours and base fee < 80 since harvestMta")
+        logger.info(f"Been longer than 96 hours and base fee < 80 since harvestMta")
         res = safe_harvest_mta(harvester, voter_proxy)
         logger.info(res)
     elif harvester.is_time_to_harvest(voter_proxy) and latest_base_fee < int(150e9):
@@ -226,7 +227,7 @@ if __name__ == "__main__":
     harvester.last_harvest_times = get_last_harvest_times(
         harvester.web3,
         rewards_manager,
-        start_block=harvester.web3.eth.block_number - THREE_DAYS_OF_BLOCKS,
+        start_block=harvester.web3.eth.block_number - seconds_to_blocks(HOURS_120),
     )
 
     for strategy_address in rewards_manager_strategies:

@@ -15,7 +15,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG
+from constants import MULTICHAIN_CONFIG, SECONDS_IN_A_DAY, BLOCKS_IN_A_DAY
 
 logger = logging.getLogger("utils")
 
@@ -469,3 +469,7 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
             strategies.append(strategy)
 
     return strategies, vaults
+
+
+def seconds_to_blocks(seconds: int) -> int:
+    return seconds / SECONDS_IN_A_DAY * BLOCKS_IN_A_DAY

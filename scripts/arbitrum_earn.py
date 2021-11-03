@@ -34,7 +34,8 @@ def get_abi(chain: str, contract_id: str):
 
 if __name__ == "__main__":
     for chain in ["arbitrum"]:
-        node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
+        # node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
+        node_url = "https://arb1.arbitrum.io/rpc"
         node = Web3(Web3.HTTPProvider(node_url))
 
         strategies, vaults = get_strategies_and_vaults(node, chain)
