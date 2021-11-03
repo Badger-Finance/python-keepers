@@ -7,7 +7,8 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     env:
-      WEB3_INFURA_PROJECT_ID: e8b107f3f27c4073a5ef4a4f7e32d6eb
+      WEB3_INFURA_PROJECT_ID: ${{ secrets.WEB3_INFURA_PROJECT_ID }}
+      ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_TOKEN }}
     steps:
       - name: Checkout Service
         uses: actions/checkout@main
