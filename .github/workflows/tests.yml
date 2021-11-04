@@ -9,6 +9,7 @@ jobs:
     env:
       WEB3_INFURA_PROJECT_ID: ${{ secrets.WEB3_INFURA_PROJECT_ID }}
       ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_TOKEN }}
+      TEST_DISCORD_WEBHOOK_URL: ''
     steps:
       - name: Checkout Service
         uses: actions/checkout@main
@@ -29,6 +30,6 @@ jobs:
         run: |
           # fails if .env is not found
           touch .env
-      - name: Run general_harvester tests
+      - name: Run tests
         run: ./run_tests.sh
 
