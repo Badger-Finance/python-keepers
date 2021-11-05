@@ -29,6 +29,8 @@ from constants import (
     ETH_BADGER_UNI_LP_VAULT,
 )
 
+AUTOCOMPOUND_PCT = .5
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("eth-external-harvest")
 
@@ -95,6 +97,7 @@ if __name__ == "__main__":
     )
 
     # BDIGG
+    logger.info("BDIGG")
     days_since = eharvester.days_since_last_harvest(ETH_BDIGG_STRATEGY)
     last_harvest = eharvester.last_harvest_times[ETH_BDIGG_STRATEGY]
     amount_owed = eharvester.get_amount_digg_owed(last_harvest, ETH_BDIGG_VAULT)
@@ -102,8 +105,6 @@ if __name__ == "__main__":
         _, fragments = to_digg_shares_and_fragments(node, amount_owed)
     else:
         fragments = 0
-
-    logger.info("BDIGG")
     logger.info(
         {
             "want": DIGG_TOKEN,
@@ -114,19 +115,21 @@ if __name__ == "__main__":
     )
 
     # DIGG SUSHI
+    logger.info("-------------------------------------------")
+    logger.info("DIGG SLP")
     days_since = eharvester.days_since_last_harvest(ETH_DIGG_SUSHI_LP_STRATEGY)
     last_harvest = eharvester.last_harvest_times[ETH_DIGG_SUSHI_LP_STRATEGY]
     amount_owed = eharvester.get_amount_digg_owed(last_harvest, ETH_DIGG_SUSHI_LP_VAULT)
     if amount_owed != 0:
         _, fragments = to_digg_shares_and_fragments(node, amount_owed)
+        # only autocompound 50%
+        fragments = fragments * AUTOCOMPOUND_PCT
     else:
         fragments = 0
     strategy = node.eth.contract(
         address=ETH_DIGG_SUSHI_LP_STRATEGY, abi=get_abi("eth", "strategy")
     )
 
-    logger.info("-------------------------------------------")
-    logger.info("DIGG SLP")
     logger.info(
         {
             "want": strategy.functions.want().call(),
@@ -142,18 +145,18 @@ if __name__ == "__main__":
     )
 
     # BADGER SUSHI
+    logger.info("-------------------------------------------")
+    logger.info("BADGER SLP")
     days_since = eharvester.days_since_last_harvest(ETH_BADGER_SUSHI_LP_STRATEGY)
     last_harvest = eharvester.last_harvest_times[ETH_BADGER_SUSHI_LP_STRATEGY]
     amount_owed = Decimal(
         eharvester.get_amount_badger_owed(last_harvest, ETH_BADGER_SUSHI_LP_VAULT)
-        * 1e18
+        * 1e18 * AUTOCOMPOUND_PCT
     )
     strategy = node.eth.contract(
         address=ETH_BADGER_SUSHI_LP_STRATEGY, abi=get_abi("eth", "strategy")
     )
 
-    logger.info("-------------------------------------------")
-    logger.info("BADGER SLP")
     logger.info(
         {
             "want": strategy.functions.want().call(),
@@ -169,17 +172,17 @@ if __name__ == "__main__":
     )
 
     # BADGER UNI
+    logger.info("-------------------------------------------")
+    logger.info("BADGER UNI LP")
     days_since = eharvester.days_since_last_harvest(ETH_BADGER_UNI_LP_STRATEGY)
     last_harvest = eharvester.last_harvest_times[ETH_BADGER_UNI_LP_STRATEGY]
     amount_owed = Decimal(
-        eharvester.get_amount_badger_owed(last_harvest, ETH_BADGER_UNI_LP_VAULT) * 1e18
+        eharvester.get_amount_badger_owed(last_harvest, ETH_BADGER_UNI_LP_VAULT) * 1e18 * AUTOCOMPOUND_PCT
     )
     strategy = node.eth.contract(
         address=ETH_BADGER_UNI_LP_STRATEGY, abi=get_abi("eth", "strategy")
     )
 
-    logger.info("-------------------------------------------")
-    logger.info("BADGER UNI LP")
     logger.info(
         {
             "want": strategy.functions.want().call(),
