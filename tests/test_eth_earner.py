@@ -102,9 +102,7 @@ def test_earn(keeper_address, earner):
             address=vault.functions.token().call(), abi=get_abi("eth", "erc20")
         )
 
-        vault_before, strategy_before = earner.get_balances(
-            vault.address, strategy, want
-        )
+        vault_before, strategy_before = earner.get_balances(vault, strategy, want)
 
         logger.info(f"{strategy_name} vault_before: {vault_before}")
         logger.info(f"{strategy_name} strategy_before: {strategy_before}")
@@ -116,7 +114,7 @@ def test_earn(keeper_address, earner):
 
         earner.earn(vault, strategy)
 
-        vault_after, strategy_after = earner.get_balances(vault.address, strategy, want)
+        vault_after, strategy_after = earner.get_balances(vault, strategy, want)
         logger.info(f"{strategy_name} vault_after: {vault_after}")
         logger.info(f"{strategy_name} strategy_after: {strategy_after}")
 

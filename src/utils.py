@@ -473,3 +473,12 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
 
 def seconds_to_blocks(seconds: int) -> int:
     return seconds / SECONDS_IN_A_DAY * BLOCKS_IN_A_DAY
+
+
+def get_price_per_want(want_address: str, chain: str) -> int:
+    prices = requests.get(
+        f"https://api.badger.finance/v2/prices?currency={chain}"
+    ).json()
+    price_per_want_eth = prices.get(want_address, 0)
+    logger.info(f"price per want: {price_per_want_eth}")
+    return price_per_want_eth
