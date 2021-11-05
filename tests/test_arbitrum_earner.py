@@ -1,3 +1,4 @@
+import logging
 import os
 import pytest
 from brownie import accounts, Contract, web3
@@ -9,6 +10,8 @@ from src.earner import Earner
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
 from tests.utils import test_address, test_key
 from config.constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
+
+logger = logging.getLogger("test-eth-earner")
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress("0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612")
 KEEPER_ACL = web3.toChecksumAddress("0x265820F3779f652f2a9857133fDEAf115b87db4B")
@@ -42,7 +45,7 @@ def mock_send_discord(
     chain: str = "ETH",
     url: str = None,
 ):
-    print("sent")
+    logger.info("sent")
 
 
 @pytest.fixture(autouse=True)
@@ -132,21 +135,19 @@ def test_earn(keeper_address, earner, strategy, vault):
         address=vault.functions.token().call(), abi=get_abi("arbitrum", "erc20")
     )
 
-    vault_before = want.functions.balanceOf(vault.address).call()
-    strategy_before = strategy.functions.balanceOf().call()
+    vault_before, strategy_before = earner.get_balances(vault, strategy, want)
 
-    print(f"{strategy_name} vault_before: {vault_before}")
-    print(f"{strategy_name} strategy_before: {strategy_before}")
+    logger.info(f"{strategy_name} vault_before: {vault_before}")
+    logger.info(f"{strategy_name} strategy_before: {strategy_before}")
 
     should_earn = earner.should_earn(override_threshold, vault_before, strategy_before)
-    print(f"{strategy_name} should_earn: {should_earn}")
+    logger.info(f"{strategy_name} should_earn: {should_earn}")
 
     earner.earn(vault, strategy)
 
-    vault_after = want.functions.balanceOf(vault.address).call()
-    strategy_after = strategy.functions.balanceOf().call()
-    print(f"{strategy_name} vault_after: {vault_after}")
-    print(f"{strategy_name} strategy_after: {strategy_after}")
+    vault_after, strategy_after = earner.get_balances(vault, strategy, want)
+    logger.info(f"{strategy_name} vault_after: {vault_after}")
+    logger.info(f"{strategy_name} strategy_after: {strategy_after}")
 
     if should_earn:
         assert vault_after < vault_before

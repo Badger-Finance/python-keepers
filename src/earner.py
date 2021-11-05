@@ -7,6 +7,7 @@ import requests
 import sys
 import traceback
 from time import sleep
+from typing import Tuple
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(
@@ -20,6 +21,7 @@ from utils import (
     send_success_to_discord,
     get_abi,
     get_hash_from_failed_tx_error,
+    get_token_price,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
@@ -82,17 +84,43 @@ class Earner:
         assert vault.functions.controller().call() == controller.address
         assert controller.functions.strategies(want.address).call() == strategy.address
 
-        vault_before = want.functions.balanceOf(vault.address).call()
-        strategy_before = strategy.functions.balanceOf().call()
+        vault_balance, strategy_balance = self.get_balances(vault, strategy, want)
 
-        if self.should_earn(override_threshold, vault_before, strategy_before):
+        if self.should_earn(override_threshold, vault_balance, strategy_balance):
             self.__process_earn(vault, sett_name)
+
+    def get_balances(
+        self, vault: contract, strategy: contract, want: contract
+    ) -> Tuple[float, float]:
+        """Returns the balance of want in the vault and strategy.
+
+        Args:
+            vault (contract): vault web3 contract object
+            strategy (contract): strategy web3 contract object
+            want (contract): want web3 contract object
+
+        Returns:
+            Tuple[float, float]: want in vault denominated in eth, want in strat denominated in eth
+        """
+        price_per_want_eth = get_token_price(want.address, "eth", self.chain)
+        self.logger.info(f"price per want: {price_per_want_eth}")
+        want_decimals = want.functions.decimals().call()
+
+        vault_balance = want.functions.balanceOf(vault.address).call()
+        strategy_balance = strategy.functions.balanceOf().call()
+
+        vault_balance_eth = price_per_want_eth * vault_balance / 10 ** want_decimals
+        strategy_balance_eth = (
+            price_per_want_eth * strategy_balance / 10 ** want_decimals
+        )
+
+        return vault_balance_eth, strategy_balance_eth
 
     def should_earn(
         self, override_threshold: int, vault_balance: int, strategy_balance: int
     ) -> bool:
         # Always allow earn on first run
-        if strategy_balance == 0:
+        if strategy_balance == 0 and vault_balance > 0:
             self.logger.info("No strategy balance, earn")
             return True
         # Earn if deposits have accumulated over a static threshold

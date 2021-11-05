@@ -2,7 +2,7 @@ autofetch_sources: True
 dotenv: .env
 
 networks:
-  default: mainnet-fork
+  default: hardhat-fork
   bsc-fork:
     explorer: https://www.bscscan.com/
     cmd: ganache-cli
