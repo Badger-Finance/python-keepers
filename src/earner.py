@@ -21,7 +21,7 @@ from utils import (
     send_success_to_discord,
     get_abi,
     get_hash_from_failed_tx_error,
-    get_price_per_want,
+    get_token_price,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
@@ -102,7 +102,7 @@ class Earner:
         Returns:
             Tuple[int, int]: want in vault denominated in eth, want in strat denominated in eth
         """
-        price_per_want_eth = get_price_per_want(want.address, "eth")
+        price_per_want_eth = get_token_price(want.address, "eth")
         want_decimals = want.functions.decimals().call()
 
         vault_balance = want.functions.balanceOf(vault.address).call()
