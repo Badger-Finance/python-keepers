@@ -475,10 +475,14 @@ def seconds_to_blocks(seconds: int) -> int:
     return seconds / SECONDS_IN_A_DAY * BLOCKS_IN_A_DAY
 
 
-def get_token_price(token_address: str, currency: str) -> int:
+def get_token_price(token_address: str, currency: str, chain: str) -> int:
+    # TODO: refactor chain into enum for all keepers, hack for now
+    if chain == "poly":
+        chain = "polygon"
+    elif chain == "arb":
+        chain = "arbitrum"
     prices = requests.get(
-        f"https://api.badger.finance/v2/prices?currency={currency}"
+        f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
     ).json()
     token_price = prices.get(token_address, 0)
-    logger.info(f"price per want: {token_price}")
     return token_price

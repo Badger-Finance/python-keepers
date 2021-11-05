@@ -102,7 +102,8 @@ class Earner:
         Returns:
             Tuple[int, int]: want in vault denominated in eth, want in strat denominated in eth
         """
-        price_per_want_eth = get_token_price(want.address, "eth")
+        price_per_want_eth = get_token_price(want.address, "eth", self.chain)
+        self.logger.info(f"price per want: {price_per_want_eth}")
         want_decimals = want.functions.decimals().call()
 
         vault_balance = want.functions.balanceOf(vault.address).call()
