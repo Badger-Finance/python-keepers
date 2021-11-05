@@ -1,3 +1,4 @@
+import logging
 import os
 import pytest
 from brownie import accounts, Contract, web3
@@ -19,6 +20,8 @@ from config.constants import (
     EARN_PCT_THRESHOLD,
     MULTICHAIN_CONFIG,
 )
+
+logger = logging.getLogger("test-eth-earner")
 
 
 def mock_send_discord(
@@ -99,23 +102,23 @@ def test_earn(keeper_address, earner):
             address=vault.functions.token().call(), abi=get_abi("eth", "erc20")
         )
 
-        vault_before = want.functions.balanceOf(vault.address).call()
-        strategy_before = strategy.functions.balanceOf().call()
+        vault_before, strategy_before = earner.get_balances(
+            vault.address, strategy, want
+        )
 
-        print(f"{strategy_name} vault_before: {vault_before}")
-        print(f"{strategy_name} strategy_before: {strategy_before}")
+        logger.info(f"{strategy_name} vault_before: {vault_before}")
+        logger.info(f"{strategy_name} strategy_before: {strategy_before}")
 
         should_earn = earner.should_earn(
             override_threshold, vault_before, strategy_before
         )
-        print(f"{strategy_name} should_earn: {should_earn}")
+        logger.info(f"{strategy_name} should_earn: {should_earn}")
 
         earner.earn(vault, strategy)
 
-        vault_after = want.functions.balanceOf(vault.address).call()
-        strategy_after = strategy.functions.balanceOf().call()
-        print(f"{strategy_name} vault_after: {vault_after}")
-        print(f"{strategy_name} strategy_after: {strategy_after}")
+        vault_after, strategy_after = earner.get_balances(vault.address, strategy, want)
+        logger.info(f"{strategy_name} vault_after: {vault_after}")
+        logger.info(f"{strategy_name} strategy_after: {strategy_after}")
 
         if should_earn:
             assert vault_after < vault_before
