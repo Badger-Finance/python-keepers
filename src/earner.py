@@ -64,7 +64,7 @@ class Earner:
 
     def earn(self, vault: contract, strategy: contract, sett_name: str = None):
         override_threshold = EARN_EXCEPTIONS.get(
-            strategy.address, self.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether")
+            strategy.address, EARN_OVERRIDE_THRESHOLD
         )
 
         # handle skipping outside of earn call, only call this on setts we want to earn
