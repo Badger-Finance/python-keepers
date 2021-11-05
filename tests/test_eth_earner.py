@@ -96,7 +96,7 @@ def test_earn(keeper_address, earner):
 
         strategy_name = strategy.functions.getName().call()
 
-        override_threshold = earner.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether")
+        override_threshold = EARN_OVERRIDE_THRESHOLD
 
         want = earner.web3.eth.contract(
             address=vault.functions.token().call(), abi=get_abi("eth", "erc20")
