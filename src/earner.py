@@ -95,7 +95,7 @@ class Earner:
         """Returns the balance of want in the vault and strategy.
 
         Args:
-            vault_address (str): address of vault
+            vault (contract): vault web3 contract object
             strategy (contract): strategy web3 contract object
             want (contract): want web3 contract object
 
