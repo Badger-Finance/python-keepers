@@ -100,7 +100,7 @@ class Earner:
             want (contract): want web3 contract object
 
         Returns:
-            Tuple[int, int]: want in vault denominated in eth, want in strat denominated in eth
+            Tuple[float, float]: want in vault denominated in eth, want in strat denominated in eth
         """
         price_per_want_eth = get_token_price(want.address, "eth", self.chain)
         self.logger.info(f"price per want: {price_per_want_eth}")
