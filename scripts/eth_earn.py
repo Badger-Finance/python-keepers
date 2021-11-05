@@ -49,11 +49,23 @@ if __name__ == "__main__":
 
         vaults = []
         strategies = []
-        vault_addresses = registry.functions.getFilteredProductionVaults("v1", 1).call()
-        vault_addresses.extend(
-            registry.functions.getFilteredProductionVaults("v1", 2).call()
-        )
+        # vault_addresses = registry.functions.getFilteredProductionVaults("v1", 1).call()
+        # vault_addresses.extend(
+        #     registry.functions.getFilteredProductionVaults("v1", 2).call()
+        # )
         # vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
+
+        # manually earn for strategy migration test
+        vault_addresses = [
+            "0xD3eC271d07f2f9a4eB5dfD314f84f8a94ba96145",
+            "0x8D7A5Bacbc763b8bA7c2BB983089b01bBF3C9408",
+            "0xe71246810751dfaf8430dcd838a1e58A904a2725",
+            "0x8E8Fd0dD9F8C69E621054538Fb106Ae77B0847DD",
+            "0xdD954ff59A99352aCF16AAd0801350a0742359E3",
+            "0x0eC330A6f4e93204B9AA62a4e7A0C78D7849821E",
+            "0x68e8efd42A22BF4B53ecE7162d9aCbA2Ad2f9991",
+            "0x29001E42899308A61d981c5f5780e4E4D727a0BB"
+        ]
 
         for address in vault_addresses:
             if address not in INVALID_VAULTS:
