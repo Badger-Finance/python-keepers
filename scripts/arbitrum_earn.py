@@ -11,7 +11,7 @@ sys.path.insert(
 )
 
 from earner import Earner
-from utils import get_secret, get_strategies_and_vaults
+from utils import get_secret, get_strategies_and_vaults, get_abi
 from constants import MULTICHAIN_CONFIG
 from enums import Network
 
@@ -26,11 +26,6 @@ def safe_earn(earner, vault, strategy):
         earner.earn(vault, strategy, sett_name=sett_name)
     except Exception as e:
         logger.error(f"Error running earn: {e}")
-
-
-def get_abi(chain: str, contract_id: str):
-    with open(f"./abi/{chain}/{contract_id}.json") as f:
-        return json.load(f)
 
 
 if __name__ == "__main__":
