@@ -22,19 +22,17 @@ logger = logging.getLogger(Path(__file__).name)
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
-strategies = [
-    ####################### New Strategies #########################
-    # "0xe66dB6Eb807e6DAE8BD48793E9ad0140a2DEE22A",  # renBTC/wBTC
-    # "0x2f278515425c8eE754300e158116930B8EcCBBE1",  # renBTC/wBTC/sBTC
-    # "0x9e0742EE7BECde52A5494310f09aad639AA4790B",  # tBTC/sbtcCrv
-    # "0x7354D5119bD42a77E7162c8Afa8A1D18d5Da9cF8",  # hBTC/wBTC
-    # "0x3f98F3a21B125414e4740316bd6Ef14718764a22",  # pBTC/sbtcCRV
-    "0x50Dd8A61Bdd11Cf5539DAA83Bc8E0F581eD8110a",  # oBTC/sbtcCRV
-    # "0xf92660E0fdAfE945aa13616428c9fB4BE19f4d34",  # bBTC/sbtcCRV
-    # "0xf3202Aa2783F3DEE24a35853C6471db065B05D37",  # USD-BTC-ETH
-    # "0xf6D442Aead5960b283281A794B3e7d3605601247",  # Convex CRV
-    # "0xc67129cf19BB00d60CC5CF62398fcA3A4Dc02a14",  # Convex Token
-]
+STRATEGIES = {
+    # New strategies
+    "native.renCrv": "0x61e16b46F74aEd8f9c2Ec6CB2dCb2258Bdfc7071",
+    "native.sbtcCrv": "0xCce0D2d1Eb2310F7e67e128bcFE3CE870A3D3a3d",
+    "native.tbtcCrv": "0xAB73Ec65a1Ef5a2e5b56D5d6F36Bee4B2A1D3FFb",
+    "native.hbtcCrv": "0x8c26D9B6B80684CC642ED9eb1Ac1729Af3E819eE",
+    "native.pbtcCrv": "0xA9A646668Df5Cec5344941646F5c6b269551e53D",
+    "native.obtcCrv": "0x5dd69c6D81f0a403c03b99C5a44Ef2D49b66d388",
+    "native.bbtcCrv": "0xF2F3AB09E2D8986fBECbBa59aE838a5418a6680c",
+    "native.tricrypto2": "0x647eeb5C5ED5A71621183f09F6CE8fa66b96827d",
+}
 
 
 def safe_tend(harvester, strategy_name, strategy) -> str:
@@ -63,7 +61,7 @@ if __name__ == "__main__":
         use_flashbots=False,
     )
 
-    for strategy_address in strategies:
+    for strategy_address in STRATEGIES.values():
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
             abi=get_abi(Network.Ethereum, "strategy"),
