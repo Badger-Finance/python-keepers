@@ -15,7 +15,8 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, SECONDS_IN_A_DAY, BLOCKS_IN_A_DAY
+from constants import MULTICHAIN_CONFIG, SECONDS_IN_A_DAY, BLOCKS_IN_A_DAY, ABI_DIRS
+from enums import Network
 
 logger = logging.getLogger("utils")
 
@@ -77,7 +78,7 @@ def get_secret(
 
 # TODO: Don't duplicate common abis for all chains
 def get_abi(chain: str, contract_id: str):
-    with open(f"./abi/{chain}/{contract_id}.json") as f:
+    with open(f"./abi/{ABI_DIRS[chain]}/{contract_id}.json") as f:
         return json.load(f)
 
 
@@ -132,7 +133,7 @@ def send_success_to_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     try:
@@ -332,16 +333,16 @@ def get_hash_from_failed_tx_error(
 
 
 def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
-    if chain.lower() == "eth":
+    if chain == Network.Ethereum:
         explorer_name = "Etherscan"
         explorer_url = f"https://etherscan.io/tx/{tx_hash.hex()}"
-    elif chain.lower() == "bsc":
+    elif chain == Network.BinanceSmartChain:
         explorer_name = "Bscscan"
         explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
-    elif chain.lower() == "poly":
+    elif chain == Network.Polygon:
         explorer_name = "Polygonscan"
         explorer_url = f"https://polygonscan.com/tx/{tx_hash.hex()}"
-    elif chain.lower() == "arbitrum":
+    elif chain == Network.Arbitrum:
         explorer_name = "Arbiscan"
         explorer_url = f"https://arbiscan.io/tx/{tx_hash.hex()}"
 
@@ -456,7 +457,7 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
     vaults = []
 
     registry = node.eth.contract(
-        address=node.toChecksumAddress(MULTICHAIN_CONFIG.get(chain).get("registry")),
+        address=node.toChecksumAddress(MULTICHAIN_CONFIG[chain]["registry"]),
         abi=get_abi(chain, "registry"),
     )
 

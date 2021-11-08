@@ -13,6 +13,7 @@ sys.path.insert(
 from earner import Earner
 from utils import get_secret, get_strategies_and_vaults
 from constants import MULTICHAIN_CONFIG
+from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
@@ -33,7 +34,7 @@ def get_abi(chain: str, contract_id: str):
 
 
 if __name__ == "__main__":
-    for chain in ["arbitrum"]:
+    for chain in [Network.Arbitrum]:
         # node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
         node_url = "https://arb1.arbitrum.io/rpc"
         node = Web3(Web3.HTTPProvider(node_url))

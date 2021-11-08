@@ -10,6 +10,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
+from enums import Network
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret, get_strategies_from_registry
 from constants import MULTICHAIN_CONFIG
@@ -60,21 +61,21 @@ if __name__ == "__main__":
 
     harvester = GeneralHarvester(
         web3=web3,
-        chain="arbitrum",
-        keeper_acl=MULTICHAIN_CONFIG["arbitrum"]["keeper_acl"],
+        chain=Network.Arbitrum,
+        keeper_acl=MULTICHAIN_CONFIG[Network.Arbitrum]["keeper_acl"],
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=MULTICHAIN_CONFIG["arbitrum"]["gas_oracle"],
+        base_oracle_address=MULTICHAIN_CONFIG[Network.Arbitrum]["gas_oracle"],
         use_flashbots=False,
         discord_url=discord_url,
     )
 
-    strategies = get_strategies_from_registry(web3, "arbitrum")
+    strategies = get_strategies_from_registry(web3, Network.Arbitrum)
 
     for strategy in strategies:
         if (
             strategy.address
-            not in MULTICHAIN_CONFIG["arbitrum"]["harvest"]["invalid_strategies"]
+            not in MULTICHAIN_CONFIG[Network.Arbitrum]["harvest"]["invalid_strategies"]
         ):
             safe_harvest(harvester, strategy)
 

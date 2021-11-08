@@ -6,6 +6,9 @@ import sys
 from web3 import Web3, contract
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../config"))
+)
 
 from utils import (
     confirm_transaction,
@@ -18,6 +21,7 @@ from tx_utils import (
     get_effective_gas_price,
     get_priority_fee,
 )
+from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +33,7 @@ NUM_FLASHBOTS_BUNDLES = 6
 class StabilityExecutor:
     def __init__(
         self,
-        chain: str = "eth",
+        chain: str = Network.Ethereum,
         web3: Web3 = None,
         keeper_acl: str = os.getenv("KEEPER_ACL"),
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),

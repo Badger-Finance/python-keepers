@@ -7,11 +7,16 @@ from pathlib import Path
 from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-from utils import get_secret, get_abi
-
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
 )
+
+from utils import get_secret, get_abi
+from constants import NODE_URL_SECRET_NAMES
+from enums import Network
 from rebalancer import Rebalancer
 
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +32,10 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret("quiknode/eth-node-url", "NODE_URL")
+    node_url = get_secret(
+        NODE_URL_SECRET_NAMES[Network.Ethereum]["name"],
+        NODE_URL_SECRET_NAMES[Network.Ethereum]["key"],
+    )
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
@@ -36,7 +44,7 @@ if __name__ == "__main__":
     web3 = Web3(Web3.HTTPProvider(node_url))
 
     strategy = web3.eth.contract(
-        address=STABILIZE_STRAT, abi=get_abi("eth", "stability_strat")
+        address=STABILIZE_STRAT, abi=get_abi(Network.Ethereum, "stability_strat")
     )
 
     rebalancer = Rebalancer(

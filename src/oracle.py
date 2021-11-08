@@ -10,7 +10,11 @@ import sys
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from enums import Network
 from utils import (
     get_abi,
     get_secret,
@@ -42,19 +46,19 @@ class Oracle:
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
-            abi=get_abi("eth", "oracle"),
+            abi=get_abi(Network.Ethereum, "oracle"),
         )
         self.centralized_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("CENTRALIZED_ORACLE")),
-            abi=get_abi("eth", "digg_centralized_oracle"),
+            abi=get_abi(Network.Ethereum, "digg_centralized_oracle"),
         )
         self.chainlink_forwarder = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("CHAINLINK_FORWARDER")),
-            abi=get_abi("eth", "chainlink_forwarder"),
+            abi=get_abi(Network.Ethereum, "chainlink_forwarder"),
         )
         self.digg_btc_chainlink = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("DIGG_BTC_CHAINLINK")),
-            abi=get_abi("eth", "oracle"),
+            abi=get_abi(Network.Ethereum, "oracle"),
         )
 
     def is_negative_rebase(self):
@@ -93,7 +97,7 @@ class Oracle:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                    self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
@@ -292,7 +296,7 @@ class Oracle:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                    self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(

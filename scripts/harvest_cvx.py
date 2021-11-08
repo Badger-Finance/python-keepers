@@ -12,7 +12,8 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG
+from enums import Network
+from constants import MULTICHAIN_CONFIG, NODE_URL_SECRET_NAMES
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret, hours, get_last_harvest_times, seconds_to_blocks
 from tx_utils import get_latest_base_fee
@@ -159,7 +160,10 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret("quiknode/eth-node-url", "NODE_URL")
+    node_url = get_secret(
+        NODE_URL_SECRET_NAMES[Network.Ethereum]["name"],
+        NODE_URL_SECRET_NAMES[Network.Ethereum]["key"],
+    )
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
@@ -184,7 +188,7 @@ if __name__ == "__main__":
     for strategy_address in strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
+            abi=get_abi(Network.Ethereum, "strategy"),
         )
         strategy_name = strategy.functions.getName().call()
 
@@ -204,7 +208,7 @@ if __name__ == "__main__":
     # Call harvestMta before harvesting strategies
     voter_proxy = web3.eth.contract(
         address=web3.toChecksumAddress(MSTABLE_VOTER_PROXY),
-        abi=get_abi("eth", "mstable_voter_proxy"),
+        abi=get_abi(Network.Ethereum, "mstable_voter_proxy"),
     )
     conditional_harvest_mta(harvester, voter_proxy)
     # Sleep for 2 blocks before harvesting
@@ -214,7 +218,7 @@ if __name__ == "__main__":
     for strategy_address in mstable_strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
+            abi=get_abi(Network.Ethereum, "strategy"),
         )
         strategy_name = strategy.functions.getName().call()
 
@@ -233,7 +237,7 @@ if __name__ == "__main__":
     for strategy_address in rewards_manager_strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
+            abi=get_abi(Network.Ethereum, "strategy"),
         )
         strategy_name = strategy.functions.getName().call()
 

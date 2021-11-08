@@ -10,20 +10,25 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
+from enums import Network
 from earner import Earner
 from utils import get_secret, get_strategies_and_vaults, get_abi
-from constants import MULTICHAIN_CONFIG
+from constants import (
+    MULTICHAIN_CONFIG,
+    NODE_URL_SECRET_NAMES,
+    ETH_BVECVX_STRATEGY,
+    ETH_BVECVX_VAULT,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-LOCKED_CVX_STRATEGY = "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"
-LOCKED_CVX_VAULT = "0xfd05D3C7fe2924020620A8bE4961bBaA747e6305"
-
 
 if __name__ == "__main__":
-    chain = "eth"
-    node_url = get_secret(f"quiknode/{chain}-node-url", "NODE_URL")
+    chain = Network.Ethereum
+    node_url = get_secret(
+        NODE_URL_SECRET_NAMES[chain]["name"], NODE_URL_SECRET_NAMES[chain]["key"]
+    )
     node = Web3(Web3.HTTPProvider(node_url))
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
@@ -39,9 +44,9 @@ if __name__ == "__main__":
     )
 
     strategy = node.eth.contract(
-        address=LOCKED_CVX_STRATEGY, abi=get_abi(chain, "strategy")
+        address=ETH_BVECVX_STRATEGY, abi=get_abi(chain, "strategy")
     )
-    vault = node.eth.contract(address=LOCKED_CVX_VAULT, abi=get_abi(chain, "vault"))
+    vault = node.eth.contract(address=ETH_BVECVX_VAULT, abi=get_abi(chain, "vault"))
 
     strat_name = "Badger Vested Escrow Convex Token"
 

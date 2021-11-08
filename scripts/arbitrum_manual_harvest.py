@@ -11,6 +11,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
+from enums import Network
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret
 from constants import MULTICHAIN_CONFIG
@@ -45,10 +46,10 @@ if __name__ == "__main__":
 
     harvester = GeneralHarvester(
         web3=web3,
-        keeper_acl=MULTICHAIN_CONFIG["arbitrum"]["keeper_acl"],
+        keeper_acl=MULTICHAIN_CONFIG[Network.Arbitrum]["keeper_acl"],
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=MULTICHAIN_CONFIG["arbitrum"]["gas_oracle"],
+        base_oracle_address=MULTICHAIN_CONFIG[Network.Arbitrum]["gas_oracle"],
         use_flashbots=False,
         discord_url=discord_url,
     )
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     for strategy_address in strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("arbitrum", "strategy"),
+            abi=get_abi(Network.Arbitrum, "strategy"),
         )
         strategy_name = strategy.functions.getName().call()
 

@@ -13,6 +13,7 @@ sys.path.insert(
 )
 
 from constants import MULTICHAIN_CONFIG
+from enums import Network, Currency
 from harvester import IHarvester
 from utils import (
     confirm_transaction,
@@ -32,22 +33,22 @@ MAX_TIME_BETWEEN_HARVESTS = hours(120)
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
 GAS_LIMITS = {
-    "eth": 6_000_000,
-    "poly": 1_000_000,
-    "arbitrum": 3_000_000,
+    Network.Ethereum: 6_000_000,
+    Network.Polygon: 1_000_000,
+    Network.Arbitrum: 3_000_000,
 }
 NUM_FLASHBOTS_BUNDLES = 6
 API_PARAMS = {
-    "eth": {"currency": "eth", "chain": "eth"},
-    "poly": {"currency": "matic", "chain": "matic"},
-    "arbitrum": {"currency": "eth", "chain": "arbitrum"},
+    Network.Ethereum: {"currency": Currency.Eth, "chain": Network.Ethereum},
+    Network.Polygon: {"currency": Currency.Matic, "chain": Network.Polygon},
+    Network.Arbitrum: {"currency": Currency.Eth, "chain": Network.Arbitrum},
 }
 
 
 class GeneralHarvester(IHarvester):
     def __init__(
         self,
-        chain: str = "eth",  # TODO: Identify chain from web3.eth.chain_id (single source of truth)
+        chain: str = Network.Ethereum,
         web3: Web3 = None,
         keeper_acl: str = os.getenv("KEEPER_ACL"),
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
@@ -70,7 +71,7 @@ class GeneralHarvester(IHarvester):
             abi=get_abi(self.chain, "oracle"),
         )
         # Times of last harvest
-        if self.chain == "eth":
+        if self.chain == Network.Ethereum:
             self.last_harvest_times = get_last_harvest_times(
                 self.web3,
                 self.keeper_acl,
@@ -101,7 +102,7 @@ class GeneralHarvester(IHarvester):
             bool: True if time since last harvest is > harvest_interval_threshold, else False
         """
         # Only care about harvest gas costs on eth
-        if self.chain != "eth":
+        if self.chain != Network.Ethereum:
             return True
 
         try:
@@ -583,7 +584,7 @@ class GeneralHarvester(IHarvester):
             "from": self.keeper_address,
             "gas": GAS_LIMITS[self.chain],
         }
-        if self.chain == "eth":
+        if self.chain == Network.Ethereum:
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
             options["maxFeePerGas"] = self.__get_effective_gas_price()
         else:
@@ -667,13 +668,13 @@ class GeneralHarvester(IHarvester):
         )
 
     def __get_effective_gas_price(self) -> int:
-        if self.chain == "poly":
+        if self.chain == Network.Polygon:
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
-        elif self.chain == "arbitrum":
+        elif self.chain == Network.Arbitrum:
             gas_price = int(1.1 * self.web3.eth.gas_price)
             # Estimated gas price + buffer
-        elif self.chain == "eth":
+        elif self.chain == Network.Ethereum:
             # EIP-1559
             gas_price = get_effective_gas_price(self.web3)
         return gas_price

@@ -25,13 +25,14 @@ from utils import (
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
+from enums import Network, Currency
 
 logging.basicConfig(level=logging.INFO)
 
 GAS_LIMITS = {
-    "eth": 1_500_000,
-    "poly": 1_000_000,
-    "arbitrum": 3_000_000,
+    Network.Ethereum: 1_500_000,
+    Network.Polygon: 1_000_000,
+    Network.Arbitrum: 3_000_000,
 }
 EARN_EXCEPTIONS = {}
 
@@ -39,7 +40,7 @@ EARN_EXCEPTIONS = {}
 class Earner:
     def __init__(
         self,
-        chain: str = "eth",
+        chain: str = Network.Ethereum,
         keeper_acl: str = os.getenv("KEEPER_ACL"),
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
         keeper_key: str = os.getenv("KEEPER_KEY"),
@@ -102,7 +103,7 @@ class Earner:
         Returns:
             Tuple[float, float]: want in vault denominated in eth, want in strat denominated in eth
         """
-        price_per_want_eth = get_token_price(want.address, "eth", self.chain)
+        price_per_want_eth = get_token_price(want.address, Currency.Eth, self.chain)
         self.logger.info(f"price per want: {price_per_want_eth}")
         want_decimals = want.functions.decimals().call()
 
@@ -236,12 +237,12 @@ class Earner:
             return tx_hash
 
     def __get_gas_price(self) -> int:
-        if self.chain == "poly":
+        if self.chain == Network.Polygon:
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
-        elif self.chain == "eth":
+        elif self.chain == Network.Ethereum:
             gas_price = get_effective_gas_price(self.web3)
-        elif self.chain == "arbitrum":
+        elif self.chain == Network.Arbitrum:
             gas_price = int(1.1 * self.web3.eth.gas_price)
 
         return gas_price
@@ -261,7 +262,7 @@ class Earner:
             "from": self.keeper_address,
             "gas": GAS_LIMITS[self.chain],
         }
-        if self.chain == "eth":
+        if self.chain == Network.Ethereum:
             options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
             options["maxFeePerGas"] = self.__get_gas_price()
         else:

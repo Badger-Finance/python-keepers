@@ -8,9 +8,13 @@ from pathlib import Path
 from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret
+from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
@@ -62,7 +66,7 @@ if __name__ == "__main__":
     for strategy_address in strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
+            abi=get_abi(Network.Ethereum, "strategy"),
         )
 
         if strategy.functions.isTendable().call():

@@ -12,3 +12,13 @@ class Network(str, Enum):
 
     def __str__(self):
         return self.value
+
+
+class Currency(str, Enum):
+    Eth = "eth"
+    Matic = "matic"
+    Usd = "usd"
+    Btc = "btc"
+
+    def __str__(self):
+        return self.value
