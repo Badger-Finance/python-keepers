@@ -81,7 +81,7 @@ def strategy(request) -> contract:
 @pytest.fixture
 def harvester(keeper_address, keeper_key) -> GeneralHarvester:
     return GeneralHarvester(
-        chain="arbitrum",
+        chain=Network.Arbitrum,
         web3=web3,
         keeper_acl=KEEPER_ACL,
         keeper_address=keeper_address,

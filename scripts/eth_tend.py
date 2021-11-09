@@ -13,7 +13,7 @@ sys.path.insert(
 )
 
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret
+from utils import get_abi, get_secret, get_node_url
 from enums import Network
 
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret("quiknode/eth-node-url", "NODE_URL")
+    node_url = get_node_url(Network.Ethereum)
 
     web3 = Web3(Web3.HTTPProvider(node_url))
 

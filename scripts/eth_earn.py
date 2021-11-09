@@ -11,12 +11,7 @@ sys.path.insert(
 )
 
 from earner import Earner
-from utils import (
-    get_secret,
-    get_strategies_and_vaults,
-    get_strategy_from_vault,
-    get_abi,
-)
+from utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
 from constants import (
     MULTICHAIN_CONFIG,
     ETH_YVWBTC_VAULT,
@@ -41,9 +36,7 @@ def safe_earn(earner, sett_name, vault, strategy):
 
 if __name__ == "__main__":
     for chain in [Network.Ethereum]:
-        node_url = get_secret(
-            NODE_URL_SECRET_NAMES[chain]["name"], NODE_URL_SECRET_NAMES[chain]["key"]
-        )
+        node_url = get_node_url(chain)
         node = Web3(Web3.HTTPProvider(node_url))
 
         registry = node.eth.contract(

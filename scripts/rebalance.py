@@ -14,7 +14,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
 )
 
-from utils import get_secret, get_abi
+from utils import get_secret, get_abi, get_node_url
 from constants import NODE_URL_SECRET_NAMES
 from enums import Network
 from rebalancer import Rebalancer
@@ -32,10 +32,7 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret(
-        NODE_URL_SECRET_NAMES[Network.Ethereum]["name"],
-        NODE_URL_SECRET_NAMES[Network.Ethereum]["key"],
-    )
+    node_url = get_node_url(Network.Ethereum)
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )

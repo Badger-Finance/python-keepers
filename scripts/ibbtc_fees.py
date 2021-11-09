@@ -10,7 +10,7 @@ sys.path.insert(
 from enums import Network
 from constants import NODE_URL_SECRET_NAMES
 from ibbtc_fee_collector import ibBTCFeeCollector
-from utils import get_secret
+from utils import get_secret, get_node_url
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,10 +19,7 @@ if __name__ == "__main__":
 
     logger = logging.getLogger()
 
-    keeper_key = get_secret(
-        NODE_URL_SECRET_NAMES[Network.Ethereum]["name"],
-        NODE_URL_SECRET_NAMES[Network.Ethereum]["key"],
-    )
+    keeper_key = get_node_url(Network.Ethereum)
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
     node_url = get_secret("price-bots/infura-url", "INFURA_URL")
 

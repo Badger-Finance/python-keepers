@@ -15,7 +15,14 @@ sys.path.insert(
 from enums import Network
 from constants import MULTICHAIN_CONFIG, NODE_URL_SECRET_NAMES
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, hours, get_last_harvest_times, seconds_to_blocks
+from utils import (
+    get_abi,
+    get_secret,
+    hours,
+    get_last_harvest_times,
+    seconds_to_blocks,
+    get_node_url,
+)
 from tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
@@ -160,10 +167,7 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret(
-        NODE_URL_SECRET_NAMES[Network.Ethereum]["name"],
-        NODE_URL_SECRET_NAMES[Network.Ethereum]["key"],
-    )
+    node_url = get_node_url(Network.Ethereum)
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )

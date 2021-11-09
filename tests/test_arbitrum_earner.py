@@ -86,7 +86,7 @@ def setup_keeper_acl(keeper_address):
 def strategy(request) -> contract:
     return web3.eth.contract(
         address=request.param,
-        abi=get_abi("arbitrum", "strategy"),
+        abi=get_abi(Network.Arbitrum, "strategy"),
     )
 
 
@@ -94,14 +94,14 @@ def strategy(request) -> contract:
 def vault(request) -> contract:
     return web3.eth.contract(
         address=request.param,
-        abi=get_abi("arbitrum", "vault"),
+        abi=get_abi(Network.Arbitrum, "vault"),
     )
 
 
 @pytest.fixture
 def earner(keeper_address, keeper_key) -> Earner:
     return Earner(
-        chain="arbitrum",
+        chain=Network.Arbitrum,
         web3=web3,
         keeper_acl=KEEPER_ACL,
         keeper_address=keeper_address,
@@ -133,7 +133,7 @@ def test_earn(keeper_address, earner, strategy, vault):
     override_threshold = earner.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether")
 
     want = earner.web3.eth.contract(
-        address=vault.functions.token().call(), abi=get_abi("arbitrum", "erc20")
+        address=vault.functions.token().call(), abi=get_abi(Network.Arbitrum, "erc20")
     )
 
     vault_before, strategy_before = earner.get_balances(vault, strategy, want)

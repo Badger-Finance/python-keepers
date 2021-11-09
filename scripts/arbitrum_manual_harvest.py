@@ -13,7 +13,7 @@ sys.path.insert(
 
 from enums import Network
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret
+from utils import get_abi, get_secret, get_node_url
 from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
+    node_url = get_node_url(Network.Arbitrum)
     discord_url = get_secret(
         "keepers/harvester/arbitrum/info-webhook", "DISCORD_WEBHOOK_URL"
     )

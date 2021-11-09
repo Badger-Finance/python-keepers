@@ -12,7 +12,7 @@ sys.path.insert(
 
 from enums import Network
 from earner import Earner
-from utils import get_secret, get_strategies_and_vaults, get_abi
+from utils import get_secret, get_abi, get_node_url
 from constants import (
     MULTICHAIN_CONFIG,
     NODE_URL_SECRET_NAMES,
@@ -26,9 +26,7 @@ logger = logging.getLogger("script")
 
 if __name__ == "__main__":
     chain = Network.Ethereum
-    node_url = get_secret(
-        NODE_URL_SECRET_NAMES[chain]["name"], NODE_URL_SECRET_NAMES[chain]["key"]
-    )
+    node_url = get_node_url(chain)
     node = Web3(Web3.HTTPProvider(node_url))
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")

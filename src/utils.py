@@ -15,7 +15,13 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, SECONDS_IN_A_DAY, BLOCKS_IN_A_DAY, ABI_DIRS
+from constants import (
+    MULTICHAIN_CONFIG,
+    SECONDS_IN_A_DAY,
+    BLOCKS_IN_A_DAY,
+    ABI_DIRS,
+    NODE_URL_SECRET_NAMES,
+)
 from enums import Network
 
 logger = logging.getLogger("utils")
@@ -477,13 +483,15 @@ def seconds_to_blocks(seconds: int) -> int:
 
 
 def get_token_price(token_address: str, currency: str, chain: str) -> int:
-    # TODO: refactor chain into enum for all keepers, hack for now
-    if chain == "poly":
-        chain = "polygon"
-    elif chain == "arb":
-        chain = "arbitrum"
     prices = requests.get(
         f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
     ).json()
     token_price = prices.get(token_address, 0)
     return token_price
+
+
+def get_node_url(chain) -> str:
+    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
+    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
+    url = get_secret(secret_name, secret_key)
+    return url

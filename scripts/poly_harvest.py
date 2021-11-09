@@ -13,7 +13,7 @@ sys.path.insert(
 
 from enums import Network
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, get_strategies_from_registry
+from utils import get_abi, get_secret, get_strategies_from_registry, get_node_url
 from constants import MULTICHAIN_CONFIG, NODE_URL_SECRET_NAMES
 
 logging.basicConfig(level=logging.INFO)
@@ -50,9 +50,7 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
 
 if __name__ == "__main__":
     for chain in [Network.Polygon]:
-        node_url = get_secret(
-            NODE_URL_SECRET_NAMES[chain]["name"], NODE_URL_SECRET_NAMES[chain]["key"]
-        )
+        node_url = get_node_url(chain)
         node = Web3(Web3.HTTPProvider(node_url))
 
         strategies = get_strategies_from_registry(node, chain)

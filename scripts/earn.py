@@ -13,7 +13,7 @@ sys.path.insert(
 from constants import MULTICHAIN_CONFIG, NODE_URL_SECRET_NAMES
 from earner import Earner
 from enums import Network
-from utils import get_secret, get_strategies_and_vaults, get_abi
+from utils import get_secret, get_strategies_and_vaults, get_node_url
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
@@ -30,9 +30,7 @@ def safe_earn(earner, sett_name, vault, strategy):
 
 if __name__ == "__main__":
     for chain in [Network.Polygon]:
-        node_url = get_secret(
-            NODE_URL_SECRET_NAMES[chain]["name"], NODE_URL_SECRET_NAMES[chain]["key"]
-        )
+        node_url = get_node_url(chain)
         node = Web3(Web3.HTTPProvider(node_url))
 
         strategies, vaults = get_strategies_and_vaults(node, chain)
