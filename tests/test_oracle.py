@@ -10,6 +10,7 @@ import os
 from src.oracle import Oracle
 from src.utils import get_abi
 from tests.utils import test_address, test_key, mock_send_discord
+from config.enums import Network
 
 logger = logging.getLogger("test-oracle")
 
@@ -50,7 +51,7 @@ def setup_centralized_oracle(keeper_address):
     centralized_oracle = Contract.from_abi(
         "CentralizedOracle",
         os.getenv("CENTRALIZED_ORACLE"),
-        get_abi("eth", "digg_centralized_oracle"),
+        get_abi(Network.Ethereum, "digg_centralized_oracle"),
     )
     oracle_role = centralized_oracle.ORACLE_ROLE()
     admin_role = centralized_oracle.getRoleAdmin(oracle_role)
@@ -64,7 +65,7 @@ def setup_chainlink_oracle(keeper_address):
     chainlink_oracle = Contract.from_abi(
         "ChainlinkOracle",
         os.getenv("CHAINLINK_FORWARDER"),
-        get_abi("eth", "chainlink_forwarder"),
+        get_abi(Network.Ethereum, "chainlink_forwarder"),
     )
     owner = chainlink_oracle.owner()
     chainlink_oracle.transferOwnership(keeper_address, {"from": owner})
@@ -110,7 +111,7 @@ def test_is_negative_rebase(oracle):
     digg_btc_oracle = Contract.from_abi(
         "DiggBtcOracle",
         os.getenv("DIGG_BTC_CHAINLINK"),
-        get_abi("eth", "oracle"),
+        get_abi(Network.Ethereum, "oracle"),
     )
     price = digg_btc_oracle.latestAnswer()
     if price < 95000000:

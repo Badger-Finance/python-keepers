@@ -20,6 +20,7 @@ from config.constants import (
     EARN_PCT_THRESHOLD,
     MULTICHAIN_CONFIG,
 )
+from config.enums import Network
 
 logger = logging.getLogger("test-eth-earner")
 
@@ -30,7 +31,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     print("sent")
@@ -59,8 +60,8 @@ def keeper_address() -> str:
 def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
-        MULTICHAIN_CONFIG["eth"]["keeper_acl"],
-        get_abi("eth", "keeper_acl"),
+        MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"],
+        get_abi(Network.Ethereum, "keeper_acl"),
     )
     earner_key = keeper_acl.EARNER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(earner_key)
@@ -72,12 +73,12 @@ def setup_keeper_acl(keeper_address):
 @pytest.fixture
 def earner(keeper_address, keeper_key) -> Earner:
     return Earner(
-        chain="eth",
+        chain=Network.Ethereum,
         web3=web3,
-        keeper_acl=MULTICHAIN_CONFIG["eth"]["keeper_acl"],
+        keeper_acl=MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"],
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=MULTICHAIN_CONFIG["eth"]["gas_oracle"],
+        base_oracle_address=MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"],
     )
 
 
@@ -90,7 +91,7 @@ def test_earn(keeper_address, earner):
     and 0 after.
     """
     accounts[0].transfer(keeper_address, "10 ether")
-    STRATEGIES, VAULTS = get_strategies_and_vaults(web3, "eth")
+    STRATEGIES, VAULTS = get_strategies_and_vaults(web3, Network.Ethereum)
 
     for strategy, vault in zip(STRATEGIES, VAULTS):
 
@@ -99,7 +100,8 @@ def test_earn(keeper_address, earner):
         override_threshold = EARN_OVERRIDE_THRESHOLD
 
         want = earner.web3.eth.contract(
-            address=vault.functions.token().call(), abi=get_abi("eth", "erc20")
+            address=vault.functions.token().call(),
+            abi=get_abi(Network.Ethereum, "erc20"),
         )
 
         vault_before, strategy_before = earner.get_balances(vault, strategy, want)

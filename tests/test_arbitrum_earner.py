@@ -10,6 +10,7 @@ from src.earner import Earner
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
 from tests.utils import test_address, test_key
 from config.constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
+from config.enums import Network
 
 logger = logging.getLogger("test-eth-earner")
 
@@ -42,7 +43,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     logger.info("sent")
@@ -72,7 +73,7 @@ def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
         KEEPER_ACL,
-        get_abi("eth", "keeper_acl"),
+        get_abi(Network.Ethereum, "keeper_acl"),
     )
     earner_key = keeper_acl.EARNER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(earner_key)
@@ -85,7 +86,7 @@ def setup_keeper_acl(keeper_address):
 def strategy(request) -> contract:
     return web3.eth.contract(
         address=request.param,
-        abi=get_abi("arbitrum", "strategy"),
+        abi=get_abi(Network.Arbitrum, "strategy"),
     )
 
 
@@ -93,14 +94,14 @@ def strategy(request) -> contract:
 def vault(request) -> contract:
     return web3.eth.contract(
         address=request.param,
-        abi=get_abi("arbitrum", "vault"),
+        abi=get_abi(Network.Arbitrum, "vault"),
     )
 
 
 @pytest.fixture
 def earner(keeper_address, keeper_key) -> Earner:
     return Earner(
-        chain="arbitrum",
+        chain=Network.Arbitrum,
         web3=web3,
         keeper_acl=KEEPER_ACL,
         keeper_address=keeper_address,
@@ -132,7 +133,7 @@ def test_earn(keeper_address, earner, strategy, vault):
     override_threshold = earner.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether")
 
     want = earner.web3.eth.contract(
-        address=vault.functions.token().call(), abi=get_abi("arbitrum", "erc20")
+        address=vault.functions.token().call(), abi=get_abi(Network.Arbitrum, "erc20")
     )
 
     vault_before, strategy_before = earner.get_balances(vault, strategy, want)

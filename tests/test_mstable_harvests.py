@@ -9,9 +9,12 @@ from config.constants import MULTICHAIN_CONFIG
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours
 from tests.utils import test_address, test_key
+from config.enums import Network
 
-ETH_USD_CHAINLINK = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["gas_oracle"])
-KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["keeper_acl"])
+ETH_USD_CHAINLINK = web3.toChecksumAddress(
+    MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]
+)
+KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"])
 
 MSTABLE_VOTER_PROXY = "0x10D96b1Fd46Ce7cE092aA905274B8eD9d4585A6E"
 MSTABLE_STRATEGIES = [
@@ -33,7 +36,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     print("sent")
@@ -44,7 +47,7 @@ def get_mstable_strategies():
     for strategy_address in MSTABLE_STRATEGIES:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
+            abi=get_abi(Network.Ethereum, "strategy"),
         )
         strategies.append(
             {
@@ -81,7 +84,7 @@ def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
         KEEPER_ACL,
-        get_abi("eth", "keeper_acl"),
+        get_abi(Network.Ethereum, "keeper_acl"),
     )
     harvester_key = keeper_acl.HARVESTER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(harvester_key)
@@ -94,7 +97,7 @@ def setup_keeper_acl(keeper_address):
 def voter_proxy() -> contract:
     return web3.eth.contract(
         address=web3.toChecksumAddress(MSTABLE_VOTER_PROXY),
-        abi=get_abi("eth", "mstable_voter_proxy"),
+        abi=get_abi(Network.Ethereum, "mstable_voter_proxy"),
     )
 
 
@@ -114,7 +117,7 @@ def harvester(keeper_address, keeper_key) -> GeneralHarvester:
 def mta() -> contract:
     return web3.eth.contract(
         address=web3.toChecksumAddress(MTA),
-        abi=get_abi("eth", "erc20"),
+        abi=get_abi(Network.Ethereum, "erc20"),
     )
 
 
@@ -195,7 +198,7 @@ def test_conditional_mstable_harvest(
     strategies = get_mstable_strategies()
     accounts[0].transfer(keeper_address, "10 ether")
 
-    chain.sleep(hours(72))
+    chain.sleep(hours(121))
     chain.mine(1)
     # Strategy should be harvestable at this point
     assert harvester.is_time_to_harvest(voter_proxy) == True
@@ -213,7 +216,12 @@ def test_conditional_mstable_harvest(
 
     chain.sleep(hours(72))
     chain.mine(1)
-    # Strategy should be harvestable again after 72 hours
+    assert harvester.is_time_to_harvest(voter_proxy) == False
+    for strategy in strategies:
+        assert harvester.is_time_to_harvest(strategy["contract"]) == False
+    # Strategy should be harvestable again after 120 hours
+    chain.sleep(hours(49))
+    chain.mine(1)
     assert harvester.is_time_to_harvest(voter_proxy) == True
     for strategy in strategies:
         assert harvester.is_time_to_harvest(strategy["contract"]) == True

@@ -11,13 +11,14 @@ sys.path.insert(
 )
 
 from earner import Earner
-from utils import get_secret, get_strategies_and_vaults, get_strategy_from_vault
+from utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
 from constants import (
     MULTICHAIN_CONFIG,
     ETH_YVWBTC_VAULT,
     ETH_TRICRYPTO_VAULT,
     ETH_BVECVX_CVX_LP_VAULT,
 )
+from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
@@ -32,14 +33,9 @@ def safe_earn(earner, sett_name, vault, strategy):
         logger.error(f"Error running {sett_name} earn: {e}")
 
 
-def get_abi(chain: str, contract_id: str):
-    with open(f"./abi/{chain}/{contract_id}.json") as f:
-        return json.load(f)
-
-
 if __name__ == "__main__":
-    for chain in ["eth"]:
-        node_url = get_secret(f"quiknode/{chain}-node-url", "NODE_URL")
+    for chain in [Network.Ethereum]:
+        node_url = get_node_url(chain)
         node = Web3(Web3.HTTPProvider(node_url))
 
         registry = node.eth.contract(

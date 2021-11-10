@@ -3,6 +3,7 @@ from decimal import Decimal
 from hexbytes import HexBytes
 
 from src.utils import get_abi
+from config.enums import Network
 
 test_address = "0xD88a9aF149366d57aEbc32D2eABAdf93EdA41A84"
 test_key = "0f0bdc830bde4be43c3a54c369c6f6a94ac9071911dc3913e35ce5ed8fe955b9"
@@ -27,7 +28,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     print("sent")
