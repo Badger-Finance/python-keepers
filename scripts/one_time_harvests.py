@@ -13,7 +13,6 @@ sys.path.insert(
 )
 
 from enums import Network
-from constants import NODE_URL_SECRET_NAMES
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret, get_node_url
 

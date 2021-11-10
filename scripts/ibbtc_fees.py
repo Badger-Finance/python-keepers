@@ -8,7 +8,6 @@ sys.path.insert(
 )
 
 from enums import Network
-from constants import NODE_URL_SECRET_NAMES
 from ibbtc_fee_collector import ibBTCFeeCollector
 from utils import get_secret, get_node_url
 

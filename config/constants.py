@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
 
-from enums import Network
+from enums import Network, Currency
 
 
 ETH_BVECVX_STRATEGY = "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"
@@ -71,6 +71,12 @@ ABI_DIRS = {
     Network.Ethereum: "eth",
     Network.Polygon: "poly",
     Network.Arbitrum: "arb",
+}
+
+BASE_CURRENCIES = {
+    Network.Ethereum: Currency.Eth,
+    Network.Arbitrum: Currency.Eth,
+    Network.Polygon: Currency.Matic,
 }
 
 EARN_PCT_THRESHOLD = 0.01

@@ -14,7 +14,7 @@ sys.path.insert(
 from enums import Network
 from general_harvester import GeneralHarvester
 from utils import get_abi, get_secret, get_strategies_from_registry, get_node_url
-from constants import MULTICHAIN_CONFIG, NODE_URL_SECRET_NAMES
+from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")

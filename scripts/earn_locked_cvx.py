@@ -15,7 +15,6 @@ from earner import Earner
 from utils import get_secret, get_abi, get_node_url
 from constants import (
     MULTICHAIN_CONFIG,
-    NODE_URL_SECRET_NAMES,
     ETH_BVECVX_STRATEGY,
     ETH_BVECVX_VAULT,
 )

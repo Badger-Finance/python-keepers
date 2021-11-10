@@ -12,7 +12,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG
+from constants import MULTICHAIN_CONFIG, BASE_CURRENCIES
 from enums import Network, Currency
 from harvester import IHarvester
 from utils import (
@@ -38,11 +38,6 @@ GAS_LIMITS = {
     Network.Arbitrum: 3_000_000,
 }
 NUM_FLASHBOTS_BUNDLES = 6
-API_PARAMS = {
-    Network.Ethereum: {"currency": Currency.Eth, "chain": Network.Ethereum},
-    Network.Polygon: {"currency": Currency.Matic, "chain": Network.Polygon},
-    Network.Arbitrum: {"currency": Currency.Eth, "chain": Network.Arbitrum},
-}
 
 
 class GeneralHarvester(IHarvester):
@@ -280,8 +275,8 @@ class GeneralHarvester(IHarvester):
             {"from": self.keeper_address}
         )
         # call badger api to get prices
-        currency = API_PARAMS[self.chain]["currency"]
-        chain = API_PARAMS[self.chain]["chain"]
+        currency = BASE_CURRENCIES[self.chain]
+        chain = self.chain
         prices = requests.get(
             f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
         ).json()

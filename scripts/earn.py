@@ -10,7 +10,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, NODE_URL_SECRET_NAMES
+from constants import MULTICHAIN_CONFIG
 from earner import Earner
 from enums import Network
 from utils import get_secret, get_strategies_and_vaults, get_node_url

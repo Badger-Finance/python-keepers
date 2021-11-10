@@ -17,7 +17,6 @@ from constants import (
     ETH_YVWBTC_VAULT,
     ETH_TRICRYPTO_VAULT,
     ETH_BVECVX_CVX_LP_VAULT,
-    NODE_URL_SECRET_NAMES,
 )
 from enums import Network
 

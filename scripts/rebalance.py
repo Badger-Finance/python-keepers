@@ -15,7 +15,6 @@ sys.path.insert(
 )
 
 from utils import get_secret, get_abi, get_node_url
-from constants import NODE_URL_SECRET_NAMES
 from enums import Network
 from rebalancer import Rebalancer
 

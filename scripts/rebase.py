@@ -9,7 +9,6 @@ sys.path.insert(
 )
 
 from enums import Network
-from constants import NODE_URL_SECRET_NAMES
 from rebaser import Rebaser
 from utils import get_secret, get_node_url
 

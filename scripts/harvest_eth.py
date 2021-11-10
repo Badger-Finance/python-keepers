@@ -13,7 +13,7 @@ sys.path.insert(
 )
 
 from enums import Network
-from constants import MULTICHAIN_CONFIG, NODE_URL_SECRET_NAMES
+from constants import MULTICHAIN_CONFIG
 from general_harvester import GeneralHarvester
 from utils import (
     get_abi,
