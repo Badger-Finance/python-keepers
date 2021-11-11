@@ -8,6 +8,7 @@ from web3 import contract
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
 from tests.utils import test_address, test_key
+from config.enums import Network
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress("0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612")
 KEEPER_ACL = web3.toChecksumAddress("0x265820F3779f652f2a9857133fDEAf115b87db4B")
@@ -28,7 +29,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     print("sent")
@@ -60,7 +61,7 @@ def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
         KEEPER_ACL,
-        get_abi("eth", "keeper_acl"),
+        get_abi(Network.Ethereum, "keeper_acl"),
     )
     harvester_key = keeper_acl.HARVESTER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(harvester_key)
@@ -73,14 +74,14 @@ def setup_keeper_acl(keeper_address):
 def strategy(request) -> contract:
     return web3.eth.contract(
         address=request.param,
-        abi=get_abi("eth", "strategy"),
+        abi=get_abi(Network.Ethereum, "strategy"),
     )
 
 
 @pytest.fixture
 def harvester(keeper_address, keeper_key) -> GeneralHarvester:
     return GeneralHarvester(
-        chain="arbitrum",
+        chain=Network.Arbitrum,
         web3=web3,
         keeper_acl=KEEPER_ACL,
         keeper_address=keeper_address,

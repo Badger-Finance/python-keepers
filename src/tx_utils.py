@@ -1,13 +1,21 @@
 from decimal import Decimal
 from hexbytes import HexBytes
 import logging
+import os
+import sys
 from web3 import Web3, contract, exceptions
+
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
+
+from enums import Network
 
 logger = logging.getLogger("tx-utils")
 
 
 def get_gas_price_of_tx(
-    web3: Web3, gas_oracle: contract, tx_hash: HexBytes, chain: str = "eth"
+    web3: Web3, gas_oracle: contract, tx_hash: HexBytes, chain: str = Network.Ethereum
 ) -> Decimal:
     """Gets the actual amount of gas used by the transaction and converts
     it from gwei to USD value for monitoring.
@@ -29,7 +37,7 @@ def get_gas_price_of_tx(
     total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
     logger.info(f"gas used: {total_gas_used}")
 
-    if chain == "arbitrum":
+    if chain == Network.Arbitrum:
         gas_prices = tx_receipt.get("feeStats", {}).get("paid", {})
         gas_cost_base = Decimal(sum([int(x, 16) for x in gas_prices.values()]) / 1e18)
     else:

@@ -8,6 +8,7 @@ from web3 import contract
 from src.utils import get_abi
 from tests.utils import test_address, test_key
 from src.eth.stability_executor import StabilityExecutor
+from config.enums import Network
 
 ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
@@ -22,7 +23,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
 ):
     print("sent")
 
@@ -67,7 +68,7 @@ def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
         KEEPER_ACL,
-        get_abi("eth", "keeper_acl"),
+        get_abi(Network.Ethereum, "keeper_acl"),
     )
     harvester_key = keeper_acl.HARVESTER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(harvester_key)
@@ -81,7 +82,7 @@ def setup_stability_vault(keeper_address):
     stability_strategy = Contract.from_abi(
         "StabilizeStrategyDiggV1",
         STABILIZE_STRAT,
-        get_abi("eth", "stability_strat"),
+        get_abi(Network.Ethereum, "stability_strat"),
     )
     governance = stability_strategy.governance()
     stability_strategy.setKeeper(keeper_address, {"from": governance})
@@ -91,7 +92,7 @@ def setup_stability_vault(keeper_address):
 @pytest.fixture
 def strategy() -> contract:
     return web3.eth.contract(
-        address=STABILIZE_STRAT, abi=get_abi("eth", "stability_strat")
+        address=STABILIZE_STRAT, abi=get_abi(Network.Ethereum, "stability_strat")
     )
 
 

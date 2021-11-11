@@ -7,7 +7,11 @@ from time import sleep
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../config"))
+)
 
+from enums import Network
 from utils import (
     confirm_transaction,
     send_error_to_discord,
@@ -31,7 +35,7 @@ NUM_FLASHBOTS_BUNDLES = 6
 class Rebalancer:
     def __init__(
         self,
-        chain: str = "eth",
+        chain: str = Network.Ethereum,
         web3: Web3 = None,
         keeper_acl: str = os.getenv("KEEPER_ACL"),
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),

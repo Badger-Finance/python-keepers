@@ -1,3 +1,4 @@
+import logging
 import os
 import pytest
 from brownie import accounts, Contract, web3
@@ -19,6 +20,9 @@ from config.constants import (
     EARN_PCT_THRESHOLD,
     MULTICHAIN_CONFIG,
 )
+from config.enums import Network
+
+logger = logging.getLogger("test-eth-earner")
 
 
 def mock_send_discord(
@@ -27,7 +31,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     print("sent")
@@ -56,8 +60,8 @@ def keeper_address() -> str:
 def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
-        MULTICHAIN_CONFIG["eth"]["keeper_acl"],
-        get_abi("eth", "keeper_acl"),
+        MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"],
+        get_abi(Network.Ethereum, "keeper_acl"),
     )
     earner_key = keeper_acl.EARNER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(earner_key)
@@ -69,12 +73,12 @@ def setup_keeper_acl(keeper_address):
 @pytest.fixture
 def earner(keeper_address, keeper_key) -> Earner:
     return Earner(
-        chain="eth",
+        chain=Network.Ethereum,
         web3=web3,
-        keeper_acl=MULTICHAIN_CONFIG["eth"]["keeper_acl"],
+        keeper_acl=MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"],
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=MULTICHAIN_CONFIG["eth"]["gas_oracle"],
+        base_oracle_address=MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"],
     )
 
 
@@ -87,35 +91,34 @@ def test_earn(keeper_address, earner):
     and 0 after.
     """
     accounts[0].transfer(keeper_address, "10 ether")
-    STRATEGIES, VAULTS = get_strategies_and_vaults(web3, "eth")
+    STRATEGIES, VAULTS = get_strategies_and_vaults(web3, Network.Ethereum)
 
     for strategy, vault in zip(STRATEGIES, VAULTS):
 
         strategy_name = strategy.functions.getName().call()
 
-        override_threshold = earner.web3.toWei(EARN_OVERRIDE_THRESHOLD, "ether")
+        override_threshold = EARN_OVERRIDE_THRESHOLD
 
         want = earner.web3.eth.contract(
-            address=vault.functions.token().call(), abi=get_abi("eth", "erc20")
+            address=vault.functions.token().call(),
+            abi=get_abi(Network.Ethereum, "erc20"),
         )
 
-        vault_before = want.functions.balanceOf(vault.address).call()
-        strategy_before = strategy.functions.balanceOf().call()
+        vault_before, strategy_before = earner.get_balances(vault, strategy, want)
 
-        print(f"{strategy_name} vault_before: {vault_before}")
-        print(f"{strategy_name} strategy_before: {strategy_before}")
+        logger.info(f"{strategy_name} vault_before: {vault_before}")
+        logger.info(f"{strategy_name} strategy_before: {strategy_before}")
 
         should_earn = earner.should_earn(
             override_threshold, vault_before, strategy_before
         )
-        print(f"{strategy_name} should_earn: {should_earn}")
+        logger.info(f"{strategy_name} should_earn: {should_earn}")
 
         earner.earn(vault, strategy)
 
-        vault_after = want.functions.balanceOf(vault.address).call()
-        strategy_after = strategy.functions.balanceOf().call()
-        print(f"{strategy_name} vault_after: {vault_after}")
-        print(f"{strategy_name} strategy_after: {strategy_after}")
+        vault_after, strategy_after = earner.get_balances(vault, strategy, want)
+        logger.info(f"{strategy_name} vault_after: {vault_after}")
+        logger.info(f"{strategy_name} strategy_after: {strategy_after}")
 
         if should_earn:
             assert vault_after < vault_before

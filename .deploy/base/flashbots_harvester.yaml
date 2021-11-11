@@ -8,7 +8,7 @@ spec:
   schedule: "*/30 21-23,0-16 * * *"
   # schedule: "55 19 * * *"
   startingDeadlineSeconds: 300
-  suspend: false
+  suspend: true
   jobTemplate:
     spec:
       template:
@@ -18,8 +18,7 @@ spec:
           - name: flashbots-harvester-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/harvest_cvx.py"]
-            #command: ["python", "scripts/one_time_harvests.py"]
+            command: ["python", "scripts/harvest_eth.py"]
             env:
               - name: LOG_LEVEL
                 value: "info"

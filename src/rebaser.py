@@ -9,7 +9,11 @@ import sys
 import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from enums import Network
 from utils import (
     get_secret,
     hours,
@@ -142,7 +146,7 @@ class Rebaser:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                    self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 send_rebase_to_discord(tx_hash=tx_hash, gas_cost=gas_price_of_tx)
             elif tx_hash != HexBytes(0):

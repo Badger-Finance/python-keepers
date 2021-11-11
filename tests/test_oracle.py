@@ -10,6 +10,7 @@ import os
 from src.oracle import Oracle
 from src.utils import get_abi
 from tests.utils import test_address, test_key, mock_send_discord
+from config.enums import Network
 
 logger = logging.getLogger("test-oracle")
 
@@ -28,6 +29,7 @@ os.environ[
 os.environ["SUSHI_PAIR"] = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
 os.environ["CENTRALIZED_ORACLE"] = "0x73083058e0f61D3fc7814eEEDc39F9608B4546d7"
 os.environ["CHAINLINK_FORWARDER"] = "0xB572f69edbfC946af11a1b3ef8D5c2f41D38a642"
+os.environ["DIGG_BTC_CHAINLINK"] = "0x418a6c98cd5b8275955f08f0b8c1c6838c8b1685"
 
 
 def mock_send_error(tx_type: str, error: Exception):
@@ -49,7 +51,7 @@ def setup_centralized_oracle(keeper_address):
     centralized_oracle = Contract.from_abi(
         "CentralizedOracle",
         os.getenv("CENTRALIZED_ORACLE"),
-        get_abi("eth", "digg_centralized_oracle"),
+        get_abi(Network.Ethereum, "digg_centralized_oracle"),
     )
     oracle_role = centralized_oracle.ORACLE_ROLE()
     admin_role = centralized_oracle.getRoleAdmin(oracle_role)
@@ -63,7 +65,7 @@ def setup_chainlink_oracle(keeper_address):
     chainlink_oracle = Contract.from_abi(
         "ChainlinkOracle",
         os.getenv("CHAINLINK_FORWARDER"),
-        get_abi("eth", "chainlink_forwarder"),
+        get_abi(Network.Ethereum, "chainlink_forwarder"),
     )
     owner = chainlink_oracle.owner()
     chainlink_oracle.transferOwnership(keeper_address, {"from": owner})
@@ -102,3 +104,17 @@ def test_propose_report_centralized(oracle):
 def test_chainlink_forwarder(oracle):
     accounts[0].transfer(test_address, "1 ether")
     oracle.publish_chainlink_report()
+
+
+@pytest.mark.require_network("hardhat-fork")
+def test_is_negative_rebase(oracle):
+    digg_btc_oracle = Contract.from_abi(
+        "DiggBtcOracle",
+        os.getenv("DIGG_BTC_CHAINLINK"),
+        get_abi(Network.Ethereum, "oracle"),
+    )
+    price = digg_btc_oracle.latestAnswer()
+    if price < 95000000:
+        assert oracle.is_negative_rebase() == True
+    else:
+        assert oracle.is_negative_rebase() == False
