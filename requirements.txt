@@ -8,4 +8,4 @@ requests==2.26.0
 web3>=5.24.0,<6
 pytest==6.2.4
 git+https://github.com/flashbots/web3-flashbots.git@master
-ethereum_kms_signer==0.1.5
+ethereum_kms_signer==0.1.6

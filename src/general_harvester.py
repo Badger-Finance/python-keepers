@@ -6,11 +6,6 @@ from decimal import Decimal
 from hexbytes import HexBytes
 from time import sleep
 from web3 import Web3, contract, exceptions
-import boto3
-from ethereum_kms_signer import (
-    get_eth_address as get_kms_eth_address,
-    sign_transaction as sign_transaction_with_kms,
-)
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
 sys.path.insert(
@@ -31,6 +26,7 @@ from utils import (
     seconds_to_blocks,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
+from signer_mixin import SignerMixin
 
 logging.basicConfig(level=logging.INFO)
 
@@ -45,7 +41,7 @@ GAS_LIMITS = {
 NUM_FLASHBOTS_BUNDLES = 6
 
 
-class GeneralHarvester(IHarvester):
+class GeneralHarvester(IHarvester, SignerMixin):
     def __init__(
         self,
         chain: str = Network.Ethereum,
@@ -60,6 +56,7 @@ class GeneralHarvester(IHarvester):
         use_flashbots: bool = False,
         discord_url: str = None,
         region_name: str = "us-west-1",
+        assume_role_arn: str = None,
     ):
         self.logger = logging.getLogger("harvester")
         self.chain = chain
@@ -94,6 +91,18 @@ class GeneralHarvester(IHarvester):
 
         self.use_flashbots = use_flashbots
         self.discord_url = discord_url
+
+        # init the signer mixin
+        SignerMixin.__init__(
+            self,
+            keeper_key=keeper_key,
+            keeper_address=keeper_address,
+            signing_method=signing_method,
+            keeper_kms_key_id=keeper_kms_key_id,
+            assume_role_arn=assume_role_arn,
+            region_name=region_name,
+            web3=web3,
+        )
 
     def is_time_to_harvest(
         self,
@@ -309,33 +318,6 @@ class GeneralHarvester(IHarvester):
         # harvest if ideal want change is > 0.05% of total vault assets
         # should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
         return True
-
-    @property
-    def keeper_address(self):
-        if self.signing_method == 'kms':
-            if self._kms_keeper_address is None:
-                self._kms_keeper_address = get_kms_eth_address(
-                    self.keeper_kms_key_id,
-                    self.kms_client
-                )
-
-            return self._kms_keeper_address
-        return self._keeper_address
-
-    @property
-    def kms_session(self):
-        if self._kms_session is None:
-            self._kms_session = boto3.session.Session()
-        return self._kms_session
-
-    @property
-    def kms_client(self):
-        if self._kms_client is None:
-            self._kms_client = self.kms_session.client(
-                service_name="kms",
-                region_name=self.kms_region
-            )
-        return self._kms_client
 
     def __is_keeper_whitelisted(self, function: str) -> bool:
         """Checks if the bot we're using is whitelisted for the strategy.
@@ -709,14 +691,6 @@ class GeneralHarvester(IHarvester):
             # EIP-1559
             gas_price = get_effective_gas_price(self.web3)
         return gas_price
-
-    def __sign_transaction(self, tx: dict):
-        if self.signing_method == 'kms':
-            return sign_transaction_with_kms(tx, self.keeper_kms_key_id, self.kms_client)
-        else:
-            return self.web3.eth.account.sign_transaction(
-                tx, private_key=self.keeper_key
-            )
 
     def update_last_harvest_time(self, strategy_address: str):
         self.last_harvest_times[strategy_address] = self.web3.eth.get_block("latest")[
