@@ -496,7 +496,7 @@ class GeneralHarvester(IHarvester, SignerMixin):
         tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, returns=returns)
-            signed_tx = self.__sign_transaction(tx)
+            signed_tx = self.sign_transaction(tx)
             tx_hash = signed_tx.hash
 
             if not self.use_flashbots:
@@ -538,7 +538,7 @@ class GeneralHarvester(IHarvester, SignerMixin):
         tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(strategy.address, function="tend")
-            signed_tx = self.__sign_transaction(tx)
+            signed_tx = self.sign_transaction(tx)
             tx_hash = signed_tx.hash
 
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
@@ -566,7 +566,7 @@ class GeneralHarvester(IHarvester, SignerMixin):
         tx_hash = HexBytes(0)
         try:
             tx = self.__build_transaction(voter_proxy.address, function="harvestMta")
-            signed_tx = self.__sign_transaction(tx)
+            signed_tx = self.sign_transaction(tx)
             tx_hash = signed_tx.hash
 
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)

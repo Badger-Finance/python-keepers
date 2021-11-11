@@ -94,13 +94,11 @@ class SignerMixin:
 
     @property
     def keeper_address(self):
-        if self._signing_method == "kms":
-            if self._kms_keeper_address is None:
-                self._kms_keeper_address = get_kms_eth_address(
-                    self._keeper_kms_key_id, self.kms_client
-                )
-
-            return self._kms_keeper_address
+        if self._signing_method == 'kms' and self._keeper_address is None:
+            self._keeper_address = get_kms_eth_address(
+                self.keeper_kms_key_id,
+                self.kms_client
+            )
         return self._keeper_address
 
     def sign_transaction(self, tx: dict):
