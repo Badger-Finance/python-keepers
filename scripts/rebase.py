@@ -29,7 +29,6 @@ if __name__ == "__main__":
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
     node_url = get_node_url(Network.Ethereum)
-    logger.info(node_url)
 
     rebaser = Rebaser(
         keeper_address=keeper_address, keeper_key=keeper_key, web3=node_url
