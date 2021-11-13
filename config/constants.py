@@ -70,7 +70,7 @@ NODE_URL_SECRET_NAMES = {
 ABI_DIRS = {
     Network.Ethereum: "eth",
     Network.Polygon: "poly",
-    Network.Arbitrum: "arb",
+    Network.Arbitrum: "arbitrum",
 }
 
 BASE_CURRENCIES = {
