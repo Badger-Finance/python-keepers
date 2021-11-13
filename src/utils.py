@@ -491,10 +491,7 @@ def get_token_price(token_address: str, currency: str, chain: str) -> int:
 
 
 def get_node_url(chain) -> str:
-    if chain == Network.Ethereum:
-        url = "https://rpc.flashbots.net/"
-    else:
-        secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
-        secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
-        url = get_secret(secret_name, secret_key)
+    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
+    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
+    url = get_secret(secret_name, secret_key)
     return url
