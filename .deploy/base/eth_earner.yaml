@@ -8,7 +8,7 @@ spec:
   # cron to run every hour
   schedule: "10 * * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
