@@ -17,6 +17,7 @@ from constants import (
     ETH_YVWBTC_VAULT,
     ETH_TRICRYPTO_VAULT,
     ETH_BVECVX_CVX_LP_VAULT,
+    ETH_IBBTC_CRV_LP_VAULT,
 )
 from enums import Network
 
@@ -50,6 +51,7 @@ if __name__ == "__main__":
             registry.functions.getFilteredProductionVaults("v1", 2).call()
         )
         vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
+        vault_addresses.append(ETH_IBBTC_CRV_LP_VAULT)
 
         for address in vault_addresses:
             if address not in INVALID_VAULTS:
