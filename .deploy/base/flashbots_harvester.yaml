@@ -5,7 +5,7 @@ metadata:
   labels:
     app: flashbots-harvester-keeper
 spec:
-  schedule: "*/30 21-23,0-16 * * *"
+  schedule: "47 2 * * *"
   # schedule: "55 19 * * *"
   startingDeadlineSeconds: 300
   suspend: false
@@ -18,7 +18,7 @@ spec:
           - name: flashbots-harvester-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/harvest_eth.py"]
+            command: ["python", "scripts/one_time_harvests.py"]
             env:
               - name: LOG_LEVEL
                 value: "info"
