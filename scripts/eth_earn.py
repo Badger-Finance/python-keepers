@@ -18,13 +18,26 @@ from constants import (
     ETH_TRICRYPTO_VAULT,
     ETH_BVECVX_CVX_LP_VAULT,
     ETH_IBBTC_CRV_LP_VAULT,
+    ETH_IBBTC_SUSHI_VAULT,
+    ETH_SBTC_VAULT,
+    ETH_TBTC_VAULT,
+    ETH_PBTC_VAULT,
+    ETH_BBTC_VAULT
 )
 from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-INVALID_VAULTS = [ETH_YVWBTC_VAULT, ETH_TRICRYPTO_VAULT]
+INVALID_VAULTS = [
+    ETH_YVWBTC_VAULT, 
+    ETH_TRICRYPTO_VAULT,
+    ETH_IBBTC_SUSHI_VAULT,
+    ETH_SBTC_VAULT,
+    ETH_TBTC_VAULT,
+    ETH_PBTC_VAULT,
+    ETH_BBTC_VAULT
+]
 
 
 def safe_earn(earner, sett_name, vault, strategy):
