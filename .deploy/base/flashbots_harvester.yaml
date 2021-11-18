@@ -5,7 +5,7 @@ metadata:
   labels:
     app: flashbots-harvester-keeper
 spec:
-  schedule: "47 2 * * *"
+  schedule: "59 2 * * *"
   # schedule: "55 19 * * *"
   startingDeadlineSeconds: 300
   suspend: false

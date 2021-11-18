@@ -87,7 +87,7 @@ if __name__ == "__main__":
         keeper_address=keeper_address,
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
-        use_flashbots=True,
+        use_flashbots=False,
     )
 
     for strategy_address in strategies:
