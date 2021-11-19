@@ -5,10 +5,10 @@ metadata:
   labels:
     app: flashbots-harvester-keeper
 spec:
-  schedule: "*/30 21-23,0-16 * * *"
+  schedule: "*/30 21-23,0-18 * * *"
   # schedule: "55 19 * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
