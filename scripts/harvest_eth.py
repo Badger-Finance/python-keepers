@@ -28,6 +28,7 @@ from tx_utils import get_latest_base_fee
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
+HOURS_24 = hours(24)
 HOURS_72 = hours(72)
 HOURS_96 = hours(96)
 HOURS_120 = hours(120)
@@ -81,8 +82,8 @@ mstable_strategies = {
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
     # ibbtc exception
-    if strategy == IBBTC_CRV_STRATEGY and harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(150e9):
-        logger.info(f"Been longer than 72 hours and base fee < 150 for {strategy_name}")
+    if strategy == IBBTC_CRV_STRATEGY and harvester.is_time_to_harvest(strategy, HOURS_24) and latest_base_fee < int(150e9):
+        logger.info(f"Been longer than 24 hours and base fee < 150 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     # regular thresholds for rest of vaults
