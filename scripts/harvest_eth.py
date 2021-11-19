@@ -28,6 +28,7 @@ from tx_utils import get_latest_base_fee
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
+HOURS_72 = hours(72)
 HOURS_96 = hours(96)
 HOURS_120 = hours(120)
 
@@ -36,6 +37,7 @@ KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
 CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
+IBBTC_CRV_STRATEGY = "0x6D4BA00Fd7BB73b5aa5b3D6180c6f1B0c89f70D1"
 
 MSTABLE_VOTER_PROXY = "0x10D96b1Fd46Ce7cE092aA905274B8eD9d4585A6E"
 
@@ -58,6 +60,7 @@ strategies = {
     "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9",  # locked cvx strategy
     # "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
     # "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
+    IBBTC_CRV_STRATEGY
 }
 
 rewards_manager_strategies = {
@@ -77,7 +80,11 @@ mstable_strategies = {
 
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
-
+    # ibbtc exception
+    if strategy == IBBTC_CRV_STRATEGY and harvester.is_time_to_harvest(strategy, HOURS_72) and latest_base_fee < int(150e9):
+        logger.info(f"Been longer than 72 hours and base fee < 150 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
     # regular thresholds for rest of vaults
     if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
         logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")
