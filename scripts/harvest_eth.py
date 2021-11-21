@@ -81,7 +81,7 @@ mstable_strategies = {
 
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
-    logger.info(f"Checking harvests for {strategy_name} {strategy}")
+    logger.info(f"Checking harvests for {strategy_name} {strategy.address}")
     # ibbtc exception
     if strategy == IBBTC_CRV_STRATEGY and harvester.is_time_to_harvest(strategy, HOURS_24) and latest_base_fee < int(150e9):
         logger.info(f"Been longer than 24 hours and base fee < 150 for {strategy_name}")
