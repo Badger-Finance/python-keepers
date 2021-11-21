@@ -22,7 +22,7 @@ from constants import (
     ETH_SBTC_VAULT,
     ETH_TBTC_VAULT,
     ETH_PBTC_VAULT,
-    ETH_BBTC_VAULT
+    ETH_BBTC_VAULT,
 )
 from enums import Network
 
@@ -30,13 +30,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
 INVALID_VAULTS = [
-    ETH_YVWBTC_VAULT, 
+    ETH_YVWBTC_VAULT,
     ETH_TRICRYPTO_VAULT,
     ETH_IBBTC_SUSHI_VAULT,
     ETH_SBTC_VAULT,
     ETH_TBTC_VAULT,
     ETH_PBTC_VAULT,
-    ETH_BBTC_VAULT
+    ETH_BBTC_VAULT,
 ]
 
 

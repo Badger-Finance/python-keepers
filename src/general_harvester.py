@@ -103,7 +103,9 @@ class GeneralHarvester(IHarvester):
         try:
             last_harvest = self.last_harvest_times[strategy.address]
             current_time = self.web3.eth.get_block("latest")["timestamp"]
-            self.logger.info(f"Time since last harvest: {(current_time - last_harvest)/3600}")
+            self.logger.info(
+                f"Time since last harvest: {(current_time - last_harvest)/3600}"
+            )
 
             return current_time - last_harvest > harvest_interval_threshold
         except KeyError:
