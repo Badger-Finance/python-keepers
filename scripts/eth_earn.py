@@ -12,6 +12,7 @@ sys.path.insert(
 
 from earner import Earner
 from utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
+from tx_utils import get_latest_base_fee
 from constants import (
     MULTICHAIN_CONFIG,
     ETH_YVWBTC_VAULT,
@@ -87,10 +88,13 @@ if __name__ == "__main__":
             discord_url=discord_url,
         )
 
+        latest_base_fee = get_latest_base_fee(earner.web3)
+
         for strategy, vault in zip(strategies, vaults):
             if (
                 strategy.address
                 not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
+                and latest_base_fee < int(150e9)
             ):
                 strat_name = strategy.functions.getName().call()
 
