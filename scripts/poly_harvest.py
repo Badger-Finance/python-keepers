@@ -20,7 +20,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
 
-INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
+INVALID_STRATS = [
+    "0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C",
+    "0xF8F02D0d41C79a1973f65A440C98acAc7eAA8Dc1",
+]
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
@@ -50,7 +53,7 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
 
 if __name__ == "__main__":
     for chain in [Network.Polygon]:
-        node_url = get_node_url(chain)
+        node_url = "https://polygon-rpc.com/"
         node = Web3(Web3.HTTPProvider(node_url))
 
         strategies = get_strategies_from_registry(node, chain)

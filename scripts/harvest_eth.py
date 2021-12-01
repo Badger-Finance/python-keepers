@@ -28,6 +28,8 @@ from tx_utils import get_latest_base_fee
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
+HOURS_24 = hours(24)
+HOURS_72 = hours(72)
 HOURS_96 = hours(96)
 HOURS_120 = hours(120)
 
@@ -36,29 +38,29 @@ KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
 CVX_HELPER_STRATEGY = "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 CVX_CRV_HELPER_STRATEGY = "0x826048381d65a65DAa51342C51d464428d301896"
+IBBTC_CRV_STRATEGY = "0x6D4BA00Fd7BB73b5aa5b3D6180c6f1B0c89f70D1"
 
 MSTABLE_VOTER_PROXY = "0x10D96b1Fd46Ce7cE092aA905274B8eD9d4585A6E"
 
-strategies = {
+strategies = [
+    IBBTC_CRV_STRATEGY,
     "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
     "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
-    "0xff26f400e57bf726822eacbb64fa1c52f1f27988",  # HBTC_CRV_STRATEGY
-    "0x1C1fD689103bbFD701b3B7D41A3807F12814033D",  # PBTC_CRV_STRATEGY
-    "0x2bb864cdb4856ab2d148c5ca52dd7ccec126d138",  # OBTC_CRV_STRATEGY
-    "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0",  # BBTC_CRV_STRATEGY
-    "0x2eB6479c2f033360C0F4575A88e3b8909Cbc6a03",  # TRICRYPTO_CRV_STRATEGY
-    "0x6582a5b139fc1c6360846efdc4440d51aad4df7b",  # native.renCrv
-    "0xf1ded284e891943b3e9c657d7fc376b86164ffc2",  # native.sbtcCrv
-    "0x522bb024c339a12be1a47229546f288c40b62d29",  # native.tbtcCrv
+    "0x8c26D9B6B80684CC642ED9eb1Ac1729Af3E819eE",  # HBTC_CRV_STRATEGY
+    "0xA9A646668Df5Cec5344941646F5c6b269551e53D",  # PBTC_CRV_STRATEGY
+    "0x5dd69c6D81f0a403c03b99C5a44Ef2D49b66d388",  # OBTC_CRV_STRATEGY
+    "0xF2F3AB09E2D8986fBECbBa59aE838a5418a6680c",  # BBTC_CRV_STRATEGY
+    "0x647eeb5C5ED5A71621183f09F6CE8fa66b96827d",  # TRICRYPTO_CRV_STRATEGY
+    # "0x61e16b46F74aEd8f9c2Ec6CB2dCb2258Bdfc7071",  # native.renCrv
+    "0xCce0D2d1Eb2310F7e67e128bcFE3CE870A3D3a3d",  # native.sbtcCrv
+    "0xAB73Ec65a1Ef5a2e5b56D5d6F36Bee4B2A1D3FFb",  # native.tbtcCrv
     "0xaaE82E3c89e15E6F26F60724f115d5012363e030",  # harvest.renCrv
     "0x7A56d65254705B4Def63c68488C0182968C452ce",  # native.sushiWbtcEth
     "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # native.sushiBadgerWbtc
     "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
     # "0xA6af1B913E205B8E9B95D3B30768c0989e942316",  # experimental.digg
     "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9",  # locked cvx strategy
-    # "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
-    # "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
-}
+]
 
 rewards_manager_strategies = {
     "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
@@ -77,7 +79,16 @@ mstable_strategies = {
 
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
-
+    logger.info(f"Checking harvests for {strategy_name} {strategy.address}")
+    # ibbtc exception
+    if (
+        strategy.address == IBBTC_CRV_STRATEGY
+        and harvester.is_time_to_harvest(strategy, HOURS_24)
+        and latest_base_fee < int(150e9)
+    ):
+        logger.info(f"Been longer than 24 hours and base fee < 150 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
     # regular thresholds for rest of vaults
     if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
         logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")

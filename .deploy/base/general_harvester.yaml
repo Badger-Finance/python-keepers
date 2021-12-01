@@ -5,8 +5,7 @@ metadata:
   labels:
     app: general-harvester-keeper
 spec:
-  # cron to run once everyday at 5:45
-  schedule: "45 5 * * *"
+  schedule: "59 20 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:

@@ -12,18 +12,33 @@ sys.path.insert(
 
 from earner import Earner
 from utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
+from tx_utils import get_latest_base_fee
 from constants import (
     MULTICHAIN_CONFIG,
     ETH_YVWBTC_VAULT,
     ETH_TRICRYPTO_VAULT,
     ETH_BVECVX_CVX_LP_VAULT,
+    ETH_IBBTC_CRV_LP_VAULT,
+    ETH_IBBTC_SUSHI_VAULT,
+    ETH_SBTC_VAULT,
+    ETH_TBTC_VAULT,
+    ETH_PBTC_VAULT,
+    ETH_BBTC_VAULT,
 )
 from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-INVALID_VAULTS = [ETH_YVWBTC_VAULT, ETH_TRICRYPTO_VAULT]
+INVALID_VAULTS = [
+    ETH_YVWBTC_VAULT,
+    ETH_TRICRYPTO_VAULT,
+    ETH_IBBTC_SUSHI_VAULT,
+    ETH_SBTC_VAULT,
+    ETH_TBTC_VAULT,
+    ETH_PBTC_VAULT,
+    ETH_BBTC_VAULT,
+]
 
 
 def safe_earn(earner, sett_name, vault, strategy):
@@ -50,6 +65,7 @@ if __name__ == "__main__":
             registry.functions.getFilteredProductionVaults("v1", 2).call()
         )
         vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
+        vault_addresses.append(ETH_IBBTC_CRV_LP_VAULT)
 
         for address in vault_addresses:
             if address not in INVALID_VAULTS:
@@ -72,11 +88,12 @@ if __name__ == "__main__":
             discord_url=discord_url,
         )
 
+        latest_base_fee = get_latest_base_fee(earner.web3)
+
         for strategy, vault in zip(strategies, vaults):
-            if (
-                strategy.address
-                not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
-            ):
+            if strategy.address not in MULTICHAIN_CONFIG[chain]["earn"][
+                "invalid_strategies"
+            ] and latest_base_fee < int(150e9):
                 strat_name = strategy.functions.getName().call()
 
                 logger.info(f"+-----Earning {strat_name}-----+")
