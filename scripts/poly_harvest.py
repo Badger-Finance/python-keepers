@@ -50,7 +50,7 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
 
 if __name__ == "__main__":
     for chain in [Network.Polygon]:
-        node_url = get_node_url(chain)
+        node_url = "https://polygon-rpc.com/"
         node = Web3(Web3.HTTPProvider(node_url))
 
         strategies = get_strategies_from_registry(node, chain)
