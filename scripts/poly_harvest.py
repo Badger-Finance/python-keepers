@@ -20,7 +20,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
 
-INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
+INVALID_STRATS = [
+    "0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C",
+    "0xF8F02D0d41C79a1973f65A440C98acAc7eAA8Dc1",
+]
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
