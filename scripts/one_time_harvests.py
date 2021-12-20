@@ -39,6 +39,8 @@ strategies = {
     # "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # native.sushiBadgerWbtc
     # "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
     # "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
+    "0x61e16b46F74aEd8f9c2Ec6CB2dCb2258Bdfc7071",  # native.renCrv
+    "0x647eeb5C5ED5A71621183f09F6CE8fa66b96827d",  # TRICRYPTO_CRV_STRATEGY
     "0x6D4BA00Fd7BB73b5aa5b3D6180c6f1B0c89f70D1"  # crv ibbtc
 }
 
