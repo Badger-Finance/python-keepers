@@ -5,9 +5,9 @@ metadata:
   labels:
     app: arb-harvester-keeper
 spec:
-  schedule: "0 20 * * *"
+  schedule: "5 1 * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
