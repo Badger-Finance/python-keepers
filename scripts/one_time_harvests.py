@@ -8,9 +8,13 @@ from pathlib import Path
 from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from enums import Network
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret
+from utils import get_abi, get_secret, get_node_url
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
@@ -20,7 +24,7 @@ KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
 
 strategies = {
     # "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
-    "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
+    # "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
     # "0xff26f400e57bf726822eacbb64fa1c52f1f27988",  # HBTC_CRV_STRATEGY
     # "0x1C1fD689103bbFD701b3B7D41A3807F12814033D",  # PBTC_CRV_STRATEGY
     # "0x2bb864cdb4856ab2d148c5ca52dd7ccec126d138",  # OBTC_CRV_STRATEGY
@@ -35,6 +39,9 @@ strategies = {
     # "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # native.sushiBadgerWbtc
     # "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
     # "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
+    "0x61e16b46F74aEd8f9c2Ec6CB2dCb2258Bdfc7071",  # native.renCrv
+    "0x647eeb5C5ED5A71621183f09F6CE8fa66b96827d",  # TRICRYPTO_CRV_STRATEGY
+    "0x6D4BA00Fd7BB73b5aa5b3D6180c6f1B0c89f70D1"  # crv ibbtc
 }
 
 
@@ -65,7 +72,7 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret("quiknode/eth-node-url", "NODE_URL")
+    node_url = get_node_url(Network.Ethereum)
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
@@ -82,13 +89,13 @@ if __name__ == "__main__":
         keeper_address=keeper_address,
         keeper_key=keeper_key,
         base_oracle_address=ETH_USD_CHAINLINK,
-        use_flashbots=True,
+        use_flashbots=False,
     )
 
     for strategy_address in strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
-            abi=get_abi("eth", "strategy"),
+            abi=get_abi(Network.Ethereum, "strategy"),
         )
         strategy_name = strategy.functions.getName().call()
 

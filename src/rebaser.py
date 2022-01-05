@@ -9,14 +9,17 @@ import sys
 import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from enums import Network
 from utils import (
     get_secret,
     hours,
     confirm_transaction,
     get_hash_from_failed_tx_error,
     send_success_to_discord,
-    send_error_to_discord,
     send_rebase_to_discord,
     send_rebase_error_to_discord,
 )
@@ -143,7 +146,7 @@ class Rebaser:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                    self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 send_rebase_to_discord(tx_hash=tx_hash, gas_cost=gas_price_of_tx)
             elif tx_hash != HexBytes(0):
@@ -179,6 +182,8 @@ class Rebaser:
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending rebase tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash

@@ -6,7 +6,7 @@ metadata:
     app: eth-tender-keeper
 spec:
   # cron to run every 30 min every day "*/30 * * * *"
-  schedule: "30 9 * * 0,2,4"
+  schedule: "35 15 * * 1"
   startingDeadlineSeconds: 300
   suspend: true
   jobTemplate:

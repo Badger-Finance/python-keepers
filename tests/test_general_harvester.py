@@ -7,12 +7,23 @@ from web3 import contract
 
 from config.constants import MULTICHAIN_CONFIG
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi, get_last_harvest_times, hours, get_secret
+from src.utils import (
+    get_abi,
+    get_last_harvest_times,
+    hours,
+    get_secret,
+    seconds_to_blocks,
+)
 from tests.utils import test_address, test_key
+from config.enums import Network
 
-ETH_USD_CHAINLINK = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["gas_oracle"])
-KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["keeper_acl"])
-REWARDS_MANAGER = web3.toChecksumAddress(MULTICHAIN_CONFIG["eth"]["rewards_manager"])
+ETH_USD_CHAINLINK = web3.toChecksumAddress(
+    MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]
+)
+KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"])
+REWARDS_MANAGER = web3.toChecksumAddress(
+    MULTICHAIN_CONFIG[Network.Ethereum]["rewards_manager"]
+)
 CVX_HELPER_STRATEGY = web3.toChecksumAddress(
     "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
 )
@@ -36,7 +47,7 @@ def mock_send_discord(
     gas_cost: Decimal = None,
     amt: Decimal = None,
     sett_name: str = None,
-    chain: str = "ETH",
+    chain: str = Network.Ethereum,
     url: str = None,
 ):
     print("sent")
@@ -68,7 +79,7 @@ def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
         KEEPER_ACL,
-        get_abi("eth", "keeper_acl"),
+        get_abi(Network.Ethereum, "keeper_acl"),
     )
     harvester_key = keeper_acl.HARVESTER_ROLE()
     admin_role = keeper_acl.getRoleAdmin(harvester_key)
@@ -82,7 +93,7 @@ def setup_rewards_manager(keeper_address):
     rewards_manager = Contract.from_abi(
         "BadgerRewardsManager",
         REWARDS_MANAGER,
-        get_abi("eth", "rewards_manager"),
+        get_abi(Network.Ethereum, "rewards_manager"),
     )
     keeper_role = rewards_manager.KEEPER_ROLE()
     admin_role = rewards_manager.getRoleAdmin(keeper_role)
@@ -95,7 +106,7 @@ def setup_rewards_manager(keeper_address):
 def strategy() -> contract:
     return web3.eth.contract(
         address=CVX_CRV_HELPER_STRATEGY,
-        abi=get_abi("eth", "strategy"),
+        abi=get_abi(Network.Ethereum, "strategy"),
     )
 
 
@@ -103,13 +114,15 @@ def strategy() -> contract:
 def rewards_manager_strategy() -> contract:
     return web3.eth.contract(
         address=DIGG_STRATEGY,
-        abi=get_abi("eth", "strategy"),
+        abi=get_abi(Network.Ethereum, "strategy"),
     )
 
 
 @pytest.fixture
 def btc_strategy() -> contract:
-    return web3.eth.contract(address=HBTC_STRATEGY, abi=get_abi("eth", "strategy"))
+    return web3.eth.contract(
+        address=HBTC_STRATEGY, abi=get_abi(Network.Ethereum, "strategy")
+    )
 
 
 @pytest.fixture
@@ -137,13 +150,13 @@ def test_harvest_rewards_manager(keeper_address, harvester, rewards_manager_stra
 
     harvester.keeper_acl = harvester.web3.eth.contract(
         address=harvester.web3.toChecksumAddress(
-            MULTICHAIN_CONFIG["eth"]["rewards_manager"]
+            MULTICHAIN_CONFIG[Network.Ethereum]["rewards_manager"]
         ),
-        abi=get_abi("eth", "rewards_manager"),
+        abi=get_abi(Network.Ethereum, "rewards_manager"),
     )
 
     xsushi = Contract.from_abi(
-        "ERC20", web3.toChecksumAddress(XSUSHI), get_abi("eth", "erc20")
+        "ERC20", web3.toChecksumAddress(XSUSHI), get_abi(Network.Ethereum, "erc20")
     )
 
     strategy_name = rewards_manager_strategy.functions.getName().call()
@@ -201,7 +214,8 @@ def test_harvest(keeper_address, harvester, strategy):
 
 def test_btc_profit_est(harvester, btc_strategy):
     want = web3.eth.contract(
-        address=btc_strategy.functions.want().call(), abi=get_abi("eth", "erc20")
+        address=btc_strategy.functions.want().call(),
+        abi=get_abi(Network.Ethereum, "erc20"),
     )
     # assert harvester.estimate_harvest_amount(btc_strategy) == 10
 
@@ -212,7 +226,7 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     accounts[0].transfer(keeper_address, "10 ether")
 
     # Strategy should be harvestable at this point
-    chain.sleep(hours(72))
+    chain.sleep(hours(121))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
@@ -220,8 +234,11 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(strategy) == False
 
-    # Strategy should be harvestable again after 72 hours
+    # Should only be able to harvest after 120 hours
     chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(strategy) == False
+    chain.sleep(hours(49))
     chain.mine(1)
     assert harvester.is_time_to_harvest(strategy) == True
     harvester.harvest(strategy)
@@ -229,22 +246,44 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
 
 @pytest.mark.require_network("hardhat-fork")
 def test_is_time_to_harvest_rewards_manager(
-    web3, chain, keeper_address, harvester, rewards_manager_strategy
+    web3,
+    chain,
+    keeper_address,
+    harvester,
+    rewards_manager_strategy,
+    setup_rewards_manager,
 ):
+    harvester.keeper_acl = harvester.web3.eth.contract(
+        address=harvester.web3.toChecksumAddress(
+            MULTICHAIN_CONFIG[Network.Ethereum]["rewards_manager"]
+        ),
+        abi=get_abi(Network.Ethereum, "rewards_manager"),
+    )
+    harvester.last_harvest_times = get_last_harvest_times(
+        harvester.web3,
+        harvester.keeper_acl,
+        start_block=harvester.web3.eth.block_number - seconds_to_blocks(hours(120)),
+        etherscan_key=os.getenv("ETHERSCAN_TOKEN"),
+    )
     strategy_name = rewards_manager_strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")
 
     # Strategy should be harvestable at this point
-    chain.sleep(hours(72))
+    chain.sleep(hours(121))
     chain.mine(1)
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
     harvester.harvest_rewards_manager(rewards_manager_strategy)
 
+    assert harvester.last_harvest_times[rewards_manager_strategy.address]
+
     # Strategy shouldn't be harvestable
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
 
-    # Strategy should be harvestable again after 72 hours
+    # Should only be able to harvest after 120 hours
     chain.sleep(hours(72))
+    chain.mine(1)
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
+    chain.sleep(hours(49))
     chain.mine(1)
     assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
     harvester.harvest_rewards_manager(rewards_manager_strategy)

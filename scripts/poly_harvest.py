@@ -11,15 +11,19 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
+from enums import Network
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, get_strategies_from_registry
+from utils import get_abi, get_secret, get_strategies_from_registry, get_node_url
 from constants import MULTICHAIN_CONFIG
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
 
-INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
+INVALID_STRATS = [
+    "0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C",
+    "0xF8F02D0d41C79a1973f65A440C98acAc7eAA8Dc1",
+]
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
@@ -48,26 +52,14 @@ def safe_harvest(harvester, strategy_name, strategy) -> str:
 
 
 if __name__ == "__main__":
-    for chain in ["poly"]:
-        node_url = get_secret(f"quiknode/{chain}-node-url", "NODE_URL")
+    for chain in [Network.Polygon]:
+        node_url = "https://polygon-rpc.com/"
         node = Web3(Web3.HTTPProvider(node_url))
 
-        if chain == "eth":
-            strategies = [
-                node.eth.contract(
-                    address=node.toChecksumAddress(address),
-                    abi=get_abi(chain, "strategy"),
-                )
-                for address in MULTICHAIN_CONFIG.get(chain).get("strategies")
-            ]
-        else:
-            strategies = get_strategies_from_registry(node, chain)
+        strategies = get_strategies_from_registry(node, chain)
 
-        if chain == "poly":
-            discord_url = get_secret("keepers/discord/poly-url", "DISCORD_WEBHOOK_URL")
-            node.middleware_onion.inject(geth_poa_middleware, layer=0)
-        else:
-            discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
+        discord_url = get_secret("keepers/discord/poly-url", "DISCORD_WEBHOOK_URL")
+        node.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
         keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")

@@ -9,7 +9,11 @@ import sys
 import time
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from enums import Network
 from utils import (
     get_secret,
     hours,
@@ -105,7 +109,7 @@ class ibBTCFeeCollector:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                    self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 send_success_to_discord(
                     tx_hash=tx_hash,
@@ -142,6 +146,8 @@ class ibBTCFeeCollector:
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
             self.logger.error(f"Error in sending collection tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash

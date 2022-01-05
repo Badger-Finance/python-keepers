@@ -1,13 +1,21 @@
 from decimal import Decimal
 from hexbytes import HexBytes
 import logging
+import os
+import sys
 from web3 import Web3, contract, exceptions
+
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
+
+from enums import Network
 
 logger = logging.getLogger("tx-utils")
 
 
 def get_gas_price_of_tx(
-    web3: Web3, gas_oracle: contract, tx_hash: HexBytes, chain: str = "eth"
+    web3: Web3, gas_oracle: contract, tx_hash: HexBytes, chain: str = Network.Ethereum
 ) -> Decimal:
     """Gets the actual amount of gas used by the transaction and converts
     it from gwei to USD value for monitoring.
@@ -29,7 +37,7 @@ def get_gas_price_of_tx(
     total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
     logger.info(f"gas used: {total_gas_used}")
 
-    if chain == "arbitrum":
+    if chain == Network.Arbitrum:
         gas_prices = tx_receipt.get("feeStats", {}).get("paid", {})
         gas_cost_base = Decimal(sum([int(x, 16) for x in gas_prices.values()]) / 1e18)
     else:
@@ -74,7 +82,7 @@ def get_effective_gas_price(web3: Web3) -> int:
 
 def get_priority_fee(
     web3: Web3,
-    num_blocks: str = "0x4",
+    num_blocks: int = 4,
     percentile: int = 70,
     default_reward: int = int(10e9),
 ) -> int:
@@ -83,16 +91,23 @@ def get_priority_fee(
 
     Args:
         web3 (Web3): Web3 object
-        num_blocks (str, optional): Number of historic blocks to look at in hex form (no leading 0s). Defaults to "0x4".
+        num_blocks (int, optional): Number of historic blocks to look at. Defaults to 4.
         percentiles (int, optional): Percentile of transactions in blocks to use to analyze fees. Defaults to 70.
         default_reward (int, optional): If call fails, what default reward to use in gwei. Defaults to 10e9.
 
     Returns:
         int: [description]
     """
-    gas_data = web3.eth.fee_history(num_blocks, "latest", [percentile])
+    try:
+        gas_data = web3.eth.fee_history(num_blocks, "latest", [percentile])
+    except ValueError:
+        # Sometimes times out on hardhat-fork
+        logger.warning(
+            f"Couldn't fetch fee history, using default priority fee of {default_reward}"
+        )
+        gas_data = {}
     rewards = gas_data.get("reward", [[default_reward]])
     priority_fee = int(sum([r[0] for r in rewards]) / len(rewards))
 
-    logger.info(f"piority fee: {priority_fee}")
+    logger.info(f"priority fee: {priority_fee}")
     return priority_fee

@@ -6,12 +6,16 @@ from flashbots import flashbot
 from web3 import Web3
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-from utils import get_secret, get_abi
-
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
 )
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
+
+from utils import get_secret, get_abi
 from stability_executor import StabilityExecutor
+from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,7 +39,7 @@ if __name__ == "__main__":
     web3 = Web3(Web3.HTTPProvider(node_url))
 
     strategy = web3.eth.contract(
-        address=STABILIZE_STRAT, abi=get_abi("eth", "stability_strat")
+        address=STABILIZE_STRAT, abi=get_abi(Network.Ethereum, "stability_strat")
     )
 
     stability_executor = StabilityExecutor(

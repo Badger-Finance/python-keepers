@@ -10,7 +10,11 @@ import sys
 from web3 import Web3, contract, exceptions
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
+)
 
+from enums import Network
 from utils import (
     get_abi,
     get_secret,
@@ -18,7 +22,6 @@ from utils import (
     confirm_transaction,
     get_hash_from_failed_tx_error,
     send_success_to_discord,
-    send_error_to_discord,
     send_oracle_error_to_discord,
 )
 from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
@@ -27,6 +30,7 @@ from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_pr
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
 WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 GAS_LIMIT = 200_000
+NEGATIVE_THRESHOLD = 0.95
 
 
 class Oracle:
@@ -42,16 +46,25 @@ class Oracle:
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
-            abi=get_abi("eth", "oracle"),
+            abi=get_abi(Network.Ethereum, "oracle"),
         )
         self.centralized_oracle = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("CENTRALIZED_ORACLE")),
-            abi=get_abi("eth", "digg_centralized_oracle"),
+            abi=get_abi(Network.Ethereum, "digg_centralized_oracle"),
         )
         self.chainlink_forwarder = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(os.getenv("CHAINLINK_FORWARDER")),
-            abi=get_abi("eth", "chainlink_forwarder"),
+            abi=get_abi(Network.Ethereum, "chainlink_forwarder"),
         )
+        self.digg_btc_chainlink = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(os.getenv("DIGG_BTC_CHAINLINK")),
+            abi=get_abi(Network.Ethereum, "oracle"),
+        )
+
+    def is_negative_rebase(self):
+        price = self.digg_btc_chainlink.functions.latestAnswer().call()
+        self.logger.info(f"price: [{price} - {price / 10**8}]")
+        return price / 10 ** 8 < NEGATIVE_THRESHOLD
 
     def propose_centralized_report_push(self):
         """Gets price using centralized oracle and pushes report to market oracle for use
@@ -84,7 +97,7 @@ class Oracle:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                    self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
@@ -139,10 +152,14 @@ class Oracle:
 
         except ValueError as e:
             self.logger.error(f"Error in sending oracle tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         except Exception as e:
             self.logger.error(format_exc())
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
 
@@ -279,7 +296,7 @@ class Oracle:
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
-                    self.web3, self.eth_usd_oracle, tx_hash, "eth"
+                    self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
@@ -324,6 +341,8 @@ class Oracle:
 
         except ValueError as e:
             self.logger.error(f"Error in sending chainlink tx: {e}")
-            tx_hash = get_hash_from_failed_tx_error(e, self.logger)
+            tx_hash = get_hash_from_failed_tx_error(
+                e, self.logger, keeper_address=self.keeper_address
+            )
         finally:
             return tx_hash
