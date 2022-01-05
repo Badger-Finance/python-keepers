@@ -86,7 +86,7 @@ class ExternalHarvester:
         self.last_harvest_times = get_last_external_harvest_times(
             self.web3,
             self.keeper_acl,
-            start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS * 10,
+            start_block=self.web3.eth.block_number - THREE_DAYS_OF_BLOCKS * 20,
         )
         schedule_json = get_rewards_schedule()
         self.emissions = EmissionsSchedule(schedule_json)

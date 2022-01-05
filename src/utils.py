@@ -459,7 +459,7 @@ def get_rewards_schedule(github_token: str = os.getenv("GITHUB_TOKEN")) -> dict:
         github_token = get_secret("github_token/path", "GITHUB_TOKEN")
     url = (
         "https://raw.githubusercontent.com/Badger-Finance/badger-ape/"
-        "main/scripts/dev_multisig/emissions/emissions_info.json?"
+        "main/scripts/dev_multisig/emissions/generated_emissions_info_BIP_82_Emissions.json?"
         f"token={github_token}"
     )
     schedule = requests.get(url)
