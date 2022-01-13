@@ -83,10 +83,10 @@ def conditional_harvest(harvester, strategy_name, strategy) -> str:
     # ibbtc exception
     if (
         strategy.address == IBBTC_CRV_STRATEGY
-        and harvester.is_time_to_harvest(strategy, HOURS_24)
-        and latest_base_fee < int(150e9)
+        and harvester.is_time_to_harvest(strategy, HOURS_72)
+        and latest_base_fee < int(120e9)
     ):
-        logger.info(f"Been longer than 24 hours and base fee < 150 for {strategy_name}")
+        logger.info(f"Been longer than 72 hours and base fee < 120 for {strategy_name}")
         res = safe_harvest(harvester, strategy_name, strategy)
         logger.info(res)
     # regular thresholds for rest of vaults
