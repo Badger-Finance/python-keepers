@@ -7,7 +7,7 @@ metadata:
 spec:
   schedule: "47 23 * * 3"
   startingDeadlineSeconds: 300
-  suspend: false
+  suspend: true
   jobTemplate:
     spec:
       template:
