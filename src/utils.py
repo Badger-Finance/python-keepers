@@ -21,8 +21,9 @@ from constants import (
     BLOCKS_IN_A_DAY,
     ABI_DIRS,
     NODE_URL_SECRET_NAMES,
+    PERFORMANCE_FEE_DECIMALS,
 )
-from enums import Network
+from enums import Network, Currency
 
 logger = logging.getLogger("utils")
 
@@ -495,3 +496,27 @@ def get_node_url(chain) -> str:
     secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
     url = get_secret(secret_name, secret_key)
     return url
+
+
+def get_performance_fee_strategy(
+    node: Web3, strategy: contract, chain: Network
+) -> float:
+
+    vault = node.eth.contract(
+        address=strategy.functions.vault().call(), abi=get_abi(chain, "vault")
+    )
+
+    performance_fee = (
+        vault.functions.performanceFeeGovernance().call()
+        + vault.functions.performanceFeeStrategist().call() / PERFORMANCE_FEE_DECIMALS
+    )
+
+    return performance_fee
+
+def get_usd_price_of_token(token_address: str, chain: Network, currency: Currency = Currency.Usd) -> float:
+    prices = requests.get(
+        f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
+    ).json()
+
+    return prices.get(token_address)
+    

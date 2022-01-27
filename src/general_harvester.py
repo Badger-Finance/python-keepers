@@ -24,6 +24,8 @@ from utils import (
     get_hash_from_failed_tx_error,
     get_last_harvest_times,
     seconds_to_blocks,
+    get_usd_price_of_token,
+    get_performance_fee_strategy
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
@@ -151,7 +153,7 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"estimated gas cost: {gas_fee}")
 
         # for now we'll just harvest every hour
-        should_harvest = self.is_profitable()
+        should_harvest = self.is_profitable(strategy)
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
@@ -188,7 +190,7 @@ class GeneralHarvester(IHarvester):
         self.logger.info(f"estimated gas cost: {gas_fee}")
 
         # for now we'll just harvest every hour
-        should_harvest = self.is_profitable()
+        should_harvest = self.is_profitable(strategy)
         self.logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
@@ -291,11 +293,13 @@ class GeneralHarvester(IHarvester):
             want_gained = 0
         return price_per_want * want_gained
 
-    def is_profitable(self) -> bool:
-        # TODO: Implement this
-
-        # harvest if ideal want change is > 0.05% of total vault assets
-        # should_harvest = want_to_harvest / vault_balance >= HARVEST_THRESHOLD
+    def is_profitable(self, strategy: contract = None) -> bool:
+        if self.chain == Network.Avalanche:
+            performance_fee = get_performance_fee_strategy(strategy)
+            rewards = strategy.functions.balanceOfRewards().call()
+            for token, amount in rewards:
+                revenue = amount * performance_fee * get_usd_price_of_token(token, self.chain)
+                
         return True
 
     def __is_keeper_whitelisted(self, function: str) -> bool:
