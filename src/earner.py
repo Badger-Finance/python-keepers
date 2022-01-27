@@ -24,7 +24,7 @@ from utils import (
     get_token_price,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
-from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
+from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD, ETH_BVECVX_STRATEGY
 from enums import Network, Currency
 
 logging.basicConfig(level=logging.INFO)
@@ -34,7 +34,7 @@ GAS_LIMITS = {
     Network.Polygon: 1_000_000,
     Network.Arbitrum: 3_000_000,
 }
-EARN_EXCEPTIONS = {}
+EARN_EXCEPTIONS = {ETH_BVECVX_STRATEGY: 20}
 
 
 class Earner:
