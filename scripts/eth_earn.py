@@ -24,6 +24,8 @@ from constants import (
     ETH_TBTC_VAULT,
     ETH_PBTC_VAULT,
     ETH_BBTC_VAULT,
+    ETH_FRAX_CRV_VAULT,
+    ETH_MIM_CRV_VAULT
 )
 from enums import Network
 
@@ -66,6 +68,8 @@ if __name__ == "__main__":
         )
         vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
         vault_addresses.append(ETH_IBBTC_CRV_LP_VAULT)
+        vault_addresses.append(ETH_FRAX_CRV_VAULT)
+        vault_addresses.append(ETH_MIM_CRV_VAULT)
 
         for address in vault_addresses:
             if address not in INVALID_VAULTS:
