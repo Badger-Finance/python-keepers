@@ -36,6 +36,7 @@ GAS_LIMITS = {
     Network.Ethereum: 6_000_000,
     Network.Polygon: 1_000_000,
     Network.Arbitrum: 3_000_000,
+    Network.Fantom: 3_000_000,
 }
 NUM_FLASHBOTS_BUNDLES = 6
 
@@ -669,7 +670,7 @@ class GeneralHarvester(IHarvester):
         if self.chain == Network.Polygon:
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
-        elif self.chain == Network.Arbitrum:
+        elif self.chain in [Network.Arbitrum, Network.Fantom]:
             gas_price = int(1.1 * self.web3.eth.gas_price)
             # Estimated gas price + buffer
         elif self.chain == Network.Ethereum:

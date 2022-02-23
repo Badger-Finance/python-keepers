@@ -1,0 +1,24 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: ftm-earner-keeper
+  labels:
+    app: ftm-earner-keeper
+spec:
+  schedule: "7-59/10 * * * *"
+  startingDeadlineSeconds: 300
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: ftm-earner-keeper
+          containers:
+          - name: ftm-earner-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/ftm_earn.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure

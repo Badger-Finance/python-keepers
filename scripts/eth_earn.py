@@ -25,7 +25,7 @@ from constants import (
     ETH_PBTC_VAULT,
     ETH_BBTC_VAULT,
     ETH_FRAX_CRV_VAULT,
-    ETH_MIM_CRV_VAULT
+    ETH_MIM_CRV_VAULT,
 )
 from enums import Network
 

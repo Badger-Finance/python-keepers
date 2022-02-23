@@ -33,6 +33,7 @@ GAS_LIMITS = {
     Network.Ethereum: 1_500_000,
     Network.Polygon: 1_000_000,
     Network.Arbitrum: 3_000_000,
+    Network.Fantom: 1_500_000,
 }
 EARN_EXCEPTIONS = {ETH_BVECVX_STRATEGY: 20}
 
@@ -242,7 +243,7 @@ class Earner:
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == Network.Ethereum:
             gas_price = get_effective_gas_price(self.web3)
-        elif self.chain == Network.Arbitrum:
+        elif self.chain in [Network.Arbitrum, Network.Fantom]:
             gas_price = int(1.1 * self.web3.eth.gas_price)
 
         return gas_price
