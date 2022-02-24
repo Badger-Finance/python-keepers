@@ -96,6 +96,7 @@ ABI_DIRS = {
     Network.Ethereum: "eth",
     Network.Polygon: "poly",
     Network.Arbitrum: "arbitrum",
+    Network.Fantom: "fantom",
 }
 
 BASE_CURRENCIES = {
