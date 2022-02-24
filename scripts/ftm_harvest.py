@@ -12,8 +12,8 @@ sys.path.insert(
 
 from enums import Network
 from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, get_strategies_from_registry
-from constants import MULTICHAIN_CONFIG, FTM_STRATEGIES
+from utils import get_abi, get_secret, get_strategy_from_vault
+from constants import MULTICHAIN_CONFIG, FTM_VAULTS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
@@ -63,8 +63,12 @@ if __name__ == "__main__":
         use_flashbots=False,
         discord_url=discord_url,
     )
+    strategies = []
+    for vault_address in FTM_VAULTS:
+        strategy, _ = get_strategy_from_vault(web3, Network.Fantom, vault_address)
+        strategies.append(strategy)
 
-    for strategy in FTM_STRATEGIES:
+    for strategy in strategies:
         if (
             strategy.address
             not in MULTICHAIN_CONFIG[Network.Fantom]["harvest"]["invalid_strategies"]

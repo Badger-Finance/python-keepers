@@ -11,8 +11,8 @@ sys.path.insert(
 )
 
 from earner import Earner
-from utils import get_secret, get_strategies_and_vaults, get_abi
-from constants import MULTICHAIN_CONFIG, FTM_STRATEGIES, FTM_VAULTS
+from utils import get_secret, get_strategy_from_vault
+from constants import MULTICHAIN_CONFIG, FTM_VAULTS
 from enums import Network
 
 logging.basicConfig(level=logging.INFO)
@@ -48,8 +48,14 @@ if __name__ == "__main__":
             base_oracle_address=MULTICHAIN_CONFIG.get(chain).get("gas_oracle"),
             discord_url=discord_url,
         )
+        strategies = []
+        vaults = []
+        for vault_address in FTM_VAULTS:
+            strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+            strategies.append(strategy)
+            vaults.append(vault)
 
-        for strategy, vault in zip(FTM_STRATEGIES, FTM_VAULTS):
+        for strategy, vault in zip(strategies, vaults):
             if (
                 strategy.address
                 not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
