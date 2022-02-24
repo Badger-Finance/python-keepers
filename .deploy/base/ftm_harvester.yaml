@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: ftm-harvester-keeper
+  labels:
+    app: ftm-harvester-keeper
+spec:
+  schedule: "35 20 * * *"
+  startingDeadlineSeconds: 300
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: ftm-harvester-keeper
+          containers:
+          - name: ftm-harvester-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "scripts/ftm_harvest.py"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure
+      backoffLimit: 3
