@@ -351,6 +351,9 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     elif chain == Network.Arbitrum:
         explorer_name = "Arbiscan"
         explorer_url = f"https://arbiscan.io/tx/{tx_hash.hex()}"
+    elif chain == Network.Fantom:
+        explorer_name = "Ftmscan"
+        explorer_url = f"https://ftmscan.com/tx/{tx_hash.hex()}"
 
     return (explorer_name, explorer_url)
 
