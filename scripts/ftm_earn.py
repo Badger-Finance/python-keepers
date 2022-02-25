@@ -11,7 +11,7 @@ sys.path.insert(
 )
 
 from earner import Earner
-from utils import get_secret, get_strategy_from_vault
+from utils import get_secret, get_strategy_from_vault, get_node_url
 from constants import MULTICHAIN_CONFIG, FTM_VAULTS
 from enums import Network
 
@@ -30,7 +30,7 @@ def safe_earn(earner, vault, strategy):
 
 if __name__ == "__main__":
     for chain in [Network.Fantom]:
-        node_url = "https://rpc.ftm.tools/"
+        node_url = get_node_url(chain)
         node = Web3(Web3.HTTPProvider(node_url))
 
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
