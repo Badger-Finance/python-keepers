@@ -122,6 +122,7 @@ class Earner:
         self, override_threshold: int, vault_balance: int, strategy_balance: int
     ) -> bool:
         # Always allow earn on first run
+        self.logger.info({"strategy_balance": strategy_balance, "vault_balance": vault_balance})
         if strategy_balance == 0 and vault_balance > 0:
             self.logger.info("No strategy balance, earn")
             return True
