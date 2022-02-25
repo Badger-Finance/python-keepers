@@ -73,7 +73,10 @@ if __name__ == "__main__":
             strategy.address
             not in MULTICHAIN_CONFIG[Network.Fantom]["harvest"]["invalid_strategies"]
         ):
-            safe_harvest(harvester, strategy)
+            # safe_harvest(harvester, strategy)
+            strategy_name = strategy.functions.getName().call()
+            logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
+            harvester.harvest(strategy)
 
             # Sleep for a few blocks in between harvests
             time.sleep(30)

@@ -95,7 +95,7 @@ MULTICHAIN_CONFIG = {
 NODE_URL_SECRET_NAMES = {
     Network.Ethereum: {"name": "quiknode/eth-node-url", "key": "NODE_URL"},
     Network.Polygon: {"name": "quiknode/poly-node-url", "key": "NODE_URL"},
-    Network.Fantom: {"name": "chainstack/ftm-url", "key": "NODE_URL"}
+    Network.Fantom: {"name": "chainstack/ftm-url", "key": "NODE_URL"},
 }
 
 ABI_DIRS = {
@@ -109,6 +109,7 @@ BASE_CURRENCIES = {
     Network.Ethereum: Currency.Eth,
     Network.Arbitrum: Currency.Eth,
     Network.Polygon: Currency.Matic,
+    Network.Fantom: Currency.Ftm,
 }
 
 EARN_PCT_THRESHOLD = 0.01

@@ -24,7 +24,12 @@ from utils import (
     get_token_price,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
-from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD, ETH_BVECVX_STRATEGY
+from constants import (
+    BASE_CURRENCIES,
+    EARN_OVERRIDE_THRESHOLD,
+    EARN_PCT_THRESHOLD,
+    ETH_BVECVX_STRATEGY,
+)
 from enums import Network, Currency
 
 logging.basicConfig(level=logging.INFO)
@@ -102,16 +107,17 @@ class Earner:
             want (contract): want web3 contract object
 
         Returns:
-            Tuple[float, float]: want in vault denominated in selected currenct, want in strat 
+            Tuple[float, float]: want in vault denominated in selected currenct, want in strat
                 denominated in selected currency.
         """
+        currency = BASE_CURRENCIES[self.chain]
         if self.chain == Network.Fantom:
-            currency = Currency.Ftm
-            price_per_want = get_token_price(want.address, currency, self.chain, use_staging=True)
+            price_per_want = get_token_price(
+                want.address, currency, self.chain, use_staging=True
+            )
         else:
-            currency = Currency.Eth
             price_per_want = get_token_price(want.address, currency, self.chain)
-    
+
         self.logger.info(f"price per want: {price_per_want} {currency}")
 
         want_decimals = want.functions.decimals().call()
@@ -120,9 +126,7 @@ class Earner:
         strategy_balance = strategy.functions.balanceOf().call()
 
         vault_balance = price_per_want * vault_balance / 10 ** want_decimals
-        strategy_balance = (
-            price_per_want * strategy_balance / 10 ** want_decimals
-        )
+        strategy_balance = price_per_want * strategy_balance / 10 ** want_decimals
 
         return vault_balance, strategy_balance
 
@@ -130,7 +134,9 @@ class Earner:
         self, override_threshold: int, vault_balance: int, strategy_balance: int
     ) -> bool:
         # Always allow earn on first run
-        self.logger.info({"strategy_balance": strategy_balance, "vault_balance": vault_balance})
+        self.logger.info(
+            {"strategy_balance": strategy_balance, "vault_balance": vault_balance}
+        )
         if strategy_balance == 0 and vault_balance > 0:
             self.logger.info("No strategy balance, earn")
             return True
@@ -153,7 +159,9 @@ class Earner:
                     "vault_balance": vault_balance,
                     "strategy_balance": strategy_balance,
                     "override_threshold": override_threshold,
-                    "vault_to_strategy_ratio": vault_balance / strategy_balance if strategy_balance > 0 else 0,
+                    "vault_to_strategy_ratio": vault_balance / strategy_balance
+                    if strategy_balance > 0
+                    else 0,
                 }
             )
             return False

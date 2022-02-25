@@ -23,6 +23,7 @@ from utils import (
     get_abi,
     get_hash_from_failed_tx_error,
     get_last_harvest_times,
+    get_token_price,
     seconds_to_blocks,
 )
 from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
@@ -280,13 +281,14 @@ class GeneralHarvester(IHarvester):
         )
         # call badger api to get prices
         currency = BASE_CURRENCIES[self.chain]
-        chain = self.chain
-        prices = requests.get(
-            f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
-        ).json()
-        # Price of want token in ETH
-        price_per_want = prices.get(want.address)
-        self.logger.info(f"price per want: {price_per_want}")
+        if self.chain == Network.Fantom:
+            price_per_want = get_token_price(
+                want.address, currency, self.chain, use_staging=True
+            )
+        else:
+            price_per_want = get_token_price(want.address, currency, self.chain)
+
+        self.logger.info(f"price per want: {price_per_want} {currency}")
         self.logger.info(f"want gained: {want_gained}")
         if type(want_gained) is list:
             want_gained = 0
