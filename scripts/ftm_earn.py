@@ -60,4 +60,7 @@ if __name__ == "__main__":
                 strategy.address
                 not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
             ):
-                safe_earn(earner, vault, strategy)
+                sett_name = strategy.functions.getName().call()
+                logger.info(f"+-----Earning {sett_name}-----+")
+                earner.earn(vault, strategy, sett_name=sett_name)
+                # safe_earn(earner, vault, strategy)
