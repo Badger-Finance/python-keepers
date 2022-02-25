@@ -144,7 +144,7 @@ class Earner:
                     "vault_balance": vault_balance,
                     "strategy_balance": strategy_balance,
                     "override_threshold": override_threshold,
-                    "vault_to_strategy_ratio": vault_balance / strategy_balance,
+                    "vault_to_strategy_ratio": vault_balance / strategy_balance if strategy_balance > 0 else 0,
                 }
             )
             return False
