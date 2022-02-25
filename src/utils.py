@@ -485,10 +485,15 @@ def seconds_to_blocks(seconds: int) -> int:
     return seconds / SECONDS_IN_A_DAY * BLOCKS_IN_A_DAY
 
 
-def get_token_price(token_address: str, currency: str, chain: str) -> int:
-    prices = requests.get(
-        f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
-    ).json()
+def get_token_price(token_address: str, currency: str, chain: str, use_staging: bool = False) -> int:  
+    if use_staging:
+        prices = requests.get(
+            f"https://staging-api.badger.finance/v2/prices?currency={currency}&chain={chain}"
+        ).json()
+    else:
+        prices = requests.get(
+            f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
+        ).json()
     token_price = prices.get(token_address, 0)
     return token_price
 

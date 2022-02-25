@@ -102,21 +102,29 @@ class Earner:
             want (contract): want web3 contract object
 
         Returns:
-            Tuple[float, float]: want in vault denominated in eth, want in strat denominated in eth
+            Tuple[float, float]: want in vault denominated in selected currenct, want in strat 
+                denominated in selected currency.
         """
-        price_per_want_eth = get_token_price(want.address, Currency.Eth, self.chain)
-        self.logger.info(f"price per want: {price_per_want_eth}")
+        if self.chain == Network.Fantom:
+            currency = Currency.Ftm
+            price_per_want = get_token_price(want.address, currency, self.chain, use_staging=True)
+        else:
+            currency = Currency.Eth
+            price_per_want = get_token_price(want.address, currency, self.chain)
+    
+        self.logger.info(f"price per want: {price_per_want} {currency}")
+
         want_decimals = want.functions.decimals().call()
 
         vault_balance = want.functions.balanceOf(vault.address).call()
         strategy_balance = strategy.functions.balanceOf().call()
 
-        vault_balance_eth = price_per_want_eth * vault_balance / 10 ** want_decimals
-        strategy_balance_eth = (
-            price_per_want_eth * strategy_balance / 10 ** want_decimals
+        vault_balance = price_per_want * vault_balance / 10 ** want_decimals
+        strategy_balance = (
+            price_per_want * strategy_balance / 10 ** want_decimals
         )
 
-        return vault_balance_eth, strategy_balance_eth
+        return vault_balance, strategy_balance
 
     def should_earn(
         self, override_threshold: int, vault_balance: int, strategy_balance: int

@@ -19,6 +19,7 @@ class Currency(str, Enum):
     Matic = "matic"
     Usd = "usd"
     Btc = "btc"
+    Ftm = "ftm"
 
     def __str__(self):
         return self.value

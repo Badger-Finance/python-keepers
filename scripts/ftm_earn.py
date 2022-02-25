@@ -30,7 +30,7 @@ def safe_earn(earner, vault, strategy):
 
 if __name__ == "__main__":
     for chain in [Network.Fantom]:
-        node_url = get_node_url(chain)
+        node_url = "https://rpc.ftm.tools/"
         node = Web3(Web3.HTTPProvider(node_url))
 
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
