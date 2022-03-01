@@ -139,6 +139,7 @@ class ibBTCFeeCollector:
             "maxPriorityFeePerGas": get_priority_fee(self.web3),
             "maxFeePerGas": get_effective_gas_price(self.web3),
         }
+        tx_hash = HexBytes(0)
         try:
             tx = self.ibbtc.functions.collectFee().buildTransaction(options)
             signed_tx = self.web3.eth.account.sign_transaction(
