@@ -18,9 +18,9 @@ if __name__ == "__main__":
 
     logger = logging.getLogger()
 
-    keeper_key = get_node_url(Network.Ethereum)
+    keeper_key = keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_secret("price-bots/infura-url", "INFURA_URL")
+    node_url = get_node_url(Network.Ethereum)
 
     collector = ibBTCFeeCollector(
         keeper_address=keeper_address, keeper_key=keeper_key, web3=node_url

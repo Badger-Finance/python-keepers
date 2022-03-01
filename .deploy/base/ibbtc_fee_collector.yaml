@@ -5,8 +5,7 @@ metadata:
   labels:
     app: ibbtc-fee-collector-keeper
 spec:
-  # cron to run every 6 AM EST every day "0 10 * * *"
-  schedule: "45 20 * * *"
+  schedule: "35 21 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
