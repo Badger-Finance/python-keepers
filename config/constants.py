@@ -112,6 +112,13 @@ BASE_CURRENCIES = {
     Network.Fantom: Currency.Ftm,
 }
 
+GAS_LIMITS = {
+    Network.Ethereum: 6_000_000,
+    Network.Polygon: 1_000_000,
+    Network.Arbitrum: 3_000_000,
+    Network.Fantom: 3_000_000,
+}
+
 EARN_PCT_THRESHOLD = 0.01
 EARN_OVERRIDE_THRESHOLD = 100
 SECONDS_IN_A_DAY = 60 * 60 * 24

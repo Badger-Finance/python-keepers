@@ -6,8 +6,9 @@ from web3 import Web3
 import requests
 import os
 
+import tests.utils as test_utils
+
 from src.ibbtc_fee_collector import ibBTCFeeCollector
-from tests.utils import *
 
 os.environ["IBBTC_CORE_ADDRESS"] = "0x2A8facc9D49fBc3ecFf569847833C380A13418a8"
 os.environ["BTC_ETH_CHAINLINK"] = "0xdeb288F737066589598e9214E782fa5A8eD689e8"
@@ -22,13 +23,13 @@ def test_correct_network():
 @pytest.fixture
 def collector() -> ibBTCFeeCollector:
     return ibBTCFeeCollector(
-        keeper_address=test_address,
-        keeper_key=test_key,
+        keeper_address=test_utils.test_address,
+        keeper_key=test_utils.test_key,
         web3="http://127.0.0.1:8545",
     )
 
 
-def test_collect(collector):
+def test_collect(collector, mocker):
     """
     Check if the contract should be harvestable, then call the harvest function
 
@@ -36,7 +37,8 @@ def test_collect(collector):
     and 0 after. If not then claimable rewards should be the same before and after
     calling harvest
     """
-    accounts[0].transfer(test_address, "1 ether")
+    success_message =mocker.patch("src.ibbtc_fee_collector.send_success_to_discord")
+    accounts[0].transfer(test_utils.test_address, "5 ether")
 
-    # TODO: mock call to secretsmanager and have a real assert
-    assert collector.collect_fees() == {}
+    collector.collect_fees()
+    assert success_message.called

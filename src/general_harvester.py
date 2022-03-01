@@ -12,7 +12,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
 )
 
-from constants import MULTICHAIN_CONFIG, BASE_CURRENCIES
+from constants import MULTICHAIN_CONFIG, BASE_CURRENCIES, GAS_LIMITS
 from enums import Network, Currency
 from harvester import IHarvester
 from utils import (
@@ -33,12 +33,6 @@ logging.basicConfig(level=logging.INFO)
 MAX_TIME_BETWEEN_HARVESTS = hours(120)
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
 
-GAS_LIMITS = {
-    Network.Ethereum: 6_000_000,
-    Network.Polygon: 1_000_000,
-    Network.Arbitrum: 3_000_000,
-    Network.Fantom: 3_000_000,
-}
 NUM_FLASHBOTS_BUNDLES = 6
 
 
