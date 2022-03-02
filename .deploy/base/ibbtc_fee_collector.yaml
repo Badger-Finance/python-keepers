@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ibbtc-fee-collector-keeper
 spec:
-  schedule: "7 22 * * *"
+  schedule: "20 17 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
