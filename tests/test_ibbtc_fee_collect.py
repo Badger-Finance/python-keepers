@@ -37,7 +37,7 @@ def test_collect(collector, mocker):
     and 0 after. If not then claimable rewards should be the same before and after
     calling harvest
     """
-    success_message =mocker.patch("src.ibbtc_fee_collector.send_success_to_discord")
+    success_message = mocker.patch("src.ibbtc_fee_collector.send_success_to_discord")
     accounts[0].transfer(test_utils.test_address, "5 ether")
 
     collector.collect_fees()

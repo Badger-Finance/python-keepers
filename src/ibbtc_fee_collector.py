@@ -23,7 +23,12 @@ from utils import (
     send_success_to_discord,
     send_oracle_error_to_discord,
 )
-from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx, get_effective_gas_price
+from tx_utils import (
+    get_priority_fee,
+    get_effective_gas_price,
+    get_gas_price_of_tx,
+    get_effective_gas_price,
+)
 from web3 import Web3, contract, exceptions
 
 IBBTC_CORE_ADDRESS = "0x2A8facc9D49fBc3ecFf569847833C380A13418a8"
