@@ -1,6 +1,3 @@
-from decimal import Decimal
-from enum import Enum
-from hexbytes import HexBytes
 import json
 import logging
 import os
@@ -8,13 +5,14 @@ import requests
 import sys
 import time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
+from decimal import Decimal
+from enum import Enum
+from hexbytes import HexBytes
+from web3 import Web3, contract, exceptions
 
-from enums import Network
-from utils import (
+
+from config.enums import Network
+from src.utils import (
     get_secret,
     hours,
     confirm_transaction,
@@ -23,8 +21,7 @@ from utils import (
     send_rebase_to_discord,
     send_rebase_error_to_discord,
 )
-from tx_utils import get_gas_price_of_tx, get_priority_fee, get_effective_gas_price
-from web3 import Web3, contract, exceptions
+from src.tx_utils import get_gas_price_of_tx, get_priority_fee, get_effective_gas_price
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
 

@@ -2,20 +2,17 @@ import logging
 import os
 import requests
 import sys
+
 from decimal import Decimal
 from hexbytes import HexBytes
 from time import sleep
 from web3 import Web3, contract, exceptions
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
 
-from constants import MULTICHAIN_CONFIG, BASE_CURRENCIES, GAS_LIMITS
-from enums import Network, Currency
-from harvester import IHarvester
-from utils import (
+from config.constants import MULTICHAIN_CONFIG, BASE_CURRENCIES, GAS_LIMITS
+from config.enums import Network, Currency
+from src.harvester import IHarvester
+from src.utils import (
     confirm_transaction,
     hours,
     send_error_to_discord,
@@ -26,7 +23,7 @@ from utils import (
     get_token_price,
     seconds_to_blocks,
 )
-from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
+from src.tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
 logging.basicConfig(level=logging.INFO)
 

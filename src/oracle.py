@@ -1,21 +1,18 @@
-from datetime import datetime, timezone
-from decimal import Decimal
-from hexbytes import HexBytes
-from traceback import format_exc
 import json
 import logging
 import os
 import requests
 import sys
+
+from datetime import datetime, timezone
+from decimal import Decimal
+from hexbytes import HexBytes
+from traceback import format_exc
 from web3 import Web3, contract, exceptions
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
 
-from enums import Network
-from utils import (
+from config.enums import Network
+from src.utils import (
     get_abi,
     get_secret,
     hours,
@@ -24,7 +21,7 @@ from utils import (
     send_success_to_discord,
     send_oracle_error_to_discord,
 )
-from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
+from src.tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}

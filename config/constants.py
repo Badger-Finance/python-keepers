@@ -1,9 +1,8 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
 
-from enums import Network, Currency
+from config.enums import Network, Currency
 
 
 ETH_BVECVX_STRATEGY = "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"
@@ -50,14 +49,14 @@ FTM_STRATEGIES = [
     FTM_SMM_WFTM_SEX_STRATEGY,
     FTM_SMM_SOLID_SOLIDSEX_STRATEGY,
     FTM_SMM_WEVE_USDC_STRATEGY,
-    FTM_SMM_WBTC_RENBTC_STRATEGY
+    FTM_SMM_WBTC_RENBTC_STRATEGY,
 ]
 FTM_VAULTS = [
     FTM_SMM_BOO_XBOO_VAULT,
     FTM_SMM_WFTM_SEX_VAULT,
     FTM_SMM_SOLID_SOLIDSEX_VAULT,
     FTM_SMM_WEVE_USDC_VAULT,
-    FTM_SMM_WBTC_RENBTC_VAULT
+    FTM_SMM_WBTC_RENBTC_VAULT,
 ]
 
 

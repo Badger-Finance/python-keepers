@@ -1,18 +1,22 @@
-from decimal import Decimal
-from dotenv import load_dotenv
-from hexbytes import HexBytes
 import json
 import logging
 import os
 import requests
 import sys
+
+from decimal import Decimal
+from dotenv import load_dotenv
+from hexbytes import HexBytes
 from time import sleep
 from web3 import Web3, contract, exceptions
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from harvester import IHarvester
-from utils import confirm_transaction, send_error_to_discord, send_success_to_discord
+from src.harvester import IHarvester
+from src.utils import (
+    confirm_transaction,
+    send_error_to_discord,
+    send_success_to_discord,
+)
 
 load_dotenv()
 

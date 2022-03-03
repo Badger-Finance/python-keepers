@@ -1,21 +1,25 @@
-from decimal import Decimal
-from hexbytes import HexBytes
 import json
 import logging
 import os
 import requests
 import sys
 import traceback
+
+from decimal import Decimal
+from hexbytes import HexBytes
 from time import sleep
 from typing import Tuple
 from web3 import Web3, contract, exceptions
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
 
-from utils import (
+from config.constants import (
+    BASE_CURRENCIES,
+    EARN_OVERRIDE_THRESHOLD,
+    EARN_PCT_THRESHOLD,
+    ETH_BVECVX_STRATEGY,
+)
+from config.enums import Network, Currency
+from src.utils import (
     confirm_transaction,
     send_error_to_discord,
     send_success_to_discord,
@@ -23,14 +27,7 @@ from utils import (
     get_hash_from_failed_tx_error,
     get_token_price,
 )
-from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
-from constants import (
-    BASE_CURRENCIES,
-    EARN_OVERRIDE_THRESHOLD,
-    EARN_PCT_THRESHOLD,
-    ETH_BVECVX_STRATEGY,
-)
-from enums import Network, Currency
+from src.tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
 
 logging.basicConfig(level=logging.INFO)
 
