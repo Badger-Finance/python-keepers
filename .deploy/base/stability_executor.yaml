@@ -18,7 +18,7 @@ spec:
           - name: stability-executor-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/stability_execute.py"]
+            command: ["python", "-m", "scripts.stability_execute"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

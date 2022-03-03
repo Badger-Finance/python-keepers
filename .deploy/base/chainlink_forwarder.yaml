@@ -18,7 +18,7 @@ spec:
           - name: chainlink-forwarder-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/forward_chainlink.py"]
+            command: ["python", "-m", "scripts.forward_chainlink"]
             env:
               - name: LOG_LEVEL
                 value: 'info'
