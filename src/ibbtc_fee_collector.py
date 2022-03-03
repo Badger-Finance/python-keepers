@@ -1,6 +1,3 @@
-from decimal import Decimal
-from enum import Enum
-from hexbytes import HexBytes
 import json
 import logging
 import os
@@ -8,14 +5,14 @@ import requests
 import sys
 import time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
+from decimal import Decimal
+from enum import Enum
+from hexbytes import HexBytes
+from web3 import Web3, contract, exceptions
 
-from constants import GAS_LIMITS
-from enums import Network
-from utils import (
+from config.constants import GAS_LIMITS
+from config.enums import Network
+from src.utils import (
     get_secret,
     hours,
     confirm_transaction,
@@ -23,13 +20,12 @@ from utils import (
     send_success_to_discord,
     send_oracle_error_to_discord,
 )
-from tx_utils import (
+from src.tx_utils import (
     get_priority_fee,
     get_effective_gas_price,
     get_gas_price_of_tx,
     get_effective_gas_price,
 )
-from web3 import Web3, contract, exceptions
 
 IBBTC_CORE_ADDRESS = "0x2A8facc9D49fBc3ecFf569847833C380A13418a8"
 BTC_ETH_CHAINLINK = "0xdeb288F737066589598e9214E782fa5A8eD689e8"

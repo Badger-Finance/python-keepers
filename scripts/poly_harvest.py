@@ -2,19 +2,16 @@ import json
 import logging
 import os
 import sys
+
 from time import sleep
 from web3 import Web3, contract
 from web3.middleware import geth_poa_middleware
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
 
-from enums import Network
-from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, get_strategies_from_registry, get_node_url
-from constants import MULTICHAIN_CONFIG
+from config.constants import MULTICHAIN_CONFIG
+from config.enums import Network
+from src.general_harvester import GeneralHarvester
+from src.utils import get_abi, get_secret, get_strategies_from_registry, get_node_url
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")

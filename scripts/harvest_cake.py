@@ -2,12 +2,8 @@ import logging
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/bsc"))
-)
-
-from cake_harvester import CakeHarvester
-from utils import get_secret
+from src.bsc.cake_harvester import CakeHarvester
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

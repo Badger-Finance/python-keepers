@@ -2,18 +2,14 @@ import json
 import logging
 import os
 import sys
+
 from time import sleep
 from web3 import Web3, contract
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from earner import Earner
-from utils import get_secret, get_strategies_and_vaults, get_abi
-from constants import MULTICHAIN_CONFIG
-from enums import Network
+from config.constants import MULTICHAIN_CONFIG
+from config.enums import Network
+from src.earner import Earner
+from src.utils import get_secret, get_strategies_and_vaults, get_abi
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")

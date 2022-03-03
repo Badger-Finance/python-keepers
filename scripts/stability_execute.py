@@ -1,21 +1,16 @@
 import logging
 import os
 import sys
+
 from eth_account.account import Account
 from flashbots import flashbot
 from web3 import Web3
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/eth"))
-)
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
 
-from utils import get_secret, get_abi
-from stability_executor import StabilityExecutor
-from enums import Network
+from config.enums import Network
+from src.eth.stability_executor import StabilityExecutor
+from src.utils import get_secret, get_abi
+
 
 logging.basicConfig(level=logging.INFO)
 

@@ -2,20 +2,16 @@ import logging
 import os
 import sys
 import time
+
 from eth_account.account import Account
 from flashbots import flashbot
 from pathlib import Path
 from web3 import Web3
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from enums import Network
-from constants import MULTICHAIN_CONFIG
-from general_harvester import GeneralHarvester
-from utils import (
+from config.constants import MULTICHAIN_CONFIG
+from config.enums import Network
+from src.general_harvester import GeneralHarvester
+from src.utils import (
     get_abi,
     get_secret,
     hours,
@@ -23,7 +19,7 @@ from utils import (
     seconds_to_blocks,
     get_node_url,
 )
-from tx_utils import get_latest_base_fee
+from src.tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
