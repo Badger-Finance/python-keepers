@@ -25,3 +25,15 @@ def test_get_latest_base_fee_no_fee():
         )
     )
     assert get_latest_base_fee(web3) == default_fee
+
+
+def test_get_latest_base_fee_hex_fee():
+    hex_gas = '0x64'
+    web3 = MagicMock(
+        eth=MagicMock(
+            get_block=MagicMock(
+                return_value={"baseFeePerGas": hex_gas}
+            )
+        )
+    )
+    assert get_latest_base_fee(web3) == int(hex_gas, 0)
