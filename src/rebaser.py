@@ -10,7 +10,7 @@ from enum import Enum
 from hexbytes import HexBytes
 from web3 import Web3, contract, exceptions
 
-
+from config.constants import ETH_ETH_USD_CHAINLINK, DIGG, DIGG_ORCHESTRATOR, DIGG_POLICY, UNIV2_DIGG_WBTC, SUSHI_DIGG_WBTC
 from config.enums import Network
 from src.utils import (
     get_secret,
@@ -38,27 +38,27 @@ class Rebaser:
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
         self.eth_usd_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
+            address=self.web3.toChecksumAddress(ETH_ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
         )
         self.digg_token = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("DIGG_TOKEN_ADDRESS")),
+            address=self.web3.toChecksumAddress(DIGG),
             abi=self.__get_abi("digg_token"),
         )
         self.digg_orchestrator = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("DIGG_ORCHESTRATOR_ADDRESS")),
+            address=self.web3.toChecksumAddress(DIGG_ORCHESTRATOR),
             abi=self.__get_abi("digg_orchestrator"),
         )
         self.digg_policy = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("DIGG_POLICY_ADDRESS")),
+            address=self.web3.toChecksumAddress(DIGG_POLICY),
             abi=self.__get_abi("digg_policy"),
         )
         self.uni_pair = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("UNIV2_DIGG_WBTC_ADDRESS")),
+            address=self.web3.toChecksumAddress(UNIV2_DIGG_WBTC),
             abi=self.__get_abi("univ2_pair"),
         )
         self.sushi_pair = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("SUSHI_DIGG_WBTC_ADDRESS")),
+            address=self.web3.toChecksumAddress(SUSHI_DIGG_WBTC),
             abi=self.__get_abi("sushi_pair"),
         )
 

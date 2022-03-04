@@ -13,7 +13,7 @@ logger = logging.getLogger("tx-utils")
 
 
 def get_gas_price_of_tx(
-        web3: Web3, gas_oracle: contract, tx_hash: HexBytes, chain: str = Network.Ethereum
+    web3: Web3, gas_oracle: contract, tx_hash: HexBytes, chain: str = Network.Ethereum
 ) -> Decimal:
     """Gets the actual amount of gas used by the transaction and converts
     it from gwei to USD value for monitoring.
@@ -55,7 +55,7 @@ def get_gas_price_of_tx(
 
 
 def get_latest_base_fee(
-        web3: Web3, default: int = int(100e9)
+    web3: Web3, default: int = int(100e9)
 ) -> int:  # default to 100 gwei
     latest = web3.eth.get_block("latest")
     raw_base_fee = latest.get("baseFeePerGas", hex(default))
@@ -80,10 +80,10 @@ def get_effective_gas_price(web3: Web3) -> int:
 
 
 def get_priority_fee(
-        web3: Web3,
-        num_blocks: int = 4,
-        percentile: int = 70,
-        default_reward: int = int(10e9),
+    web3: Web3,
+    num_blocks: int = 4,
+    percentile: int = 70,
+    default_reward: int = int(10e9),
 ) -> int:
     """Calculates priority fee looking at current block - num_blocks historic
     priority fees at the given percentile and taking the average.

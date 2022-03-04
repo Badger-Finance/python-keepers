@@ -21,10 +21,4 @@ spec:
             env:
               - name: LOG_LEVEL
                 value: 'info'
-              - name: IBBTC_CORE_ADDRESS
-                value: '0x2A8facc9D49fBc3ecFf569847833C380A13418a8'
-              - name: BTC_ETH_CHAINLINK
-                value: '0xdeb288F737066589598e9214E782fa5A8eD689e8'
-              - name: ETH_USD_CHAINLINK
-                value: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
           restartPolicy: OnFailure

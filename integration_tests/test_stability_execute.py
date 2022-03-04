@@ -5,7 +5,11 @@ import pytest
 from brownie import accounts, Contract, web3
 from web3 import contract
 
-from config.constants import ETH_ETH_USD_CHAINLINK, ETH_KEEPER_ACL, ETH_STABILIZE_STRATEGY
+from config.constants import (
+    ETH_ETH_USD_CHAINLINK,
+    ETH_KEEPER_ACL,
+    ETH_STABILIZE_STRATEGY,
+)
 from src.utils import get_abi
 from integration_tests.utils import test_address, test_key
 from src.eth.stability_executor import StabilityExecutor

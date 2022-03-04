@@ -9,7 +9,8 @@ from config.constants import (
     MULTICHAIN_CONFIG,
     ETH_CVX_CRV_HELPER_STRATEGY,
     ETH_HBTC_CRV_STRATEGY,
-    ETH_SLP_DIGG_WBTC_STRATEGY, XSUSHI
+    ETH_SLP_DIGG_WBTC_STRATEGY,
+    XSUSHI,
 )
 from src.general_harvester import GeneralHarvester
 from src.utils import (

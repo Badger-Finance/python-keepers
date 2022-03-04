@@ -7,6 +7,12 @@ import logging
 import requests
 import os
 
+from config.constants import (
+    ETH_ETH_USD_CHAINLINK,
+    DIGG_CENTRALIZED_ORACLE,
+    DIGG_CHAINLINK_FORWARDER,
+    ETH_DIGG_BTC_CHAINLINK,
+)
 from src.oracle import Oracle
 from src.utils import get_abi
 from integration_tests.utils import test_address, test_key, mock_send_discord
@@ -27,9 +33,6 @@ os.environ[
     "SUSHI_SUBGRAPH"
 ] = "https://api.thegraph.com/subgraphs/name/sushiswap/exchange"
 os.environ["SUSHI_PAIR"] = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
-os.environ["CENTRALIZED_ORACLE"] = "0x73083058e0f61D3fc7814eEEDc39F9608B4546d7"
-os.environ["CHAINLINK_FORWARDER"] = "0xB572f69edbfC946af11a1b3ef8D5c2f41D38a642"
-os.environ["DIGG_BTC_CHAINLINK"] = "0x418a6c98cd5b8275955f08f0b8c1c6838c8b1685"
 
 
 def mock_send_error(tx_type: str, error: Exception):
