@@ -17,7 +17,7 @@ failing_tests="failures:"
 
 for i in "${eth_tests[@]}"
 do
-    if brownie test tests/"$i".py --network=hardhat-fork; then
+    if brownie test integration_tests/"$i".py --network=hardhat-fork; then
         continue
     else
         failing_tests="$failing_tests $i"
