@@ -1,12 +1,12 @@
+import os
+import sys
+
 from decimal import Decimal
 from hexbytes import HexBytes
-import os
-from src.eth.sushi_harvester import SushiHarvester
-import sys
 from web3 import contract
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
+from src.eth.sushi_harvester import SushiHarvester
 from src.utils import send_success_to_discord, send_error_to_discord
 
 CHEF = "0xc2EdaD668740f1aA35E4D8f227fB8E17dcA888Cd"

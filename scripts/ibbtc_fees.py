@@ -2,14 +2,9 @@ import logging
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from enums import Network
-from ibbtc_fee_collector import ibBTCFeeCollector
-from utils import get_secret, get_node_url
+from config.enums import Network
+from src.ibbtc_fee_collector import ibBTCFeeCollector
+from src.utils import get_secret, get_node_url
 
 logging.basicConfig(level=logging.INFO)
 

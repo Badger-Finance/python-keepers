@@ -1,11 +1,10 @@
 import logging
 import os
 import sys
+
 from time import sleep
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-
-from sushi_harvester import SushiHarvester
+from src.eth.sushi_harvester import SushiHarvester
 
 logging.basicConfig(level=logging.INFO)
 

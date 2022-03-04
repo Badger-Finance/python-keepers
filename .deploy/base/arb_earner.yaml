@@ -18,7 +18,7 @@ spec:
           - name: arb-earner-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/arbitrum_earn.py"]
+            command: ["python", "-m", "scripts.arbitrum_earn"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

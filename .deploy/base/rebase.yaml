@@ -18,7 +18,7 @@ spec:
           - name: rebase-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/rebase.py"]
+            command: ["python", "-m", "scripts.rebase"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

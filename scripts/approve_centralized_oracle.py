@@ -3,10 +3,8 @@ import os
 import sys
 from time import sleep, time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-
-from oracle import Oracle
-from utils import get_secret
+from src.oracle import Oracle
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

@@ -17,7 +17,7 @@ spec:
           - name: ftm-earner-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/ftm_earn.py"]
+            command: ["python", "-m", "scripts.ftm_earn"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

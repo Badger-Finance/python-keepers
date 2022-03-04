@@ -1,15 +1,13 @@
-from decimal import Decimal
-from hexbytes import HexBytes
 import logging
 import os
 import sys
+
+from decimal import Decimal
+from hexbytes import HexBytes
 from web3 import Web3, contract, exceptions
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
 
-from enums import Network
+from config.enums import Network
 
 logger = logging.getLogger("tx-utils")
 

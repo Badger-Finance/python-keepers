@@ -1,28 +1,26 @@
-import boto3
 import base64
-from botocore.exceptions import ClientError
-from decimal import Decimal
-from discord import Webhook, RequestsWebhookAdapter, Embed
-from hexbytes import HexBytes
+import boto3
 import json
 import logging
-from web3 import Web3, contract, exceptions
 import requests
 import sys
 import os
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
+from botocore.exceptions import ClientError
+from decimal import Decimal
+from discord import Webhook, RequestsWebhookAdapter, Embed
+from hexbytes import HexBytes
+from web3 import Web3, contract, exceptions
 
-from constants import (
+
+from config.constants import (
     MULTICHAIN_CONFIG,
     SECONDS_IN_A_DAY,
     BLOCKS_IN_A_DAY,
     ABI_DIRS,
     NODE_URL_SECRET_NAMES,
 )
-from enums import Network
+from config.enums import Network
 
 logger = logging.getLogger("utils")
 

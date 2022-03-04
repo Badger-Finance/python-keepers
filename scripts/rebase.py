@@ -1,16 +1,13 @@
 import logging
 import os
 import sys
+
 from time import sleep
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
 
-from enums import Network
-from rebaser import Rebaser
-from utils import get_secret, get_node_url
+from config.enums import Network
+from src.rebaser import Rebaser
+from src.utils import get_secret, get_node_url
 
 logging.basicConfig(level=logging.INFO)
 

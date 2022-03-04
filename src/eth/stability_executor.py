@@ -1,27 +1,24 @@
-from decimal import Decimal
-from hexbytes import HexBytes
 import logging
 import os
 import sys
+
+from decimal import Decimal
+from hexbytes import HexBytes
 from web3 import Web3, contract
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../config"))
-)
 
-from utils import (
+from config.enums import Network
+from src.tx_utils import (
+    get_gas_price_of_tx,
+    get_effective_gas_price,
+    get_priority_fee,
+)
+from src.utils import (
     confirm_transaction,
     send_error_to_discord,
     send_success_to_discord,
     get_abi,
 )
-from tx_utils import (
-    get_gas_price_of_tx,
-    get_effective_gas_price,
-    get_priority_fee,
-)
-from enums import Network
 
 logging.basicConfig(level=logging.INFO)
 

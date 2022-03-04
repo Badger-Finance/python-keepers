@@ -2,18 +2,11 @@ import json
 import logging
 import os
 import sys
+
 from time import sleep
 from web3 import Web3, contract
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from earner import Earner
-from utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
-from tx_utils import get_latest_base_fee
-from constants import (
+from config.constants import (
     MULTICHAIN_CONFIG,
     ETH_YVWBTC_VAULT,
     ETH_TRICRYPTO_VAULT,
@@ -27,7 +20,10 @@ from constants import (
     ETH_FRAX_CRV_VAULT,
     ETH_MIM_CRV_VAULT,
 )
-from enums import Network
+from config.enums import Network
+from src.earner import Earner
+from src.utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
+from src.tx_utils import get_latest_base_fee
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
