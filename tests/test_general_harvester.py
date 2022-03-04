@@ -5,7 +5,12 @@ from decimal import Decimal
 from hexbytes import HexBytes
 from web3 import contract
 
-from config.constants import MULTICHAIN_CONFIG
+from config.constants import (
+    MULTICHAIN_CONFIG,
+    ETH_CVX_CRV_HELPER_STRATEGY,
+    ETH_HBTC_CRV_STRATEGY,
+    ETH_SLP_DIGG_WBTC_STRATEGY, XSUSHI
+)
 from src.general_harvester import GeneralHarvester
 from src.utils import (
     get_abi,
@@ -24,15 +29,6 @@ KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG[Network.Ethereum]["keeper_
 REWARDS_MANAGER = web3.toChecksumAddress(
     MULTICHAIN_CONFIG[Network.Ethereum]["rewards_manager"]
 )
-CVX_HELPER_STRATEGY = web3.toChecksumAddress(
-    "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95"
-)
-CVX_CRV_HELPER_STRATEGY = web3.toChecksumAddress(
-    "0x826048381d65a65DAa51342C51d464428d301896"
-)
-HBTC_STRATEGY = web3.toChecksumAddress("0xf4146A176b09C664978e03d28d07Db4431525dAd")
-DIGG_STRATEGY = web3.toChecksumAddress("0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a")
-XSUSHI = "0x8798249c2e607446efb7ad49ec89dd1865ff4272"
 
 
 def mock_get_last_harvest_times(web3, keeper_acl, start_block):
@@ -105,7 +101,7 @@ def setup_rewards_manager(keeper_address):
 @pytest.fixture
 def strategy() -> contract:
     return web3.eth.contract(
-        address=CVX_CRV_HELPER_STRATEGY,
+        address=ETH_CVX_CRV_HELPER_STRATEGY,
         abi=get_abi(Network.Ethereum, "strategy"),
     )
 
@@ -113,7 +109,7 @@ def strategy() -> contract:
 @pytest.fixture
 def rewards_manager_strategy() -> contract:
     return web3.eth.contract(
-        address=DIGG_STRATEGY,
+        address=ETH_SLP_DIGG_WBTC_STRATEGY,
         abi=get_abi(Network.Ethereum, "strategy"),
     )
 
@@ -121,7 +117,7 @@ def rewards_manager_strategy() -> contract:
 @pytest.fixture
 def btc_strategy() -> contract:
     return web3.eth.contract(
-        address=HBTC_STRATEGY, abi=get_abi(Network.Ethereum, "strategy")
+        address=ETH_HBTC_CRV_STRATEGY, abi=get_abi(Network.Ethereum, "strategy")
     )
 
 

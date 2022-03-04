@@ -7,7 +7,7 @@ from hexbytes import HexBytes
 from time import sleep
 from web3 import Web3, contract, exceptions
 
-
+from config.constants import DIGG
 from config.enums import Network
 from src.utils import (
     confirm_transaction,
@@ -25,7 +25,6 @@ logging.basicConfig(level=logging.INFO)
 
 GAS_LIMIT = 1000000
 MAX_GAS_PRICE = int(200e9)  # 200 gwei
-DIGG_TOKEN = "0x798D1bE841a82a273720CE31c822C61a67a601C3"
 NUM_FLASHBOTS_BUNDLES = 6
 
 
@@ -54,7 +53,7 @@ class Rebalancer:
             abi=get_abi(self.chain, "oracle"),
         )
         self.digg = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(DIGG_TOKEN),
+            address=self.web3.toChecksumAddress(DIGG),
             abi=get_abi(self.chain, "erc20"),
         )
 

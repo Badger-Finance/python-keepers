@@ -8,6 +8,7 @@ from flashbots import flashbot
 from pathlib import Path
 from web3 import Web3
 
+from config.constants import ETH_ETH_USD_CHAINLINK, ETH_KEEPER_ACL
 from config.enums import Network
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_secret, get_node_url
@@ -15,30 +16,7 @@ from src.utils import get_abi, get_secret, get_node_url
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
-ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
-
-strategies = {
-    # "0xBCee2c6CfA7A4e29892c3665f464Be5536F16D95",  # CVX_HELPER_STRATEGY
-    # "0x826048381d65a65DAa51342C51d464428d301896",  # CVX_CRV_HELPER_STRATEGY
-    # "0xff26f400e57bf726822eacbb64fa1c52f1f27988",  # HBTC_CRV_STRATEGY
-    # "0x1C1fD689103bbFD701b3B7D41A3807F12814033D",  # PBTC_CRV_STRATEGY
-    # "0x2bb864cdb4856ab2d148c5ca52dd7ccec126d138",  # OBTC_CRV_STRATEGY
-    # "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0",  # BBTC_CRV_STRATEGY
-    # "0x05ec4356e1acd89cc2d16adc7415c8c95e736ac1",  # TRICRYPTO_CRV_STRATEGY
-    # "0x6582a5b139fc1c6360846efdc4440d51aad4df7b",  # native.renCrv
-    # "0xf1ded284e891943b3e9c657d7fc376b86164ffc2",  # native.sbtcCrv
-    # "0x522bb024c339a12be1a47229546f288c40b62d29",  # native.tbtcCrv
-    # "0x95826C65EB1f2d2F0EDBb7EcB176563B61C60bBf",  # native.uniBadgerWbtc
-    # "0xaaE82E3c89e15E6F26F60724f115d5012363e030",  # harvest.renCrv
-    # "0x7A56d65254705B4Def63c68488C0182968C452ce",  # native.sushiWbtcEth
-    # "0x3a494D79AA78118795daad8AeFF5825C6c8dF7F1",  # native.sushiBadgerWbtc
-    # "0xaa8dddfe7DFA3C3269f1910d89E4413dD006D08a",  # native.sushiDiggWbtc
-    # "0xf4146A176b09C664978e03d28d07Db4431525dAd",  # experimental.sushiIBbtcWbtc
-    "0x61e16b46F74aEd8f9c2Ec6CB2dCb2258Bdfc7071",  # native.renCrv
-    "0x647eeb5C5ED5A71621183f09F6CE8fa66b96827d",  # TRICRYPTO_CRV_STRATEGY
-    "0x6D4BA00Fd7BB73b5aa5b3D6180c6f1B0c89f70D1",  # crv ibbtc
-}
+strategies = {}
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
@@ -81,10 +59,10 @@ if __name__ == "__main__":
 
     harvester = GeneralHarvester(
         web3=web3,
-        keeper_acl=KEEPER_ACL,
+        keeper_acl=ETH_KEEPER_ACL,
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=ETH_USD_CHAINLINK,
+        base_oracle_address=ETH_ETH_USD_CHAINLINK,
         use_flashbots=False,
     )
 

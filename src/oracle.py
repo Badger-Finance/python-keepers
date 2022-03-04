@@ -10,7 +10,7 @@ from hexbytes import HexBytes
 from traceback import format_exc
 from web3 import Web3, contract, exceptions
 
-
+from config.constants import WETH
 from config.enums import Network
 from src.utils import (
     get_abi,
@@ -25,7 +25,6 @@ from src.tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_ga
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
-WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 GAS_LIMIT = 200_000
 NEGATIVE_THRESHOLD = 0.95
 
@@ -264,7 +263,7 @@ class Oracle:
         price_identifier = "DIGGBTC".encode("utf-8")
         today_timestamp = round(self._get_today_report_datetime().timestamp())
         ancillary_data = HexBytes(0)
-        currency = WETH_ADDRESS
+        currency = WETH
         reward = 0
 
         """

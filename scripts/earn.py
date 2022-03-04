@@ -6,7 +6,7 @@ import sys
 from time import sleep
 from web3 import Web3, contract
 
-from config.constants import MULTICHAIN_CONFIG
+from config.constants import MULTICHAIN_CONFIG, POLY_OLD_STRATEGY
 from config.enums import Network
 from src.earner import Earner
 from src.utils import get_secret, get_strategies_and_vaults, get_node_url
@@ -14,7 +14,7 @@ from src.utils import get_secret, get_strategies_and_vaults, get_node_url
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")
 
-INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
+INVALID_STRATS = [POLY_OLD_STRATEGY]
 
 
 def safe_earn(earner, sett_name, vault, strategy):
