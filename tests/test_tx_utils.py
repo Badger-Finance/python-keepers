@@ -13,3 +13,15 @@ def test_get_latest_base_fee():
         )
     )
     assert get_latest_base_fee(web3) == base_fee
+
+
+def test_get_latest_base_fee_no_fee():
+    default_fee = int(100e9)
+    web3 = MagicMock(
+        eth=MagicMock(
+            get_block=MagicMock(
+                return_value={}
+            )
+        )
+    )
+    assert get_latest_base_fee(web3) == default_fee
