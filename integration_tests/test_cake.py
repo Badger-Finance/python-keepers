@@ -7,7 +7,7 @@ import requests
 import os
 
 from src.bsc.cake_harvester import CakeHarvester
-from tests.utils import *
+from integration_tests.utils import *
 
 os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")
 

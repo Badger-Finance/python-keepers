@@ -9,7 +9,7 @@ import os
 from src.eth.sushi_harvester import SushiHarvester
 from src.eth.sushi_tender import SushiTender
 from src.utils import get_abi
-from tests.utils import *
+from integration_tests.utils import *
 from config.enums import Network
 
 os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")

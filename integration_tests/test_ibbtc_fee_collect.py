@@ -6,7 +6,7 @@ from web3 import Web3
 import requests
 import os
 
-import tests.utils as test_utils
+import integration_tests.utils as test_utils
 
 from src.ibbtc_fee_collector import ibBTCFeeCollector
 

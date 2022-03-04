@@ -8,7 +8,7 @@ from web3 import contract
 from config.constants import MULTICHAIN_CONFIG
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from config.enums import Network
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(

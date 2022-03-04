@@ -14,7 +14,7 @@ from src.utils import (
     get_secret,
     seconds_to_blocks,
 )
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from config.enums import Network
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(
