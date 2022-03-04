@@ -1,0 +1,6 @@
+[run]
+omit =
+    abi/*
+    tests/*
+    integration_tests/*
+    scripts/*
