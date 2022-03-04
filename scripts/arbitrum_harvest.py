@@ -14,10 +14,6 @@ from src.utils import get_abi, get_secret, get_strategies_from_registry
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)
 
-# strategies = {
-#     "0x86f772C82914f5bFD168f99e208d0FC2C371e9C2",  # WETH-SUSHI-SLP
-#     "0xA6827f0f14D0B83dB925B616d820434697328c22",  # WBTC-WETH-SLP
-# }
 
 # TODO: Add conditional harvest logic
 def safe_harvest(harvester, strategy) -> str:

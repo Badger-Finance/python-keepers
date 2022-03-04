@@ -5,7 +5,13 @@ from decimal import Decimal
 from hexbytes import HexBytes
 from web3 import contract
 
-from config.constants import MULTICHAIN_CONFIG
+from config.constants import (
+    MULTICHAIN_CONFIG,
+    MSTABLE_VOTER_PROXY,
+    ETH_MBTC_HBTC_STRATEGY,
+    ETH_IBMBTC_STRATEGY,
+    MTA,
+)
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours
 from integration_tests.utils import test_address, test_key
@@ -16,12 +22,8 @@ ETH_USD_CHAINLINK = web3.toChecksumAddress(
 )
 KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"])
 
-MSTABLE_VOTER_PROXY = "0x10D96b1Fd46Ce7cE092aA905274B8eD9d4585A6E"
-MSTABLE_STRATEGIES = [
-    "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
-    "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
-]
-MTA = "0xa3bed4e1c75d00fa6f4e5e6922db7261b5e9acd2"
+
+MSTABLE_STRATEGIES = [ETH_MBTC_HBTC_STRATEGY, ETH_IBMBTC_STRATEGY]
 
 
 def mock_get_last_harvest_times(web3, keeper_acl, start_block):

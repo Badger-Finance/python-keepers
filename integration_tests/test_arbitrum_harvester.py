@@ -5,22 +5,16 @@ from decimal import Decimal
 from hexbytes import HexBytes
 from web3 import contract
 
+from config.constants import (
+    ARB_ETH_USD_CHAINLINK,
+    ARB_KEEPER_ACL,
+    ARB_SLP_WBTC_WETH_STRATEGY,
+    ARB_SLP_WETH_SUSHI_STRATEGY,
+)
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
 from integration_tests.utils import test_address, test_key
 from config.enums import Network
-
-ETH_USD_CHAINLINK = web3.toChecksumAddress("0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612")
-KEEPER_ACL = web3.toChecksumAddress("0x265820F3779f652f2a9857133fDEAf115b87db4B")
-
-WBTC_WETH_SLP_STRATEGY = "0xA6827f0f14D0B83dB925B616d820434697328c22"  # WBTC-WETH-SLP
-WETH_SUSHI_SLP_STRATEGY = "0x86f772C82914f5bFD168f99e208d0FC2C371e9C2"  # WETH-SUSHI-SLP
-
-
-# def mock_get_last_harvest_times(web3, keeper_acl, start_block):
-#     return get_last_harvest_times(
-#         web3, keeper_acl, start_block, etherscan_key=os.getenv("ETHERSCAN_TOKEN")
-#     )
 
 
 def mock_send_discord(
@@ -41,9 +35,6 @@ def mock_fns(monkeypatch):
     monkeypatch.setattr(
         "src.general_harvester.send_success_to_discord", mock_send_discord
     )
-    # monkeypatch.setattr(
-    #     "src.general_harvester.get_last_harvest_times", mock_get_last_harvest_times
-    # )
 
 
 @pytest.fixture
@@ -60,7 +51,7 @@ def keeper_address() -> str:
 def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
-        KEEPER_ACL,
+        ARB_KEEPER_ACL,
         get_abi(Network.Ethereum, "keeper_acl"),
     )
     harvester_key = keeper_acl.HARVESTER_ROLE()
@@ -83,15 +74,15 @@ def harvester(keeper_address, keeper_key) -> GeneralHarvester:
     return GeneralHarvester(
         chain=Network.Arbitrum,
         web3=web3,
-        keeper_acl=KEEPER_ACL,
+        keeper_acl=ARB_KEEPER_ACL,
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=ETH_USD_CHAINLINK,
+        base_oracle_address=ARB_ETH_USD_CHAINLINK,
     )
 
 
 @pytest.mark.parametrize(
-    "strategy", [WBTC_WETH_SLP_STRATEGY, WETH_SUSHI_SLP_STRATEGY], indirect=True
+    "strategy", [ARB_SLP_WBTC_WETH_STRATEGY, ARB_SLP_WETH_SUSHI_STRATEGY], indirect=True
 )
 @pytest.mark.require_network("hardhat-arbitrum-fork")
 def test_harvest(keeper_address, harvester, strategy):

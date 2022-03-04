@@ -6,7 +6,11 @@ from eth_account.account import Account
 from flashbots import flashbot
 from web3 import Web3
 
-
+from config.constants import (
+    ETH_ETH_USD_CHAINLINK,
+    ETH_KEEPER_ACL,
+    ETH_STABILIZE_STRATEGY,
+)
 from config.enums import Network
 from src.eth.stability_executor import StabilityExecutor
 from src.utils import get_secret, get_abi
@@ -14,9 +18,6 @@ from src.utils import get_secret, get_abi
 
 logging.basicConfig(level=logging.INFO)
 
-ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
-STABILIZE_STRAT = "0xA6af1B913E205B8E9B95D3B30768c0989e942316"
 
 if __name__ == "__main__":
 
@@ -34,15 +35,15 @@ if __name__ == "__main__":
     web3 = Web3(Web3.HTTPProvider(node_url))
 
     strategy = web3.eth.contract(
-        address=STABILIZE_STRAT, abi=get_abi(Network.Ethereum, "stability_strat")
+        address=ETH_STABILIZE_STRATEGY, abi=get_abi(Network.Ethereum, "stability_strat")
     )
 
     stability_executor = StabilityExecutor(
         web3=web3,
-        keeper_acl=KEEPER_ACL,
+        keeper_acl=ETH_KEEPER_ACL,
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=ETH_USD_CHAINLINK,
+        base_oracle_address=ETH_ETH_USD_CHAINLINK,
         use_flashbots=False,
     )
 

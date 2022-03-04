@@ -10,7 +10,12 @@ from enum import Enum
 from hexbytes import HexBytes
 from web3 import Web3, contract, exceptions
 
-from config.constants import GAS_LIMITS
+from config.constants import (
+    GAS_LIMITS,
+    IBBTC_CORE_ADDRESS,
+    ETH_BTC_ETH_CHAINLINK,
+    ETH_ETH_USD_CHAINLINK,
+)
 from config.enums import Network
 from src.utils import (
     get_secret,
@@ -27,9 +32,6 @@ from src.tx_utils import (
     get_effective_gas_price,
 )
 
-IBBTC_CORE_ADDRESS = "0x2A8facc9D49fBc3ecFf569847833C380A13418a8"
-BTC_ETH_CHAINLINK = "0xdeb288F737066589598e9214E782fa5A8eD689e8"
-
 FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 
 
@@ -45,15 +47,15 @@ class ibBTCFeeCollector:
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
         self.eth_usd_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
+            address=self.web3.toChecksumAddress(ETH_ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
         )
         self.btc_eth_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("BTC_ETH_CHAINLINK")),
+            address=self.web3.toChecksumAddress(ETH_BTC_ETH_CHAINLINK),
             abi=self.__get_abi("oracle"),
         )
         self.ibbtc = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("IBBTC_CORE_ADDRESS")),
+            address=self.web3.toChecksumAddress(IBBTC_CORE_ADDRESS),
             abi=self.__get_abi("ibbtc_core"),
         )
 
