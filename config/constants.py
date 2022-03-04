@@ -26,6 +26,7 @@ UNI_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2"
 SUSHI_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/sushiswap/exchange"
 
 ETH_KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
+ETH_REWARDS_MANAGER = "0x5B60952481Eb42B66bdfFC3E049025AC5b91c127"
 
 ETH_BVECVX_STRATEGY = "0x3ff634ce65cDb8CC0D569D6d1697c41aa666cEA9"
 ETH_RETIRED_CVX_STRATEGY = "0x87fB47c2B9EB41d362BAb44F5Ec81514b6b1de13"
@@ -94,6 +95,7 @@ FTM_VAULTS = [
 
 ARB_KEEPER_ACL = "0x265820F3779f652f2a9857133fDEAf115b87db4B"
 ARB_ETH_USD_CHAINLINK = "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612"
+ARB_VAULT_OWNER_1 = "0xc388750A661cC0B99784bAB2c55e1F38ff91643b"
 
 ARB_SWAPR_SWAPR_WETH_STRATEGY = "0x85386C3cE0679b035a9F8F17f531C076d0b35954"
 ARB_SWAPR_WBTC_WETH_STRATEGY = "0x43942cEae98CC7485B48a37fBB1aa5035e1c8B46"
@@ -105,35 +107,44 @@ ARB_SLP_WETH_SUSHI_VAULT = "0xe774d1fb3133b037aa17d39165b8f45f444f632d"
 
 POLY_OLD_STRATEGY_1 = "0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"
 POLY_OLD_STRATEGY_2 = "0xF8F02D0d41C79a1973f65A440C98acAc7eAA8Dc1"
+POLY_MATIC_USD_CHAINLNK = "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0"
+POLY_KEEPER_ACL = "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2"
+
+REGISTRY = "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f"
+
+OPS_DEPLOYER_2 = "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556"
+OPS_EXECUTOR_4 = "0xbb2281ca5b4d07263112604d1f182ad0ab26a252"
+OPS_DEPLOYER_3 = "0x283c857ba940a61828d9f4c09e3fcee2e7aef3f7"
+OPS_DEPLOYER_6 = "0x7c1D678685B9d2F65F1909b9f2E544786807d46C"
 
 MULTICHAIN_CONFIG = {
     Network.Polygon: {
-        "gas_oracle": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
-        "keeper_acl": "0x46fa8817624eea8052093eab8e3fdf0e2e0443b2",
-        "vault_owner": ["0xeE8b29AA52dD5fF2559da2C50b1887ADee257556"],
-        "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
+        "gas_oracle": POLY_MATIC_USD_CHAINLNK,
+        "keeper_acl": POLY_KEEPER_ACL,
+        "vault_owner": [OPS_DEPLOYER_2],
+        "registry": REGISTRY,
         "earn": {"invalid_strategies": []},
     },
     Network.Arbitrum: {
-        "gas_oracle": "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612",
+        "gas_oracle": ARB_ETH_USD_CHAINLINK,
         "keeper_acl": ARB_KEEPER_ACL,
         "vault_owner": [
-            "0xeE8b29AA52dD5fF2559da2C50b1887ADee257556",
-            "0xbb2281ca5b4d07263112604d1f182ad0ab26a252",
-            "0x283c857ba940a61828d9f4c09e3fcee2e7aef3f7",
-            "0xc388750A661cC0B99784bAB2c55e1F38ff91643b",
-            "0x7c1D678685B9d2F65F1909b9f2E544786807d46C",
+            OPS_DEPLOYER_2,
+            OPS_EXECUTOR_4,
+            OPS_DEPLOYER_3,
+            ARB_VAULT_OWNER_1,
+            OPS_DEPLOYER_6,
         ],
-        "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
+        "registry": REGISTRY,
         "earn": {"invalid_strategies": []},
         "harvest": {"invalid_strategies": []},
     },
     Network.Ethereum: {
         "gas_oracle": ETH_ETH_USD_CHAINLINK,
         "keeper_acl": ETH_KEEPER_ACL,
-        "vault_owner": ["0xeE8b29AA52dD5fF2559da2C50b1887ADee257556"],
-        "registry": "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f",
-        "rewards_manager": "0x5B60952481Eb42B66bdfFC3E049025AC5b91c127",
+        "vault_owner": [OPS_DEPLOYER_2],
+        "registry": REGISTRY,
+        "rewards_manager": ETH_REWARDS_MANAGER,
         "earn": {
             "invalid_strategies": [
                 ETH_BVECVX_STRATEGY,
