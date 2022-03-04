@@ -9,7 +9,7 @@ import os
 
 from src.oracle import Oracle
 from src.utils import get_abi
-from tests.utils import test_address, test_key, mock_send_discord
+from integration_tests.utils import test_address, test_key, mock_send_discord
 from config.enums import Network
 
 logger = logging.getLogger("test-oracle")

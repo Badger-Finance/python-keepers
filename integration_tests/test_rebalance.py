@@ -6,7 +6,7 @@ from brownie import accounts, Contract, web3
 from web3 import contract
 
 from src.utils import get_abi
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from src.eth.rebalancer import Rebalancer
 from config.enums import Network
 

@@ -7,7 +7,7 @@ import requests
 import os
 
 from src.rebaser import Rebaser
-from tests.utils import *
+from integration_tests.utils import *
 
 os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")
 os.environ["ETH_USD_CHAINLINK"] = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
