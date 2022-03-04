@@ -14,7 +14,7 @@ from src.utils import (
     get_secret,
     get_strategies_and_vaults,
 )
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from config.constants import (
     EARN_OVERRIDE_THRESHOLD,
     EARN_PCT_THRESHOLD,

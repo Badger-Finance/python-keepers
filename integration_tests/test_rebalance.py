@@ -7,7 +7,7 @@ from web3 import contract
 
 from config.constants import ETH_ETH_USD_CHAINLINK, ETH_KEEPER_ACL, ETH_STABILIZE_STRATEGY
 from src.utils import get_abi
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from src.eth.rebalancer import Rebalancer
 from config.enums import Network
 

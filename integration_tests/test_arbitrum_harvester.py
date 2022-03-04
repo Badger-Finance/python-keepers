@@ -13,7 +13,7 @@ from config.constants import (
 )
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from config.enums import Network
 
 

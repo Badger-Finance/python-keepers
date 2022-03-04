@@ -16,7 +16,7 @@ from config.constants import (
 )
 from src.earner import Earner
 from src.utils import get_abi, get_last_harvest_times, hours, get_secret
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from config.constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
 from config.enums import Network
 
