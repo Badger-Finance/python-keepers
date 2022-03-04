@@ -58,7 +58,7 @@ def keeper_address() -> str:
 @pytest.fixture(autouse=True)
 def patch_rebalancer(monkeypatch):
     monkeypatch.setattr("src.eth.rebalancer.send_success_to_discord", mock_send_discord)
-    monkeypatch.setattr("tests.test_rebalance.web3.eth.fee_history", mock_fee_history)
+    monkeypatch.setattr("integration_tests.test_rebalance.web3.eth.fee_history", mock_fee_history)
 
 
 @pytest.fixture(autouse=True)
