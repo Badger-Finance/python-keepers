@@ -17,7 +17,6 @@ from config.constants import SUSHI_DIGG_WBTC
 from config.constants import SUSHI_SUBGRAPH
 from config.constants import UNIV2_DIGG_WBTC
 from config.constants import UNI_SUBGRAPH
-from config.constants import WETH
 from config.enums import Network
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
