@@ -121,7 +121,7 @@ class GeneralHarvester(IHarvester):
 
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("harvest"):
-            raise ValueError(f"Keeper ACL is not whitelisted for calling harvest")
+            raise ValueError("Keeper ACL is not whitelisted for calling harvest")
 
         want_address = strategy.functions.want().call()
         want = self.web3.eth.contract(
@@ -163,7 +163,7 @@ class GeneralHarvester(IHarvester):
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("harvestNoReturn"):
             raise ValueError(
-                f"Keeper ACL is not whitelisted for calling harvestNoReturn"
+                "Keeper ACL is not whitelisted for calling harvestNoReturn"
             )
 
         want_address = strategy.functions.want().call()
@@ -229,7 +229,7 @@ class GeneralHarvester(IHarvester):
     ):
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("harvestMta"):
-            raise ValueError(f"Keeper ACL is not whitelisted for calling harvestMta")
+            raise ValueError("Keeper ACL is not whitelisted for calling harvestMta")
 
         gas_fee = self.estimate_gas_fee(voter_proxy.address, function="harvestMta")
         self.logger.info(f"estimated gas cost: {gas_fee}")
@@ -244,7 +244,7 @@ class GeneralHarvester(IHarvester):
         strategy_name = strategy.functions.getName().call()
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("tend"):
-            raise ValueError(f"Keeper ACL is not whitelisted for calling tend")
+            raise ValueError("Keeper ACL is not whitelisted for calling tend")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
@@ -430,7 +430,7 @@ class GeneralHarvester(IHarvester):
                 )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
-                    tx_type=f"Harvest MTA",
+                    tx_type="Harvest MTA",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
@@ -438,7 +438,7 @@ class GeneralHarvester(IHarvester):
                 )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(
-                    tx_type=f"Harvest MTA",
+                    tx_type="Harvest MTA",
                     tx_hash=tx_hash,
                     chain=self.chain,
                     url=self.discord_url,
