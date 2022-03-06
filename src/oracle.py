@@ -1,37 +1,32 @@
 import json
 import logging
 import os
-import requests
-import sys
-
-from datetime import datetime, timezone
-from decimal import Decimal
-from hexbytes import HexBytes
+from datetime import datetime
+from datetime import timezone
 from traceback import format_exc
-from web3 import Web3, contract, exceptions
 
-from config.constants import (
-    WETH,
-    ETH_ETH_USD_CHAINLINK,
-    DIGG_CENTRALIZED_ORACLE,
-    DIGG_CHAINLINK_FORWARDER,
-    ETH_DIGG_BTC_CHAINLINK,
-    UNI_SUBGRAPH,
-    SUSHI_SUBGRAPH,
-    UNIV2_DIGG_WBTC,
-    SUSHI_DIGG_WBTC
-)
+import requests
+from hexbytes import HexBytes
+from web3 import Web3
+
+from config.constants import DIGG_CENTRALIZED_ORACLE
+from config.constants import DIGG_CHAINLINK_FORWARDER
+from config.constants import ETH_DIGG_BTC_CHAINLINK
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import SUSHI_DIGG_WBTC
+from config.constants import SUSHI_SUBGRAPH
+from config.constants import UNIV2_DIGG_WBTC
+from config.constants import UNI_SUBGRAPH
+from config.constants import WETH
 from config.enums import Network
-from src.utils import (
-    get_abi,
-    get_secret,
-    hours,
-    confirm_transaction,
-    get_hash_from_failed_tx_error,
-    send_success_to_discord,
-    send_oracle_error_to_discord,
-)
-from src.tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_abi
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import send_oracle_error_to_discord
+from src.utils import send_success_to_discord
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
@@ -173,7 +168,8 @@ class Oracle:
         """Calculates 24 hour TWAP for digg based on sushi and uni wbtc / digg pools
 
         Returns:
-            [int]: average of 24 hour TWAP for sushi and uni wbtc / digg pools time 10^18 (digg decimal places)
+            [int]: average of 24 hour TWAP for sushi and
+            uni wbtc / digg pools time 10^18 (digg decimal places)
         """
 
         uni_twap_data = self.send_twap_query(
@@ -306,15 +302,15 @@ class Oracle:
                 )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
-                    tx_type=f"Chainlink Forwarder",
+                    tx_type="Chainlink Forwarder",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                 )
             elif tx_hash != HexBytes(0):
-                send_success_to_discord(tx_type=f"Chainlink Forwarder", tx_hash=tx_hash)
+                send_success_to_discord(tx_type="Chainlink Forwarder", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing chainlink tx: {e}")
-            send_oracle_error_to_discord(tx_type=f"Chainlink Forwarder", error=e)
+            send_oracle_error_to_discord(tx_type="Chainlink Forwarder", error=e)
 
     def __send_chainlink_tx(self) -> HexBytes:
         """Sends transaction to ETH node for confirmation.

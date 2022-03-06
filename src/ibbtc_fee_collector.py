@@ -1,36 +1,23 @@
 import json
 import logging
 import os
-import requests
-import sys
-import time
-
 from decimal import Decimal
-from enum import Enum
-from hexbytes import HexBytes
-from web3 import Web3, contract, exceptions
 
-from config.constants import (
-    GAS_LIMITS,
-    IBBTC_CORE_ADDRESS,
-    ETH_BTC_ETH_CHAINLINK,
-    ETH_ETH_USD_CHAINLINK,
-)
+from hexbytes import HexBytes
+from web3 import Web3
+
+from config.constants import ETH_BTC_ETH_CHAINLINK
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import GAS_LIMITS
+from config.constants import IBBTC_CORE_ADDRESS
 from config.enums import Network
-from src.utils import (
-    get_secret,
-    hours,
-    confirm_transaction,
-    get_hash_from_failed_tx_error,
-    send_success_to_discord,
-    send_oracle_error_to_discord,
-)
-from src.tx_utils import (
-    get_priority_fee,
-    get_effective_gas_price,
-    get_gas_price_of_tx,
-    get_effective_gas_price,
-)
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import send_oracle_error_to_discord
+from src.utils import send_success_to_discord
 
 FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 
@@ -73,7 +60,7 @@ class ibBTCFeeCollector:
 
         # Collect fees if profitable
         if is_profitable:
-            self.logger.info(f"Collecting profitable, beginning transaction submission")
+            self.logger.info("Collecting profitable, beginning transaction submission")
 
             self.__process_collection()
         else:
