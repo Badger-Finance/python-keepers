@@ -1,22 +1,17 @@
-from typing import Tuple
-import pytest
-from decimal import Decimal
-from brownie import *
-from web3 import Web3
 import logging
-import requests
-import os
 
-from config.constants import (
-    ETH_ETH_USD_CHAINLINK,
-    DIGG_CENTRALIZED_ORACLE,
-    DIGG_CHAINLINK_FORWARDER,
-    ETH_DIGG_BTC_CHAINLINK,
-)
+import pytest
+from brownie import *
+
+from config.constants import DIGG_CENTRALIZED_ORACLE
+from config.constants import DIGG_CHAINLINK_FORWARDER
+from config.constants import ETH_DIGG_BTC_CHAINLINK
+from config.enums import Network
+from integration_tests.utils import mock_send_discord
+from integration_tests.utils import test_address
+from integration_tests.utils import test_key
 from src.oracle import Oracle
 from src.utils import get_abi
-from integration_tests.utils import test_address, test_key, mock_send_discord
-from config.enums import Network
 
 logger = logging.getLogger("test-oracle")
 
@@ -104,6 +99,6 @@ def test_is_negative_rebase(oracle):
     )
     price = digg_btc_oracle.latestAnswer()
     if price < 95000000:
-        assert oracle.is_negative_rebase() == True
+        assert oracle.is_negative_rebase() is True
     else:
-        assert oracle.is_negative_rebase() == False
+        assert oracle.is_negative_rebase() is False

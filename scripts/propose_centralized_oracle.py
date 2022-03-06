@@ -1,12 +1,10 @@
 import logging
-import os
-import sys
-
-from time import sleep, time
+from time import time
 
 from config.enums import Network
 from src.oracle import Oracle
-from src.utils import get_secret, get_node_url
+from src.utils import get_node_url
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

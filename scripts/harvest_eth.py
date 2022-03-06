@@ -1,38 +1,30 @@
 import logging
-import os
-import sys
 import time
+from pathlib import Path
 
 from eth_account.account import Account
 from flashbots import flashbot
-from pathlib import Path
 from web3 import Web3
 
-from config.constants import (
-    MULTICHAIN_CONFIG,
-    ETH_ETH_USD_CHAINLINK,
-    ETH_KEEPER_ACL,
-    ETH_CVX_HELPER_STRATEGY,
-    ETH_CVX_CRV_HELPER_STRATEGY,
-    ETH_IBBTC_CRV_STRATEGY,
-    ETH_BVECVX_STRATEGY,
-    ETH_TRICRYPTO_STRATEGY,
-    ETH_TBTC_CRV_STRATEGY,
-    ETH_RENBTC_CRV_STRATEGY,
-    ETH_SLP_BADGER_WBTC_STRATEGY,
-    ETH_SLP_DIGG_WBTC_STRATEGY,
-)
+from config.constants import ETH_BVECVX_STRATEGY
+from config.constants import ETH_CVX_CRV_HELPER_STRATEGY
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import ETH_IBBTC_CRV_STRATEGY
+from config.constants import ETH_KEEPER_ACL
+from config.constants import ETH_RENBTC_CRV_STRATEGY
+from config.constants import ETH_SLP_BADGER_WBTC_STRATEGY
+from config.constants import ETH_SLP_DIGG_WBTC_STRATEGY
+from config.constants import ETH_TBTC_CRV_STRATEGY
+from config.constants import ETH_TRICRYPTO_STRATEGY
+from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.general_harvester import GeneralHarvester
-from src.utils import (
-    get_abi,
-    get_secret,
-    hours,
-    get_last_harvest_times,
-    seconds_to_blocks,
-    get_node_url,
-)
 from src.tx_utils import get_latest_base_fee
+from src.utils import get_abi
+from src.utils import get_last_harvest_times
+from src.utils import get_secret
+from src.utils import hours
+from src.utils import seconds_to_blocks
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)

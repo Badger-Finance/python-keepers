@@ -209,7 +209,7 @@ def test_harvest(keeper_address, harvester, strategy):
 
 
 def test_btc_profit_est(harvester, btc_strategy):
-    want = web3.eth.contract(
+    web3.eth.contract(
         address=btc_strategy.functions.want().call(),
         abi=get_abi(Network.Ethereum, "erc20"),
     )
@@ -218,7 +218,7 @@ def test_btc_profit_est(harvester, btc_strategy):
 
 @pytest.mark.require_network("hardhat-fork")
 def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
-    strategy_name = strategy.functions.getName().call()
+    strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")
 
     # Strategy should be harvestable at this point
@@ -261,7 +261,7 @@ def test_is_time_to_harvest_rewards_manager(
         start_block=harvester.web3.eth.block_number - seconds_to_blocks(hours(120)),
         etherscan_key=os.getenv("ETHERSCAN_TOKEN"),
     )
-    strategy_name = rewards_manager_strategy.functions.getName().call()
+    rewards_manager_strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")
 
     # Strategy should be harvestable at this point
