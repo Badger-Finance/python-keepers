@@ -22,5 +22,5 @@ jobs:
       - name: flake8 Lint
         uses: py-actions/flake8@v2
         with:
-          ignore: "E402,W504,W503,F405"
+          ignore: "E402,W504,W503,F405,F403"
           max-line-length: "100"
