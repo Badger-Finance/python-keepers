@@ -80,7 +80,7 @@ class GeneralHarvester(IHarvester):
         harvest_interval_threshold: int = MAX_TIME_BETWEEN_HARVESTS,
     ) -> bool:
         """Calculates the time between harvests for the supplied strategy and returns true if
-        it has been longer than the supplied harvest_interval_threshold which is measured in seconds.
+        it has been longer than the supplied harvest_interval_threshold which is measured in seconds
 
         Args:
             strategy (contract): Vault strategy web3 contract object

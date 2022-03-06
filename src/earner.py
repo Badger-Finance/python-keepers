@@ -1,5 +1,4 @@
 import logging
-import logging
 import os
 import traceback
 from typing import Tuple
@@ -135,13 +134,15 @@ class Earner:
         # Earn if deposits have accumulated over a static threshold
         if vault_balance >= override_threshold:
             self.logger.info(
-                f"Vault balance of {vault_balance} over earn threshold override of {override_threshold}"
+                f"Vault balance of {vault_balance} "
+                f"over earn threshold override of {override_threshold}"
             )
             return True
         # Earn if deposits have accumulated over % threshold
         if vault_balance / strategy_balance > EARN_PCT_THRESHOLD:
             self.logger.info(
-                f"Vault balance of {vault_balance} and strategy balance of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
+                f"Vault balance of {vault_balance} and strategy balance "
+                f"of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
             )
 
             return True

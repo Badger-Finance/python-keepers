@@ -64,7 +64,7 @@ class Oracle:
 
     def is_negative_rebase(self):
         price = self.digg_btc_chainlink.functions.latestAnswer().call()
-        self.logger.info(f"price: [{price} - {price / 10**8}]")
+        self.logger.info(f"price: [{price} - {price / 10 ** 8}]")
         return price / 10 ** 8 < NEGATIVE_THRESHOLD
 
     def propose_centralized_report_push(self):
@@ -218,18 +218,18 @@ class Oracle:
         time_id = "hourStartUnix" if exchange == "uni" else "date"
 
         query = f"""
-        {{ 
-            pairHourDatas(where: 
+        {{
+            pairHourDatas(where:
                 {{
                 pair: \"{pair}\"
                 {time_id}_gte: {yesterday_timestamp}
                 {time_id}_lte: {today_timestamp}
                 }}
-            ) 
-            {{ 
-                id 
+            )
+            {{
+                id
                 {time_id}
-                reserve0 
+                reserve0
                 reserve1
             }}
         }}
