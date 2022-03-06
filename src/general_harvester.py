@@ -84,8 +84,9 @@ class GeneralHarvester(IHarvester):
 
         Args:
             strategy (contract): Vault strategy web3 contract object
-            harvest_interval_threshold (int, optional): Amount of time in seconds that is acceptable to not
-                have harvested within. Defaults to MAX_TIME_BETWEEN_HARVESTS.
+            harvest_interval_threshold (int, optional):
+                Amount of time in seconds that is acceptable to not have harvested within.
+                Defaults to MAX_TIME_BETWEEN_HARVESTS.
 
         Returns:
             bool: True if time since last harvest is > harvest_interval_threshold, else False
@@ -367,7 +368,8 @@ class GeneralHarvester(IHarvester):
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
-                # If successful, update last harvest harvest time to make sure we don't double harvest
+                # If successful, update last harvest harvest
+                # time to make sure we don't double harvest
                 self.update_last_harvest_time(strategy.address)
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain

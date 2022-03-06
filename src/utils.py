@@ -1,25 +1,24 @@
 import base64
-import boto3
 import json
 import logging
-import requests
-import sys
-import os
-
-from botocore.exceptions import ClientError
 from decimal import Decimal
-from discord import Webhook, RequestsWebhookAdapter, Embed
+
+import boto3
+import requests
+from botocore.exceptions import ClientError
+from discord import Embed
+from discord import RequestsWebhookAdapter
+from discord import Webhook
 from hexbytes import HexBytes
-from web3 import Web3, contract, exceptions
+from web3 import Web3
+from web3 import contract
+from web3 import exceptions
 
-
-from config.constants import (
-    MULTICHAIN_CONFIG,
-    SECONDS_IN_A_DAY,
-    BLOCKS_IN_A_DAY,
-    ABI_DIRS,
-    NODE_URL_SECRET_NAMES,
-)
+from config.constants import ABI_DIRS
+from config.constants import BLOCKS_IN_A_DAY
+from config.constants import MULTICHAIN_CONFIG
+from config.constants import NODE_URL_SECRET_NAMES
+from config.constants import SECONDS_IN_A_DAY
 from config.enums import Network
 
 logger = logging.getLogger("utils")
@@ -34,10 +33,12 @@ def get_secret(
         secret_key (str): Dict key value to use to access secret value
         region_name (str, optional): AWS region name for secret. Defaults to "us-west-1".
     Raises:
-        e: DecryptionFailureException - Secrets Manager can't decrypt the protected secret text using the provided KMS key.
+        e: DecryptionFailureException - Secrets Manager can't decrypt
+            the protected secret text using the provided KMS key.
         e: InternalServiceErrorException - An error occurred on the server side.
         e: InvalidParameterException - You provided an invalid value for a parameter.
-        e: InvalidRequestException - You provided a parameter value that is not valid for the current state of the resource.
+        e: InvalidRequestException - You provided a parameter value
+            that is not valid for the current state of the resource.
         e: ResourceNotFoundException - We can't find the resource that you asked for.
     Returns:
         str: secret value
@@ -69,7 +70,8 @@ def get_secret(
             raise e
     else:
         # Decrypts secret using the associated KMS CMK.
-        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        # Depending on whether the secret is a string
+        # or binary, one of these fields will be populated.
         if "SecretString" in get_secret_value_response:
             return json.loads(get_secret_value_response["SecretString"]).get(secret_key)
         else:
@@ -237,14 +239,14 @@ def send_rebase_to_discord(tx_hash: HexBytes, gas_cost: Decimal = None):
     #     "inline": True,
     # }
     embed = Embed(
-        title=f"**Badger Rebaser Report**",
+        title="**Badger Rebaser Report**",
         description=f"{status} Rebase",
     )
     for field in fields:
         embed.add_field(
             name=field.get("name"), value=field.get("value"), inline=field.get("inline")
         )
-    webhook.send(embed=embed, username=f"Rebaser")
+    webhook.send(embed=embed, username="Rebaser")
 
 
 def send_rebase_error_to_discord(error: Exception):
@@ -253,11 +255,11 @@ def send_rebase_error_to_discord(error: Exception):
         adapter=RequestsWebhookAdapter(),
     )
     embed = Embed(
-        title=f"**Badger Rebaser Report**",
-        description=f"Failed Rebase",
+        title="**Badger Rebaser Report**",
+        description="Failed Rebase",
     )
-    embed.add_field(name="Error sending rebase tx", value=f"{error}", inline=False)
-    webhook.send(embed=embed, username=f"Rebaser")
+    embed.add_field(name="Error sending rebase tx", value="{error}", inline=False)
+    webhook.send(embed=embed, username="Rebaser")
 
 
 def send_oracle_error_to_discord(tx_type: str, error: Exception):
@@ -276,7 +278,8 @@ def send_oracle_error_to_discord(tx_type: str, error: Exception):
 def confirm_transaction(
     web3: Web3, tx_hash: HexBytes, timeout: int = 120, max_block: int = None
 ) -> tuple[bool, str]:
-    """Waits for transaction to appear within a given timeframe or before a given block (if specified), and then times out.
+    """Waits for transaction to appear within
+        a given timeframe or before a given block (if specified), and then times out.
 
     Args:
         web3 (Web3): Web3 instance
@@ -359,13 +362,15 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
 def get_last_harvest_times(
     web3: Web3, keeper_acl: contract, start_block: int = 0, etherscan_key: str = None
 ):
-    """Fetches the latest harvest timestamps of strategies from Etherscan API which occur after `start_block`.
+    """Fetches the latest harvest timestamps
+        of strategies from Etherscan API which occur after `start_block`.
     NOTE: Temporary function until Harvested events are emitted from all strategies.
 
     Args:
         web3 (Web3): Web3 node instance.
         keeper_acl (contract): Keeper ACL web3 contract instance.
-        start_block (int, optional): Minimum block number to start fetching harvest timestamps from. Defaults to 0.
+        start_block (int, optional):
+            Minimum block number to start fetching harvest timestamps from. Defaults to 0.
 
     Returns:
         dict: Dictionary of strategy addresses and their latest harvest timestamps.

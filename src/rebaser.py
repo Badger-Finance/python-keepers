@@ -1,27 +1,26 @@
 import json
 import logging
 import os
-import requests
-import sys
 import time
 
-from decimal import Decimal
-from enum import Enum
 from hexbytes import HexBytes
-from web3 import Web3, contract, exceptions
+from web3 import Web3
 
-from config.constants import ETH_ETH_USD_CHAINLINK, DIGG, DIGG_ORCHESTRATOR, DIGG_POLICY, UNIV2_DIGG_WBTC, SUSHI_DIGG_WBTC
+from config.constants import DIGG
+from config.constants import DIGG_ORCHESTRATOR
+from config.constants import DIGG_POLICY
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import SUSHI_DIGG_WBTC
+from config.constants import UNIV2_DIGG_WBTC
 from config.enums import Network
-from src.utils import (
-    get_secret,
-    hours,
-    confirm_transaction,
-    get_hash_from_failed_tx_error,
-    send_success_to_discord,
-    send_rebase_to_discord,
-    send_rebase_error_to_discord,
-)
-from src.tx_utils import get_gas_price_of_tx, get_priority_fee, get_effective_gas_price
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import hours
+from src.utils import send_rebase_error_to_discord
+from src.utils import send_rebase_to_discord
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
 
