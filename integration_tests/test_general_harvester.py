@@ -1,27 +1,26 @@
 import os
-import pytest
-from brownie import accounts, Contract, web3
 from decimal import Decimal
+
+import pytest
+from brownie import Contract
+from brownie import accounts
+from brownie import web3
 from hexbytes import HexBytes
 from web3 import contract
 
-from config.constants import (
-    MULTICHAIN_CONFIG,
-    ETH_CVX_CRV_HELPER_STRATEGY,
-    ETH_HBTC_CRV_STRATEGY,
-    ETH_SLP_DIGG_WBTC_STRATEGY,
-    XSUSHI,
-)
-from src.general_harvester import GeneralHarvester
-from src.utils import (
-    get_abi,
-    get_last_harvest_times,
-    hours,
-    get_secret,
-    seconds_to_blocks,
-)
-from integration_tests.utils import test_address, test_key
+from config.constants import ETH_CVX_CRV_HELPER_STRATEGY
+from config.constants import ETH_HBTC_CRV_STRATEGY
+from config.constants import ETH_SLP_DIGG_WBTC_STRATEGY
+from config.constants import MULTICHAIN_CONFIG
+from config.constants import XSUSHI
 from config.enums import Network
+from integration_tests.utils import test_address
+from integration_tests.utils import test_key
+from src.general_harvester import GeneralHarvester
+from src.utils import get_abi
+from src.utils import get_last_harvest_times
+from src.utils import hours
+from src.utils import seconds_to_blocks
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(
     MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]
@@ -225,19 +224,19 @@ def test_is_time_to_harvest(web3, chain, keeper_address, harvester, strategy):
     # Strategy should be harvestable at this point
     chain.sleep(hours(121))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(strategy) == True
+    assert harvester.is_time_to_harvest(strategy) is True
     harvester.harvest(strategy)
 
     # Strategy shouldn't be harvestable
-    assert harvester.is_time_to_harvest(strategy) == False
+    assert harvester.is_time_to_harvest(strategy) is False
 
     # Should only be able to harvest after 120 hours
     chain.sleep(hours(72))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(strategy) == False
+    assert harvester.is_time_to_harvest(strategy) is False
     chain.sleep(hours(49))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(strategy) == True
+    assert harvester.is_time_to_harvest(strategy) is True
     harvester.harvest(strategy)
 
 
@@ -268,19 +267,19 @@ def test_is_time_to_harvest_rewards_manager(
     # Strategy should be harvestable at this point
     chain.sleep(hours(121))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) is True
     harvester.harvest_rewards_manager(rewards_manager_strategy)
 
     assert harvester.last_harvest_times[rewards_manager_strategy.address]
 
     # Strategy shouldn't be harvestable
-    assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) is False
 
     # Should only be able to harvest after 120 hours
     chain.sleep(hours(72))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(rewards_manager_strategy) == False
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) is False
     chain.sleep(hours(49))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(rewards_manager_strategy) == True
+    assert harvester.is_time_to_harvest(rewards_manager_strategy) is True
     harvester.harvest_rewards_manager(rewards_manager_strategy)
