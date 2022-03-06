@@ -265,24 +265,6 @@ class Oracle:
         )
         return today
 
-    def request_uma_report(self):
-        price_identifier = "DIGGBTC".encode("utf-8")
-        today_timestamp = round(self._get_today_report_datetime().timestamp())
-        ancillary_data = HexBytes(0)
-        currency = WETH
-        reward = 0
-
-        """
-        function requestPrice(
-            bytes32 identifier,
-            uint256 timestamp,
-            bytes memory ancillaryData,
-            IERC20 currency,
-            uint256 reward
-        ) external virtual returns (uint256 totalBond);
-        """
-        pass
-
     def get_digg_twap_uma(self) -> float:
         return 0
 

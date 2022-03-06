@@ -1,29 +1,26 @@
-import json
 import logging
-import os
-import sys
 
-from time import sleep
-from web3 import Web3, contract
+from web3 import Web3
 
-from config.constants import (
-    MULTICHAIN_CONFIG,
-    ETH_YVWBTC_VAULT,
-    ETH_TRICRYPTO_VAULT,
-    ETH_BVECVX_CVX_LP_VAULT,
-    ETH_IBBTC_CRV_LP_VAULT,
-    ETH_IBBTC_SUSHI_VAULT,
-    ETH_SBTC_VAULT,
-    ETH_TBTC_VAULT,
-    ETH_PBTC_VAULT,
-    ETH_BBTC_VAULT,
-    ETH_FRAX_CRV_VAULT,
-    ETH_MIM_CRV_VAULT,
-)
+from config.constants import ETH_BBTC_VAULT
+from config.constants import ETH_BVECVX_CVX_LP_VAULT
+from config.constants import ETH_FRAX_CRV_VAULT
+from config.constants import ETH_IBBTC_CRV_LP_VAULT
+from config.constants import ETH_IBBTC_SUSHI_VAULT
+from config.constants import ETH_MIM_CRV_VAULT
+from config.constants import ETH_PBTC_VAULT
+from config.constants import ETH_SBTC_VAULT
+from config.constants import ETH_TBTC_VAULT
+from config.constants import ETH_TRICRYPTO_VAULT
+from config.constants import ETH_YVWBTC_VAULT
+from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.earner import Earner
-from src.utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
 from src.tx_utils import get_latest_base_fee
+from src.utils import get_abi
+from src.utils import get_node_url
+from src.utils import get_secret
+from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")

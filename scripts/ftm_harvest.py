@@ -1,16 +1,15 @@
 import logging
-import os
-import sys
 import time
-
 from pathlib import Path
+
 from web3 import Web3
 
-
-from config.constants import MULTICHAIN_CONFIG, FTM_VAULTS
+from config.constants import FTM_VAULTS
+from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi, get_secret, get_strategy_from_vault
+from src.utils import get_secret
+from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)

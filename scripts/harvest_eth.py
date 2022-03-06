@@ -90,12 +90,12 @@ def conditional_harvest_mta(harvester, voter_proxy) -> str:
     if harvester.is_time_to_harvest(voter_proxy, HOURS_96) and latest_base_fee < int(
         80e9
     ):
-        logger.info(f"Been longer than 96 hours and base fee < 80 since harvestMta")
+        logger.info("Been longer than 96 hours and base fee < 80 since harvestMta")
         res = safe_harvest_mta(harvester, voter_proxy)
         logger.info(res)
     elif harvester.is_time_to_harvest(voter_proxy) and latest_base_fee < int(150e9):
         logger.info(
-            f"Been longer than 120 hours harvest no matter what since harvestMta"
+            "Been longer than 120 hours harvest no matter what since harvestMta"
         )
         res = safe_harvest_mta(harvester, voter_proxy)
         logger.info(res)
