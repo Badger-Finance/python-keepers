@@ -12,7 +12,7 @@ from src.utils import get_node_url
 from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("script")
+logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":

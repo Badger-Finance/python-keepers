@@ -32,7 +32,7 @@ class Rebaser:
         keeper_key=os.getenv("KEEPER_KEY"),
         web3=os.getenv("ETH_NODE_URL"),
     ):
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.web3 = Web3(Web3.HTTPProvider(web3))  # get secret here
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here

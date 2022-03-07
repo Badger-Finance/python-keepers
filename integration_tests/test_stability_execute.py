@@ -15,7 +15,7 @@ from integration_tests.utils import test_address, test_key
 from src.eth.stability_executor import StabilityExecutor
 from config.enums import Network
 
-logger = logging.getLogger("test_rebalance")
+logger = logging.getLogger(__name__)
 
 
 def mock_send_discord(

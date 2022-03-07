@@ -13,7 +13,7 @@ from src.utils import get_secret
 from src.utils import get_strategies_from_registry
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("script")
+logger = logging.getLogger(__name__)
 
 
 INVALID_STRATS = [

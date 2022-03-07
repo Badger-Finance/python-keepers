@@ -21,7 +21,7 @@ from integration_tests.utils import test_key
 from src.earner import Earner
 from src.utils import get_abi
 
-logger = logging.getLogger("test-eth-earner")
+logger = logging.getLogger(__name__)
 
 
 def mock_send_discord(

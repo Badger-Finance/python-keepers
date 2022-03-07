@@ -23,7 +23,7 @@ from src.utils import get_secret
 from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("script")
+logger = logging.getLogger(__name__)
 
 INVALID_VAULTS = [
     ETH_YVWBTC_VAULT,

@@ -21,7 +21,7 @@ from config.constants import NODE_URL_SECRET_NAMES
 from config.constants import SECONDS_IN_A_DAY
 from config.enums import Network
 
-logger = logging.getLogger("utils")
+logger = logging.getLogger(__name__)
 
 
 def get_secret(

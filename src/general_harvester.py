@@ -46,7 +46,7 @@ class GeneralHarvester(IHarvester):
         use_flashbots: bool = False,
         discord_url: str = None,
     ):
-        self.logger = logging.getLogger("harvester")
+        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key

@@ -16,7 +16,7 @@ from src.earner import Earner
 from src.utils import get_abi
 from src.utils import get_strategies_and_vaults
 
-logger = logging.getLogger("test-eth-earner")
+logger = logging.getLogger(__name__)
 
 
 def mock_send_discord(

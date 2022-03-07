@@ -1,6 +1,5 @@
 import logging
 import time
-from pathlib import Path
 
 from web3 import Web3
 
@@ -11,7 +10,7 @@ from src.utils import get_secret
 from src.utils import get_strategies_from_registry
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(Path(__file__).name)
+logger = logging.getLogger(__name__)
 
 
 # TODO: Add conditional harvest logic

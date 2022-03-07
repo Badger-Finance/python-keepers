@@ -27,7 +27,7 @@ from src.utils import hours
 from src.utils import seconds_to_blocks
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(Path(__file__).name)
+logger = logging.getLogger(__name__)
 
 HOURS_24 = hours(24)
 HOURS_72 = hours(72)
