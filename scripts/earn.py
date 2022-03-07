@@ -11,7 +11,7 @@ from src.utils import get_secret
 from src.utils import get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("script")
+logger = logging.getLogger(__name__)
 
 INVALID_STRATS = [POLY_OLD_STRATEGY]
 

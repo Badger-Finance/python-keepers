@@ -1,6 +1,5 @@
 import logging
 import time
-from pathlib import Path
 
 from web3 import Web3
 
@@ -12,7 +11,7 @@ from src.utils import get_secret
 from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(Path(__file__).name)
+logger = logging.getLogger(__name__)
 
 
 def safe_harvest(harvester, strategy) -> str:

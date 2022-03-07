@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 if __name__ == "__main__":
 
-    logger = logging.getLogger("script")
+    logger = logging.getLogger(__name__)
 
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")

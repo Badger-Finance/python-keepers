@@ -10,7 +10,7 @@ from src.utils import get_secret
 from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("scripts.ftm_earn")
+logger = logging.getLogger(__name__)
 
 
 def safe_earn(earner, vault, strategy):

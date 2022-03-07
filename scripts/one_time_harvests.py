@@ -1,6 +1,5 @@
 import logging
 import time
-from pathlib import Path
 
 from eth_account.account import Account
 from flashbots import flashbot
@@ -15,7 +14,7 @@ from src.utils import get_node_url
 from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(Path(__file__).name)
+logger = logging.getLogger(__name__)
 
 strategies = {}
 

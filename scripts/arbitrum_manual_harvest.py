@@ -1,6 +1,5 @@
 import logging
 import time
-from pathlib import Path
 
 from web3 import Web3
 
@@ -13,7 +12,7 @@ from src.utils import get_node_url
 from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(Path(__file__).name)
+logger = logging.getLogger(__name__)
 
 strategies = {ARB_SWAPR_WBTC_WETH_STRATEGY}
 

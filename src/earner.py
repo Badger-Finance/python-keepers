@@ -45,7 +45,7 @@ class Earner:
         web3: Web3 = None,
         discord_url: str = None,
     ):
-        self.logger = logging.getLogger("earner")
+        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key

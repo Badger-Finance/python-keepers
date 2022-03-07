@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 
 if __name__ == "__main__":
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
     logger.info(f"INVOKED AT {time()}")
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")

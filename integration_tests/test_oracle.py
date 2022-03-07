@@ -13,7 +13,7 @@ from integration_tests.utils import test_key
 from src.oracle import Oracle
 from src.utils import get_abi
 
-logger = logging.getLogger("test-oracle")
+logger = logging.getLogger(__name__)
 
 
 def mock_send_error(tx_type: str, error: Exception):

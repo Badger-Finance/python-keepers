@@ -34,7 +34,7 @@ class Rebalancer:
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         use_flashbots=False,
     ):
-        self.logger = logging.getLogger("rebalancer")
+        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key

@@ -9,7 +9,7 @@ from web3 import exceptions
 
 from config.enums import Network
 
-logger = logging.getLogger("tx-utils")
+logger = logging.getLogger(__name__)
 
 
 def get_gas_price_of_tx(
