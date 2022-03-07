@@ -1,16 +1,14 @@
-name: Pull Request - Build and Deploy to Development Environment
-# Code probably works, but may not.
-# Pushing to development environment allows for validation.
+name: Build and deploy keepers
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
 env:
   TARGET_ENVIRONMENT: 'dev'
   MANIFEST_RESPOSITORY: 'badger-finance/badger-kube-manifests'
-  IMAGE_NAME: '/badger/${{ github.event.repository.name }}:${{ github.event.pull_request.head.sha }}'
+  IMAGE_NAME: '/badger/${{ github.event.repository.name }}:${{ github.event.after }}'
 
 jobs:
   build:
