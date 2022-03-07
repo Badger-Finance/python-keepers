@@ -1,24 +1,19 @@
 import logging
 import os
-import sys
-
 from decimal import Decimal
-from hexbytes import HexBytes
-from web3 import Web3, contract
 
+from hexbytes import HexBytes
+from web3 import Web3
+from web3 import contract
 
 from config.enums import Network
-from src.tx_utils import (
-    get_gas_price_of_tx,
-    get_effective_gas_price,
-    get_priority_fee,
-)
-from src.utils import (
-    confirm_transaction,
-    send_error_to_discord,
-    send_success_to_discord,
-    get_abi,
-)
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_abi
+from src.utils import send_error_to_discord
+from src.utils import send_success_to_discord
 
 logging.basicConfig(level=logging.INFO)
 

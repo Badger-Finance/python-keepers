@@ -1,33 +1,27 @@
-import json
 import logging
 import os
-import requests
-import sys
 import traceback
-
-from decimal import Decimal
-from hexbytes import HexBytes
-from time import sleep
 from typing import Tuple
-from web3 import Web3, contract, exceptions
 
+import requests
+from hexbytes import HexBytes
+from web3 import Web3
+from web3 import contract
 
-from config.constants import (
-    BASE_CURRENCIES,
-    EARN_OVERRIDE_THRESHOLD,
-    EARN_PCT_THRESHOLD,
-    ETH_BVECVX_STRATEGY,
-)
-from config.enums import Network, Currency
-from src.utils import (
-    confirm_transaction,
-    send_error_to_discord,
-    send_success_to_discord,
-    get_abi,
-    get_hash_from_failed_tx_error,
-    get_token_price,
-)
-from src.tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
+from config.constants import BASE_CURRENCIES
+from config.constants import EARN_OVERRIDE_THRESHOLD
+from config.constants import EARN_PCT_THRESHOLD
+from config.constants import ETH_BVECVX_STRATEGY
+from config.enums import Network
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_abi
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import get_token_price
+from src.utils import send_error_to_discord
+from src.utils import send_success_to_discord
 
 logging.basicConfig(level=logging.INFO)
 
@@ -144,13 +138,15 @@ class Earner:
         # Earn if deposits have accumulated over a static threshold
         if vault_balance >= override_threshold:
             self.logger.info(
-                f"Vault balance of {vault_balance} over earn threshold override of {override_threshold}"
+                f"Vault balance of {vault_balance} "
+                f"over earn threshold override of {override_threshold}"
             )
             return True
         # Earn if deposits have accumulated over % threshold
         if vault_balance / strategy_balance > EARN_PCT_THRESHOLD:
             self.logger.info(
-                f"Vault balance of {vault_balance} and strategy balance of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
+                f"Vault balance of {vault_balance} and strategy balance "
+                f"of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
             )
 
             return True

@@ -91,8 +91,10 @@ def get_priority_fee(
     Args:
         web3 (Web3): Web3 object
         num_blocks (int, optional): Number of historic blocks to look at. Defaults to 4.
-        percentiles (int, optional): Percentile of transactions in blocks to use to analyze fees. Defaults to 70.
-        default_reward (int, optional): If call fails, what default reward to use in gwei. Defaults to 10e9.
+        percentiles (int, optional): Percentile of transactions
+            in blocks to use to analyze fees. Defaults to 70.
+        default_reward (int, optional): If call fails,
+            what default reward to use in gwei. Defaults to 10e9.
 
     Returns:
         int: [description]

@@ -1,19 +1,15 @@
-import json
 import logging
-import os
-import sys
 
-from time import sleep
-from web3 import Web3, contract
+from web3 import Web3
 
-from config.constants import (
-    MULTICHAIN_CONFIG,
-    ETH_BVECVX_STRATEGY,
-    ETH_BVECVX_VAULT,
-)
+from config.constants import ETH_BVECVX_STRATEGY
+from config.constants import ETH_BVECVX_VAULT
+from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.earner import Earner
-from src.utils import get_secret, get_abi, get_node_url
+from src.utils import get_abi
+from src.utils import get_node_url
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")

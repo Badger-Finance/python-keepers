@@ -1,13 +1,9 @@
 import logging
-import os
-import sys
-
-from time import sleep
-
 
 from config.enums import Network
 from src.rebaser import Rebaser
-from src.utils import get_secret, get_node_url
+from src.utils import get_node_url
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

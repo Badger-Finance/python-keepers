@@ -1,29 +1,30 @@
 import logging
 import os
-import requests
-import sys
-
 from decimal import Decimal
-from hexbytes import HexBytes
 from time import sleep
-from web3 import Web3, contract, exceptions
 
+import requests
+from hexbytes import HexBytes
+from web3 import Web3
+from web3 import contract
 
-from config.constants import MULTICHAIN_CONFIG, BASE_CURRENCIES, GAS_LIMITS
-from config.enums import Network, Currency
+from config.constants import BASE_CURRENCIES
+from config.constants import GAS_LIMITS
+from config.constants import MULTICHAIN_CONFIG
+from config.enums import Network
 from src.harvester import IHarvester
-from src.utils import (
-    confirm_transaction,
-    hours,
-    send_error_to_discord,
-    send_success_to_discord,
-    get_abi,
-    get_hash_from_failed_tx_error,
-    get_last_harvest_times,
-    get_token_price,
-    seconds_to_blocks,
-)
-from src.tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_abi
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import get_last_harvest_times
+from src.utils import get_token_price
+from src.utils import hours
+from src.utils import seconds_to_blocks
+from src.utils import send_error_to_discord
+from src.utils import send_success_to_discord
 
 logging.basicConfig(level=logging.INFO)
 
@@ -79,12 +80,13 @@ class GeneralHarvester(IHarvester):
         harvest_interval_threshold: int = MAX_TIME_BETWEEN_HARVESTS,
     ) -> bool:
         """Calculates the time between harvests for the supplied strategy and returns true if
-        it has been longer than the supplied harvest_interval_threshold which is measured in seconds.
+        it has been longer than the supplied harvest_interval_threshold which is measured in seconds
 
         Args:
             strategy (contract): Vault strategy web3 contract object
-            harvest_interval_threshold (int, optional): Amount of time in seconds that is acceptable to not
-                have harvested within. Defaults to MAX_TIME_BETWEEN_HARVESTS.
+            harvest_interval_threshold (int, optional):
+                Amount of time in seconds that is acceptable to not have harvested within.
+                Defaults to MAX_TIME_BETWEEN_HARVESTS.
 
         Returns:
             bool: True if time since last harvest is > harvest_interval_threshold, else False
@@ -120,7 +122,7 @@ class GeneralHarvester(IHarvester):
 
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("harvest"):
-            raise ValueError(f"Keeper ACL is not whitelisted for calling harvest")
+            raise ValueError("Keeper ACL is not whitelisted for calling harvest")
 
         want_address = strategy.functions.want().call()
         want = self.web3.eth.contract(
@@ -162,7 +164,7 @@ class GeneralHarvester(IHarvester):
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("harvestNoReturn"):
             raise ValueError(
-                f"Keeper ACL is not whitelisted for calling harvestNoReturn"
+                "Keeper ACL is not whitelisted for calling harvestNoReturn"
             )
 
         want_address = strategy.functions.want().call()
@@ -228,7 +230,7 @@ class GeneralHarvester(IHarvester):
     ):
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("harvestMta"):
-            raise ValueError(f"Keeper ACL is not whitelisted for calling harvestMta")
+            raise ValueError("Keeper ACL is not whitelisted for calling harvestMta")
 
         gas_fee = self.estimate_gas_fee(voter_proxy.address, function="harvestMta")
         self.logger.info(f"estimated gas cost: {gas_fee}")
@@ -243,7 +245,7 @@ class GeneralHarvester(IHarvester):
         strategy_name = strategy.functions.getName().call()
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("tend"):
-            raise ValueError(f"Keeper ACL is not whitelisted for calling tend")
+            raise ValueError("Keeper ACL is not whitelisted for calling tend")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
@@ -366,7 +368,8 @@ class GeneralHarvester(IHarvester):
                 self.web3, tx_hash, max_block=max_target_block
             )
             if succeeded:
-                # If successful, update last harvest harvest time to make sure we don't double harvest
+                # If successful, update last harvest harvest
+                # time to make sure we don't double harvest
                 self.update_last_harvest_time(strategy.address)
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
@@ -429,7 +432,7 @@ class GeneralHarvester(IHarvester):
                 )
                 self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
-                    tx_type=f"Harvest MTA",
+                    tx_type="Harvest MTA",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
@@ -437,7 +440,7 @@ class GeneralHarvester(IHarvester):
                 )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(
-                    tx_type=f"Harvest MTA",
+                    tx_type="Harvest MTA",
                     tx_hash=tx_hash,
                     chain=self.chain,
                     url=self.discord_url,

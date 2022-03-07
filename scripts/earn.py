@@ -1,15 +1,14 @@
-import json
 import logging
-import os
-import sys
 
-from time import sleep
-from web3 import Web3, contract
+from web3 import Web3
 
-from config.constants import MULTICHAIN_CONFIG, POLY_OLD_STRATEGY
+from config.constants import MULTICHAIN_CONFIG
+from config.constants import POLY_OLD_STRATEGY
 from config.enums import Network
 from src.earner import Earner
-from src.utils import get_secret, get_strategies_and_vaults, get_node_url
+from src.utils import get_node_url
+from src.utils import get_secret
+from src.utils import get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("script")

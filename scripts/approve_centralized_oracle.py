@@ -1,7 +1,5 @@
 import logging
-import os
-import sys
-from time import sleep, time
+from time import time
 
 from src.oracle import Oracle
 from src.utils import get_secret

@@ -1,17 +1,18 @@
 import logging
-import os
-import sys
 import time
+from pathlib import Path
 
 from eth_account.account import Account
 from flashbots import flashbot
-from pathlib import Path
 from web3 import Web3
 
-from config.constants import ETH_ETH_USD_CHAINLINK, ETH_KEEPER_ACL
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import ETH_KEEPER_ACL
 from config.enums import Network
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi, get_secret, get_node_url
+from src.utils import get_abi
+from src.utils import get_node_url
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(Path(__file__).name)

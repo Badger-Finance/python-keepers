@@ -135,3 +135,5 @@ package.json
 package-lock.json
 hardhat.config.js
 yarn.lock
+
+.idea/

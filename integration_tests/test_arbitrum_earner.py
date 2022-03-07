@@ -1,24 +1,25 @@
 import logging
-import os
-import pytest
-from brownie import accounts, Contract, web3
 from decimal import Decimal
+
+import pytest
+from brownie import Contract
+from brownie import accounts
+from brownie import web3
 from hexbytes import HexBytes
 from web3 import contract
 
-from config.constants import (
-    ARB_ETH_USD_CHAINLINK,
-    ARB_KEEPER_ACL,
-    ARB_SLP_WBTC_WETH_STRATEGY,
-    ARB_SLP_WBTC_WETH_VAULT,
-    ARB_SLP_WETH_SUSHI_STRATEGY,
-    ARB_SLP_WETH_SUSHI_VAULT,
-)
-from src.earner import Earner
-from src.utils import get_abi, get_last_harvest_times, hours, get_secret
-from integration_tests.utils import test_address, test_key
-from config.constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
+from config.constants import ARB_ETH_USD_CHAINLINK
+from config.constants import ARB_KEEPER_ACL
+from config.constants import ARB_SLP_WBTC_WETH_STRATEGY
+from config.constants import ARB_SLP_WBTC_WETH_VAULT
+from config.constants import ARB_SLP_WETH_SUSHI_STRATEGY
+from config.constants import ARB_SLP_WETH_SUSHI_VAULT
+from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.enums import Network
+from integration_tests.utils import test_address
+from integration_tests.utils import test_key
+from src.earner import Earner
+from src.utils import get_abi
 
 logger = logging.getLogger("test-eth-earner")
 

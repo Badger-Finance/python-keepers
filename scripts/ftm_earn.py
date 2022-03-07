@@ -1,15 +1,13 @@
-import json
 import logging
-import os
-import sys
 
-from time import sleep
-from web3 import Web3, contract
+from web3 import Web3
 
-from config.constants import MULTICHAIN_CONFIG, FTM_VAULTS
+from config.constants import FTM_VAULTS
+from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.earner import Earner
-from src.utils import get_secret, get_strategy_from_vault, get_node_url
+from src.utils import get_secret
+from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("scripts.ftm_earn")

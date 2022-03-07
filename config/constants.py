@@ -1,9 +1,5 @@
-import os
-import sys
-
-
-from config.enums import Network, Currency
-
+from config.enums import Currency
+from config.enums import Network
 
 ETH_DIGG_BTC_CHAINLINK = "0x418a6c98cd5b8275955f08f0b8c1c6838c8b1685"
 ETH_ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
