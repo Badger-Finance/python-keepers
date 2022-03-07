@@ -171,12 +171,8 @@ class Oracle:
             uni wbtc / digg pools time 10^18 (digg decimal places)
         """
 
-        uni_twap_data = self.send_twap_query(
-            "uni", UNI_SUBGRAPH, UNIV2_DIGG_WBTC
-        )
-        sushi_twap_data = self.send_twap_query(
-            "sushi", SUSHI_SUBGRAPH, SUSHI_DIGG_WBTC
-        )
+        uni_twap_data = self.send_twap_query("uni", UNI_SUBGRAPH, UNIV2_DIGG_WBTC)
+        sushi_twap_data = self.send_twap_query("sushi", SUSHI_SUBGRAPH, SUSHI_DIGG_WBTC)
 
         uni_prices = [
             float(x["reserve0"]) / float(x["reserve1"])

@@ -128,9 +128,13 @@ class Earner:
         self.logger.info(
             {"strategy_balance": strategy_balance, "vault_balance": vault_balance}
         )
-        if strategy_balance == 0 and vault_balance > 0:
-            self.logger.info("No strategy balance, earn")
-            return True
+        if strategy_balance == 0:
+            if vault_balance == 0:
+                self.logger.info("No strategy balance or vault balance")
+                return False
+            else:
+                self.logger.info("No strategy balance, earn")
+                return True
         # Earn if deposits have accumulated over a static threshold
         if vault_balance >= override_threshold:
             self.logger.info(
