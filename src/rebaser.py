@@ -10,7 +10,14 @@ from enum import Enum
 from hexbytes import HexBytes
 from web3 import Web3, contract, exceptions
 
-from config.constants import ETH_ETH_USD_CHAINLINK, DIGG, DIGG_ORCHESTRATOR, DIGG_POLICY, UNIV2_DIGG_WBTC, SUSHI_DIGG_WBTC
+from config.constants import (
+    ETH_ETH_USD_CHAINLINK,
+    DIGG,
+    DIGG_ORCHESTRATOR,
+    DIGG_POLICY,
+    UNIV2_DIGG_WBTC,
+    SUSHI_DIGG_WBTC,
+)
 from config.enums import Network
 from src.utils import (
     get_secret,
