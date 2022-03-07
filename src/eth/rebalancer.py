@@ -1,34 +1,25 @@
-from decimal import Decimal
-from hexbytes import HexBytes
 import logging
 import os
-import sys
-from time import sleep
-from web3 import Web3, contract, exceptions
+from decimal import Decimal
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../config"))
-)
+from hexbytes import HexBytes
+from web3 import Web3
+from web3 import contract
 
-from enums import Network
-from utils import (
-    confirm_transaction,
-    send_error_to_discord,
-    send_success_to_discord,
-    get_abi,
-)
-from tx_utils import (
-    get_gas_price_of_tx,
-    get_effective_gas_price,
-    get_priority_fee,
-)
+from config.constants import DIGG
+from config.enums import Network
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_abi
+from src.utils import send_error_to_discord
+from src.utils import send_success_to_discord
 
 logging.basicConfig(level=logging.INFO)
 
 GAS_LIMIT = 1000000
 MAX_GAS_PRICE = int(200e9)  # 200 gwei
-DIGG_TOKEN = "0x798D1bE841a82a273720CE31c822C61a67a601C3"
 NUM_FLASHBOTS_BUNDLES = 6
 
 
@@ -43,7 +34,7 @@ class Rebalancer:
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         use_flashbots=False,
     ):
-        self.logger = logging.getLogger("rebalancer")
+        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key
@@ -57,7 +48,7 @@ class Rebalancer:
             abi=get_abi(self.chain, "oracle"),
         )
         self.digg = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(DIGG_TOKEN),
+            address=self.web3.toChecksumAddress(DIGG),
             abi=get_abi(self.chain, "erc20"),
         )
 

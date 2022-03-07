@@ -1,30 +1,26 @@
-from decimal import Decimal
-from enum import Enum
-from hexbytes import HexBytes
 import json
 import logging
 import os
-import requests
-import sys
 import time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
+from hexbytes import HexBytes
+from web3 import Web3
 
-from enums import Network
-from utils import (
-    get_secret,
-    hours,
-    confirm_transaction,
-    get_hash_from_failed_tx_error,
-    send_success_to_discord,
-    send_rebase_to_discord,
-    send_rebase_error_to_discord,
-)
-from tx_utils import get_gas_price_of_tx, get_priority_fee, get_effective_gas_price
-from web3 import Web3, contract, exceptions
+from config.constants import DIGG
+from config.constants import DIGG_ORCHESTRATOR
+from config.constants import DIGG_POLICY
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import SUSHI_DIGG_WBTC
+from config.constants import UNIV2_DIGG_WBTC
+from config.enums import Network
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import hours
+from src.utils import send_rebase_error_to_discord
+from src.utils import send_rebase_to_discord
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
 
@@ -36,32 +32,32 @@ class Rebaser:
         keeper_key=os.getenv("KEEPER_KEY"),
         web3=os.getenv("ETH_NODE_URL"),
     ):
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.web3 = Web3(Web3.HTTPProvider(web3))  # get secret here
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
         self.eth_usd_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
+            address=self.web3.toChecksumAddress(ETH_ETH_USD_CHAINLINK),
             abi=self.__get_abi("oracle"),
         )
         self.digg_token = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("DIGG_TOKEN_ADDRESS")),
+            address=self.web3.toChecksumAddress(DIGG),
             abi=self.__get_abi("digg_token"),
         )
         self.digg_orchestrator = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("DIGG_ORCHESTRATOR_ADDRESS")),
+            address=self.web3.toChecksumAddress(DIGG_ORCHESTRATOR),
             abi=self.__get_abi("digg_orchestrator"),
         )
         self.digg_policy = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("DIGG_POLICY_ADDRESS")),
+            address=self.web3.toChecksumAddress(DIGG_POLICY),
             abi=self.__get_abi("digg_policy"),
         )
         self.uni_pair = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("UNIV2_DIGG_WBTC_ADDRESS")),
+            address=self.web3.toChecksumAddress(UNIV2_DIGG_WBTC),
             abi=self.__get_abi("univ2_pair"),
         )
         self.sushi_pair = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("SUSHI_DIGG_WBTC_ADDRESS")),
+            address=self.web3.toChecksumAddress(SUSHI_DIGG_WBTC),
             abi=self.__get_abi("sushi_pair"),
         )
 

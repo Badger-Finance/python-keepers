@@ -5,16 +5,17 @@ import pytest
 from brownie import accounts, Contract, web3
 from web3 import contract
 
+from config.constants import (
+    ETH_ETH_USD_CHAINLINK,
+    ETH_KEEPER_ACL,
+    ETH_STABILIZE_STRATEGY,
+)
 from src.utils import get_abi
-from tests.utils import test_address, test_key
+from integration_tests.utils import test_address, test_key
 from src.eth.stability_executor import StabilityExecutor
 from config.enums import Network
 
-ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-KEEPER_ACL = "0x711A339c002386f9db409cA55b6A35a604aB6cF6"
-STABILIZE_STRAT = "0xA6af1B913E205B8E9B95D3B30768c0989e942316"
-
-logger = logging.getLogger("test_rebalance")
+logger = logging.getLogger(__name__)
 
 
 def mock_send_discord(
@@ -59,7 +60,8 @@ def patch_stability_executor(monkeypatch):
         "src.eth.stability_executor.send_success_to_discord", mock_send_discord
     )
     monkeypatch.setattr(
-        "tests.test_stability_execute.web3.eth.fee_history", mock_fee_history
+        "integration_tests.test_stability_execute.web3.eth.fee_history",
+        mock_fee_history,
     )
 
 
@@ -67,7 +69,7 @@ def patch_stability_executor(monkeypatch):
 def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
-        KEEPER_ACL,
+        ETH_KEEPER_ACL,
         get_abi(Network.Ethereum, "keeper_acl"),
     )
     harvester_key = keeper_acl.HARVESTER_ROLE()
@@ -81,7 +83,7 @@ def setup_keeper_acl(keeper_address):
 def setup_stability_vault(keeper_address):
     stability_strategy = Contract.from_abi(
         "StabilizeStrategyDiggV1",
-        STABILIZE_STRAT,
+        ETH_STABILIZE_STRATEGY,
         get_abi(Network.Ethereum, "stability_strat"),
     )
     governance = stability_strategy.governance()
@@ -92,7 +94,7 @@ def setup_stability_vault(keeper_address):
 @pytest.fixture
 def strategy() -> contract:
     return web3.eth.contract(
-        address=STABILIZE_STRAT, abi=get_abi(Network.Ethereum, "stability_strat")
+        address=ETH_STABILIZE_STRATEGY, abi=get_abi(Network.Ethereum, "stability_strat")
     )
 
 
@@ -100,10 +102,10 @@ def strategy() -> contract:
 def stability_executor(keeper_address, keeper_key) -> StabilityExecutor:
     return StabilityExecutor(
         web3=web3,
-        keeper_acl=KEEPER_ACL,
+        keeper_acl=ETH_KEEPER_ACL,
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=ETH_USD_CHAINLINK,
+        base_oracle_address=ETH_ETH_USD_CHAINLINK,
         use_flashbots=False,
     )
 

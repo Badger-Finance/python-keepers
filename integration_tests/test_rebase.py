@@ -1,13 +1,10 @@
-from typing import Tuple
-import pytest
-from decimal import Decimal
-from brownie import *
-from web3 import Web3
-import requests
 import os
 
+import pytest
+from brownie import *
+
+from integration_tests.utils import *
 from src.rebaser import Rebaser
-from tests.utils import *
 
 os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")
 os.environ["ETH_USD_CHAINLINK"] = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"

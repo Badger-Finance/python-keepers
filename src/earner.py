@@ -1,31 +1,27 @@
-from decimal import Decimal
-from hexbytes import HexBytes
-import json
 import logging
 import os
-import requests
-import sys
 import traceback
-from time import sleep
 from typing import Tuple
-from web3 import Web3, contract, exceptions
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "./")))
+import requests
+from hexbytes import HexBytes
+from web3 import Web3
+from web3 import contract
 
-from utils import (
-    confirm_transaction,
-    send_error_to_discord,
-    send_success_to_discord,
-    get_abi,
-    get_hash_from_failed_tx_error,
-    get_token_price,
-)
-from tx_utils import get_priority_fee, get_effective_gas_price, get_gas_price_of_tx
-from constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
-from enums import Network, Currency
+from config.constants import BASE_CURRENCIES
+from config.constants import EARN_OVERRIDE_THRESHOLD
+from config.constants import EARN_PCT_THRESHOLD
+from config.constants import ETH_BVECVX_STRATEGY
+from config.enums import Network
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_abi
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import get_token_price
+from src.utils import send_error_to_discord
+from src.utils import send_success_to_discord
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,8 +29,9 @@ GAS_LIMITS = {
     Network.Ethereum: 1_500_000,
     Network.Polygon: 1_000_000,
     Network.Arbitrum: 3_000_000,
+    Network.Fantom: 1_500_000,
 }
-EARN_EXCEPTIONS = {}
+EARN_EXCEPTIONS = {ETH_BVECVX_STRATEGY: 20}
 
 
 class Earner:
@@ -48,7 +45,7 @@ class Earner:
         web3: Web3 = None,
         discord_url: str = None,
     ):
-        self.logger = logging.getLogger("earner")
+        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key
@@ -101,39 +98,55 @@ class Earner:
             want (contract): want web3 contract object
 
         Returns:
-            Tuple[float, float]: want in vault denominated in eth, want in strat denominated in eth
+            Tuple[float, float]: want in vault denominated in selected currenct, want in strat
+                denominated in selected currency.
         """
-        price_per_want_eth = get_token_price(want.address, Currency.Eth, self.chain)
-        self.logger.info(f"price per want: {price_per_want_eth}")
+        currency = BASE_CURRENCIES[self.chain]
+        if self.chain == Network.Fantom:
+            price_per_want = get_token_price(
+                want.address, currency, self.chain, use_staging=True
+            )
+        else:
+            price_per_want = get_token_price(want.address, currency, self.chain)
+
+        self.logger.info(f"price per want: {price_per_want} {currency}")
+
         want_decimals = want.functions.decimals().call()
 
         vault_balance = want.functions.balanceOf(vault.address).call()
         strategy_balance = strategy.functions.balanceOf().call()
 
-        vault_balance_eth = price_per_want_eth * vault_balance / 10 ** want_decimals
-        strategy_balance_eth = (
-            price_per_want_eth * strategy_balance / 10 ** want_decimals
-        )
+        vault_balance = price_per_want * vault_balance / 10 ** want_decimals
+        strategy_balance = price_per_want * strategy_balance / 10 ** want_decimals
 
-        return vault_balance_eth, strategy_balance_eth
+        return vault_balance, strategy_balance
 
     def should_earn(
         self, override_threshold: int, vault_balance: int, strategy_balance: int
     ) -> bool:
         # Always allow earn on first run
-        if strategy_balance == 0 and vault_balance > 0:
-            self.logger.info("No strategy balance, earn")
-            return True
+        self.logger.info(
+            {"strategy_balance": strategy_balance, "vault_balance": vault_balance}
+        )
+        if strategy_balance == 0:
+            if vault_balance == 0:
+                self.logger.info("No strategy balance or vault balance")
+                return False
+            else:
+                self.logger.info("No strategy balance, earn")
+                return True
         # Earn if deposits have accumulated over a static threshold
         if vault_balance >= override_threshold:
             self.logger.info(
-                f"Vault balance of {vault_balance} over earn threshold override of {override_threshold}"
+                f"Vault balance of {vault_balance} "
+                f"over earn threshold override of {override_threshold}"
             )
             return True
         # Earn if deposits have accumulated over % threshold
         if vault_balance / strategy_balance > EARN_PCT_THRESHOLD:
             self.logger.info(
-                f"Vault balance of {vault_balance} and strategy balance of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
+                f"Vault balance of {vault_balance} and strategy balance "
+                f"of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
             )
 
             return True
@@ -143,7 +156,9 @@ class Earner:
                     "vault_balance": vault_balance,
                     "strategy_balance": strategy_balance,
                     "override_threshold": override_threshold,
-                    "vault_to_strategy_ratio": vault_balance / strategy_balance,
+                    "vault_to_strategy_ratio": vault_balance / strategy_balance
+                    if strategy_balance > 0
+                    else 0,
                 }
             )
             return False
@@ -242,7 +257,7 @@ class Earner:
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
         elif self.chain == Network.Ethereum:
             gas_price = get_effective_gas_price(self.web3)
-        elif self.chain == Network.Arbitrum:
+        elif self.chain in [Network.Arbitrum, Network.Fantom]:
             gas_price = int(1.1 * self.web3.eth.gas_price)
 
         return gas_price

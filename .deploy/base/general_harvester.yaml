@@ -18,7 +18,7 @@ spec:
           - name: general-harvester-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/poly_harvest.py"]
+            command: ["python", "-m", "scripts.poly_harvest"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

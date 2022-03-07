@@ -1,35 +1,19 @@
-from typing import Tuple
-import pytest
-from decimal import Decimal
-from brownie import *
-from web3 import Web3
 import logging
-import requests
-import os
 
+import pytest
+from brownie import *
+
+from config.constants import DIGG_CENTRALIZED_ORACLE
+from config.constants import DIGG_CHAINLINK_FORWARDER
+from config.constants import ETH_DIGG_BTC_CHAINLINK
+from config.enums import Network
+from integration_tests.utils import mock_send_discord
+from integration_tests.utils import test_address
+from integration_tests.utils import test_key
 from src.oracle import Oracle
 from src.utils import get_abi
-from tests.utils import test_address, test_key, mock_send_discord
-from config.enums import Network
 
-logger = logging.getLogger("test-oracle")
-
-os.environ[
-    "DISCORD_WEBHOOK_URL"
-] = "https://discord.com/api/webhooks/838956838636093491/OXDBt7dz6nn_AghoD5W8yhVjw7udBO6noHU8JNzbyAZMDgszvWAIJm9gAUikAdxTd03c"  # os.getenv("TEST_DISCORD_WEBHOOK_URL")
-os.environ["ETH_USD_CHAINLINK"] = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-os.environ["GAS_LIMIT"] = "1000000"
-os.environ[
-    "UNI_SUBGRAPH"
-] = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2"
-os.environ["UNI_PAIR"] = "0xe86204c4eddd2f70ee00ead6805f917671f56c52"
-os.environ[
-    "SUSHI_SUBGRAPH"
-] = "https://api.thegraph.com/subgraphs/name/sushiswap/exchange"
-os.environ["SUSHI_PAIR"] = "0x9a13867048e01c663ce8ce2fe0cdae69ff9f35e3"
-os.environ["CENTRALIZED_ORACLE"] = "0x73083058e0f61D3fc7814eEEDc39F9608B4546d7"
-os.environ["CHAINLINK_FORWARDER"] = "0xB572f69edbfC946af11a1b3ef8D5c2f41D38a642"
-os.environ["DIGG_BTC_CHAINLINK"] = "0x418a6c98cd5b8275955f08f0b8c1c6838c8b1685"
+logger = logging.getLogger(__name__)
 
 
 def mock_send_error(tx_type: str, error: Exception):
@@ -50,7 +34,7 @@ def keeper_address() -> str:
 def setup_centralized_oracle(keeper_address):
     centralized_oracle = Contract.from_abi(
         "CentralizedOracle",
-        os.getenv("CENTRALIZED_ORACLE"),
+        DIGG_CENTRALIZED_ORACLE,
         get_abi(Network.Ethereum, "digg_centralized_oracle"),
     )
     oracle_role = centralized_oracle.ORACLE_ROLE()
@@ -64,7 +48,7 @@ def setup_centralized_oracle(keeper_address):
 def setup_chainlink_oracle(keeper_address):
     chainlink_oracle = Contract.from_abi(
         "ChainlinkOracle",
-        os.getenv("CHAINLINK_FORWARDER"),
+        DIGG_CHAINLINK_FORWARDER,
         get_abi(Network.Ethereum, "chainlink_forwarder"),
     )
     owner = chainlink_oracle.owner()
@@ -110,11 +94,11 @@ def test_chainlink_forwarder(oracle):
 def test_is_negative_rebase(oracle):
     digg_btc_oracle = Contract.from_abi(
         "DiggBtcOracle",
-        os.getenv("DIGG_BTC_CHAINLINK"),
+        ETH_DIGG_BTC_CHAINLINK,
         get_abi(Network.Ethereum, "oracle"),
     )
     price = digg_btc_oracle.latestAnswer()
     if price < 95000000:
-        assert oracle.is_negative_rebase() == True
+        assert oracle.is_negative_rebase() is True
     else:
-        assert oracle.is_negative_rebase() == False
+        assert oracle.is_negative_rebase() is False

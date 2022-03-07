@@ -2,11 +2,12 @@ import logging
 
 from web3 import Web3
 
+from config.constants import FTM_VAULTS
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.earner import Earner
 from src.utils import get_secret
-from src.utils import get_strategies_and_vaults
+from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,17 +23,14 @@ def safe_earn(earner, vault, strategy):
 
 
 if __name__ == "__main__":
-    for chain in [Network.Arbitrum]:
-        # node_url = get_secret("alchemy/arbitrum-node-url", "ARBITRUM_NODE_URL")
-        node_url = "https://arb1.arbitrum.io/rpc"
+    for chain in [Network.Fantom]:
+        node_url = "https://rpc.ftm.tools/"
         node = Web3(Web3.HTTPProvider(node_url))
-
-        strategies, vaults = get_strategies_and_vaults(node, chain)
 
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
         keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
         discord_url = get_secret(
-            "keepers/harvester/arbitrum/info-webhook", "DISCORD_WEBHOOK_URL"
+            "keepers/harvester/fantom/info-webhook", "DISCORD_WEBHOOK_URL"
         )
 
         earner = Earner(
@@ -44,10 +42,19 @@ if __name__ == "__main__":
             base_oracle_address=MULTICHAIN_CONFIG.get(chain).get("gas_oracle"),
             discord_url=discord_url,
         )
+        strategies = []
+        vaults = []
+        for vault_address in FTM_VAULTS:
+            strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+            strategies.append(strategy)
+            vaults.append(vault)
 
         for strategy, vault in zip(strategies, vaults):
             if (
                 strategy.address
                 not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
             ):
-                safe_earn(earner, vault, strategy)
+                sett_name = strategy.functions.getName().call()
+                logger.info(f"+-----Earning {sett_name}-----+")
+                earner.earn(vault, strategy, sett_name=sett_name)
+                # safe_earn(earner, vault, strategy)

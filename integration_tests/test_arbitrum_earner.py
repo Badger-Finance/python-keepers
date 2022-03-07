@@ -1,40 +1,27 @@
 import logging
-import os
-import pytest
-from brownie import accounts, Contract, web3
 from decimal import Decimal
+
+import pytest
+from brownie import Contract
+from brownie import accounts
+from brownie import web3
 from hexbytes import HexBytes
 from web3 import contract
 
-from src.earner import Earner
-from src.utils import get_abi, get_last_harvest_times, hours, get_secret
-from tests.utils import test_address, test_key
-from config.constants import EARN_OVERRIDE_THRESHOLD, EARN_PCT_THRESHOLD
+from config.constants import ARB_ETH_USD_CHAINLINK
+from config.constants import ARB_KEEPER_ACL
+from config.constants import ARB_SLP_WBTC_WETH_STRATEGY
+from config.constants import ARB_SLP_WBTC_WETH_VAULT
+from config.constants import ARB_SLP_WETH_SUSHI_STRATEGY
+from config.constants import ARB_SLP_WETH_SUSHI_VAULT
+from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.enums import Network
+from integration_tests.utils import test_address
+from integration_tests.utils import test_key
+from src.earner import Earner
+from src.utils import get_abi
 
-logger = logging.getLogger("test-eth-earner")
-
-ETH_USD_CHAINLINK = web3.toChecksumAddress("0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612")
-KEEPER_ACL = web3.toChecksumAddress("0x265820F3779f652f2a9857133fDEAf115b87db4B")
-
-WBTC_WETH_SLP_STRATEGY = web3.toChecksumAddress(
-    "0xA6827f0f14D0B83dB925B616d820434697328c22"
-)  # WBTC-WETH-SLP
-WETH_SUSHI_SLP_STRATEGY = web3.toChecksumAddress(
-    "0x86f772C82914f5bFD168f99e208d0FC2C371e9C2"
-)  # WETH-SUSHI-SLP
-WBTC_WETH_SLP_VAULT = web3.toChecksumAddress(
-    "0xFc13209cAfE8fb3bb5fbD929eC9F11a39e8Ac041"
-)
-WETH_SUSHI_SLP_VAULT = web3.toChecksumAddress(
-    "0xe774d1fb3133b037aa17d39165b8f45f444f632d"
-)
-
-
-# def mock_get_last_harvest_times(web3, keeper_acl, start_block):
-#     return get_last_harvest_times(
-#         web3, keeper_acl, start_block, etherscan_key=os.getenv("ETHERSCAN_TOKEN")
-#     )
+logger = logging.getLogger(__name__)
 
 
 def mock_send_discord(
@@ -53,9 +40,6 @@ def mock_send_discord(
 def mock_fns(monkeypatch):
     # TODO: Ideally should find a way to mock get_secret
     monkeypatch.setattr("src.earner.send_success_to_discord", mock_send_discord)
-    # monkeypatch.setattr(
-    #     "src.general_harvester.get_last_harvest_times", mock_get_last_harvest_times
-    # )
 
 
 @pytest.fixture
@@ -72,7 +56,7 @@ def keeper_address() -> str:
 def setup_keeper_acl(keeper_address):
     keeper_acl = Contract.from_abi(
         "KeeperAccessControl",
-        KEEPER_ACL,
+        ARB_KEEPER_ACL,
         get_abi(Network.Ethereum, "keeper_acl"),
     )
     earner_key = keeper_acl.EARNER_ROLE()
@@ -103,18 +87,18 @@ def earner(keeper_address, keeper_key) -> Earner:
     return Earner(
         chain=Network.Arbitrum,
         web3=web3,
-        keeper_acl=KEEPER_ACL,
+        keeper_acl=ARB_KEEPER_ACL,
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        base_oracle_address=ETH_USD_CHAINLINK,
+        base_oracle_address=ARB_ETH_USD_CHAINLINK,
     )
 
 
 @pytest.mark.parametrize(
     "strategy,vault",
     [
-        (WBTC_WETH_SLP_STRATEGY, WBTC_WETH_SLP_VAULT),
-        (WETH_SUSHI_SLP_STRATEGY, WETH_SUSHI_SLP_VAULT),
+        (ARB_SLP_WBTC_WETH_STRATEGY, ARB_SLP_WBTC_WETH_VAULT),
+        (ARB_SLP_WETH_SUSHI_STRATEGY, ARB_SLP_WETH_SUSHI_VAULT),
     ],
     indirect=True,
 )

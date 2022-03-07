@@ -18,7 +18,7 @@ spec:
           - name: eth-tender-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/eth_tend.py"]
+            command: ["python", "-m", "scripts.eth_tend"]
             env:
               - name: LOG_LEVEL
                 value: "info"

@@ -1,16 +1,14 @@
-name: Pull Request - Build and Deploy to Development Environment
-# Code probably works, but may not.
-# Pushing to development environment allows for validation.
+name: Build and deploy keepers
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
 env:
   TARGET_ENVIRONMENT: 'dev'
   MANIFEST_RESPOSITORY: 'badger-finance/badger-kube-manifests'
-  IMAGE_NAME: '/badger/${{ github.event.repository.name }}:${{ github.event.pull_request.head.sha }}'
+  IMAGE_NAME: '/badger/${{ github.event.repository.name }}:${{ github.event.after }}'
 
 jobs:
   build:
@@ -32,6 +30,15 @@ jobs:
         run: |
           docker build -t ${{ steps.login-ecr.outputs.registry }}${{ env.IMAGE_NAME }} .
           docker push ${{ steps.login-ecr.outputs.registry }}${{ env.IMAGE_NAME }}
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ steps.login-ecr.outputs.registry }}${{ env.IMAGE_NAME }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   validate_manifest:
     name: Run Manifest Validation

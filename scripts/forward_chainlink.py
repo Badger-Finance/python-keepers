@@ -1,23 +1,17 @@
 import logging
-import os
-import sys
-from time import sleep, time
+from time import time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from enums import Network
-from oracle import Oracle
-from utils import get_secret, get_node_url
+from config.enums import Network
+from src.oracle import Oracle
+from src.utils import get_node_url
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
 
 if __name__ == "__main__":
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
     logger.info(f"INVOKED AT {time()}")
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")

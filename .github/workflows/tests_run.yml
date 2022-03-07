@@ -1,0 +1,43 @@
+on:
+    push:
+        branches:
+            - develop
+            - main
+    pull_request:
+
+name: main workflow
+
+env:
+    ENV: TEST
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v1
+
+            - name: npm install
+              run: npm install
+
+            - name: Install Ganache
+              run: npm install -g ganache-cli@6.10.2
+
+            - name: Setup Python 3.9
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.9.5
+
+            - name: Install Requirements
+              run: pip install -r requirements.txt && pip install -r requirements-dev.txt
+
+            - name: Run Tests
+              run: brownie test --cov-report=xml --cov=.
+
+            - uses: codecov/codecov-action@v1
+              with:
+                  fail_ci_if_error: false
+                  token: ${{ secrets.CODECOV_TOKEN }}

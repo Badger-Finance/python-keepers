@@ -1,16 +1,9 @@
 import logging
-import os
-import sys
-from time import sleep
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from enums import Network
-from rebaser import Rebaser
-from utils import get_secret, get_node_url
+from config.enums import Network
+from src.rebaser import Rebaser
+from src.utils import get_node_url
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,7 +17,7 @@ def safe_rebase(harvester, sett_name, strategy):
 
 if __name__ == "__main__":
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")

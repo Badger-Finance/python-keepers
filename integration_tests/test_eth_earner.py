@@ -1,28 +1,22 @@
 import logging
-import os
-import pytest
-from brownie import accounts, Contract, web3
 from decimal import Decimal
+
+import pytest
+from brownie import Contract
+from brownie import accounts
+from brownie import web3
 from hexbytes import HexBytes
-from web3 import contract
 
-from src.earner import Earner
-from src.utils import (
-    get_abi,
-    get_last_harvest_times,
-    hours,
-    get_secret,
-    get_strategies_and_vaults,
-)
-from tests.utils import test_address, test_key
-from config.constants import (
-    EARN_OVERRIDE_THRESHOLD,
-    EARN_PCT_THRESHOLD,
-    MULTICHAIN_CONFIG,
-)
+from config.constants import EARN_OVERRIDE_THRESHOLD
+from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
+from integration_tests.utils import test_address
+from integration_tests.utils import test_key
+from src.earner import Earner
+from src.utils import get_abi
+from src.utils import get_strategies_and_vaults
 
-logger = logging.getLogger("test-eth-earner")
+logger = logging.getLogger(__name__)
 
 
 def mock_send_discord(
@@ -91,9 +85,9 @@ def test_earn(keeper_address, earner):
     and 0 after.
     """
     accounts[0].transfer(keeper_address, "10 ether")
-    STRATEGIES, VAULTS = get_strategies_and_vaults(web3, Network.Ethereum)
+    strategies, vaults = get_strategies_and_vaults(web3, Network.Ethereum)
 
-    for strategy, vault in zip(STRATEGIES, VAULTS):
+    for strategy, vault in zip(strategies, vaults):
 
         strategy_name = strategy.functions.getName().call()
 

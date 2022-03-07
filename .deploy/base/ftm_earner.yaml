@@ -1,23 +1,23 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: eth-bvecvx-earner-keeper
+  name: ftm-earner-keeper
   labels:
-    app: eth-bvecvx-earner-keeper
+    app: ftm-earner-keeper
 spec:
-  schedule: "47 23 * * 3"
+  schedule: "*/10 * * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: eth-bvecvx-earner-keeper
+          serviceAccountName: ftm-earner-keeper
           containers:
-          - name: eth-bvecvx-earner-keeper
+          - name: ftm-earner-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "-m", "scripts.earn_locked_cvx"]
+            command: ["python", "-m", "scripts.ftm_earn"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

@@ -1,17 +1,15 @@
-from decimal import Decimal
-from hexbytes import HexBytes
+# TODO: Move this module as a shared functionality to badger utils lib
 import logging
-import os
-import sys
-from web3 import Web3, contract, exceptions
+from decimal import Decimal
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
+from hexbytes import HexBytes
+from web3 import Web3
+from web3 import contract
+from web3 import exceptions
 
-from enums import Network
+from config.enums import Network
 
-logger = logging.getLogger("tx-utils")
+logger = logging.getLogger(__name__)
 
 
 def get_gas_price_of_tx(
@@ -69,7 +67,8 @@ def get_latest_base_fee(
 
 
 def get_effective_gas_price(web3: Web3) -> int:
-    # TODO: Currently using max fee (per gas) that can be used for this tx. Maybe use base + priority (for average).
+    # TODO: Currently using max fee (per gas) that can be used for this tx.
+    # TODO: Maybe use base + priority (for average).
     base_fee = get_latest_base_fee(web3)
     logger.info(f"latest base fee: {base_fee}")
 
@@ -92,8 +91,10 @@ def get_priority_fee(
     Args:
         web3 (Web3): Web3 object
         num_blocks (int, optional): Number of historic blocks to look at. Defaults to 4.
-        percentiles (int, optional): Percentile of transactions in blocks to use to analyze fees. Defaults to 70.
-        default_reward (int, optional): If call fails, what default reward to use in gwei. Defaults to 10e9.
+        percentiles (int, optional): Percentile of transactions
+            in blocks to use to analyze fees. Defaults to 70.
+        default_reward (int, optional): If call fails,
+            what default reward to use in gwei. Defaults to 10e9.
 
     Returns:
         int: [description]

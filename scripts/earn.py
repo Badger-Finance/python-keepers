@@ -1,24 +1,19 @@
-import json
 import logging
-import os
-import sys
-from time import sleep
-from web3 import Web3, contract
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
+from web3 import Web3
 
-from constants import MULTICHAIN_CONFIG
-from earner import Earner
-from enums import Network
-from utils import get_secret, get_strategies_and_vaults, get_node_url
+from config.constants import MULTICHAIN_CONFIG
+from config.constants import POLY_OLD_STRATEGY
+from config.enums import Network
+from src.earner import Earner
+from src.utils import get_node_url
+from src.utils import get_secret
+from src.utils import get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("script")
+logger = logging.getLogger(__name__)
 
-INVALID_STRATS = ["0xDb0C3118ef1acA6125200139BEaCc5D675F37c9C"]
+INVALID_STRATS = [POLY_OLD_STRATEGY]
 
 
 def safe_earn(earner, sett_name, vault, strategy):

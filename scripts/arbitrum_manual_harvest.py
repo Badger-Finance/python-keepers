@@ -1,27 +1,20 @@
 import logging
-import os
-import sys
 import time
-from eth_account.account import Account
-from pathlib import Path
+
 from web3 import Web3
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from enums import Network
-from general_harvester import GeneralHarvester
-from utils import get_abi, get_secret, get_node_url
-from constants import MULTICHAIN_CONFIG
+from config.constants import ARB_SWAPR_WBTC_WETH_STRATEGY
+from config.constants import MULTICHAIN_CONFIG
+from config.enums import Network
+from src.general_harvester import GeneralHarvester
+from src.utils import get_abi
+from src.utils import get_node_url
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(Path(__file__).name)
+logger = logging.getLogger(__name__)
 
-strategies = {
-    "0x43942cEae98CC7485B48a37fBB1aa5035e1c8B46",  # WBTC WETH SWAPR
-}
+strategies = {ARB_SWAPR_WBTC_WETH_STRATEGY}
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:

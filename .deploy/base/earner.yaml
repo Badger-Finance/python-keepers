@@ -18,7 +18,7 @@ spec:
           - name: earner-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "scripts/earn.py"]
+            command: ["python", "-m", "scripts.earn"]
             env:
               - name: LOG_LEVEL
                 value: 'info'

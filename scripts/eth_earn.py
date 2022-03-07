@@ -1,34 +1,29 @@
-import json
 import logging
-import os
-import sys
-from time import sleep
-from web3 import Web3, contract
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
+from web3 import Web3
 
-from earner import Earner
-from utils import get_secret, get_strategy_from_vault, get_abi, get_node_url
-from tx_utils import get_latest_base_fee
-from constants import (
-    MULTICHAIN_CONFIG,
-    ETH_YVWBTC_VAULT,
-    ETH_TRICRYPTO_VAULT,
-    ETH_BVECVX_CVX_LP_VAULT,
-    ETH_IBBTC_CRV_LP_VAULT,
-    ETH_IBBTC_SUSHI_VAULT,
-    ETH_SBTC_VAULT,
-    ETH_TBTC_VAULT,
-    ETH_PBTC_VAULT,
-    ETH_BBTC_VAULT,
-)
-from enums import Network
+from config.constants import ETH_BBTC_VAULT
+from config.constants import ETH_BVECVX_CVX_LP_VAULT
+from config.constants import ETH_FRAX_CRV_VAULT
+from config.constants import ETH_IBBTC_CRV_LP_VAULT
+from config.constants import ETH_IBBTC_SUSHI_VAULT
+from config.constants import ETH_MIM_CRV_VAULT
+from config.constants import ETH_PBTC_VAULT
+from config.constants import ETH_SBTC_VAULT
+from config.constants import ETH_TBTC_VAULT
+from config.constants import ETH_TRICRYPTO_VAULT
+from config.constants import ETH_YVWBTC_VAULT
+from config.constants import MULTICHAIN_CONFIG
+from config.enums import Network
+from src.earner import Earner
+from src.tx_utils import get_latest_base_fee
+from src.utils import get_abi
+from src.utils import get_node_url
+from src.utils import get_secret
+from src.utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("script")
+logger = logging.getLogger(__name__)
 
 INVALID_VAULTS = [
     ETH_YVWBTC_VAULT,
@@ -66,6 +61,8 @@ if __name__ == "__main__":
         )
         vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
         vault_addresses.append(ETH_IBBTC_CRV_LP_VAULT)
+        vault_addresses.append(ETH_FRAX_CRV_VAULT)
+        vault_addresses.append(ETH_MIM_CRV_VAULT)
 
         for address in vault_addresses:
             if address not in INVALID_VAULTS:

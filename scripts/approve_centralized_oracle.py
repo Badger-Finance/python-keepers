@@ -1,19 +1,15 @@
 import logging
-import os
-import sys
-from time import sleep, time
+from time import time
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-
-from oracle import Oracle
-from utils import get_secret
+from src.oracle import Oracle
+from src.utils import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
 
 if __name__ == "__main__":
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
     logger.info(f"INVOKED AT {time()}")
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")

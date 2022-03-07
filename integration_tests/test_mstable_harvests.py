@@ -1,27 +1,33 @@
 import os
-import pytest
-from brownie import accounts, interface, Contract, web3
 from decimal import Decimal
+
+import pytest
+from brownie import Contract
+from brownie import accounts
+from brownie import web3
 from hexbytes import HexBytes
 from web3 import contract
 
+from config.constants import ETH_IBMBTC_STRATEGY
+from config.constants import ETH_MBTC_HBTC_STRATEGY
+from config.constants import MSTABLE_VOTER_PROXY
+from config.constants import MTA
 from config.constants import MULTICHAIN_CONFIG
-from src.general_harvester import GeneralHarvester
-from src.utils import get_abi, get_last_harvest_times, hours
-from tests.utils import test_address, test_key
 from config.enums import Network
+from integration_tests.utils import test_address
+from integration_tests.utils import test_key
+from src.general_harvester import GeneralHarvester
+from src.utils import get_abi
+from src.utils import get_last_harvest_times
+from src.utils import hours
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(
     MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]
 )
 KEEPER_ACL = web3.toChecksumAddress(MULTICHAIN_CONFIG[Network.Ethereum]["keeper_acl"])
 
-MSTABLE_VOTER_PROXY = "0x10D96b1Fd46Ce7cE092aA905274B8eD9d4585A6E"
-MSTABLE_STRATEGIES = [
-    "0x54D06A0E1cE55a7a60Ee175AbCeaC7e363f603f3",  # mBTC/hBTC mstable
-    "0xd409C506742b7f76f164909025Ab29A47e06d30A",  # ibmBTC mstable
-]
-MTA = "0xa3bed4e1c75d00fa6f4e5e6922db7261b5e9acd2"
+
+MSTABLE_STRATEGIES = [ETH_MBTC_HBTC_STRATEGY, ETH_IBMBTC_STRATEGY]
 
 
 def mock_get_last_harvest_times(web3, keeper_acl, start_block):
@@ -201,30 +207,30 @@ def test_conditional_mstable_harvest(
     chain.sleep(hours(121))
     chain.mine(1)
     # Strategy should be harvestable at this point
-    assert harvester.is_time_to_harvest(voter_proxy) == True
+    assert harvester.is_time_to_harvest(voter_proxy) is True
     for strategy in strategies:
-        assert harvester.is_time_to_harvest(strategy["contract"]) == True
+        assert harvester.is_time_to_harvest(strategy["contract"]) is True
 
     harvester.harvest_mta(voter_proxy)
     for strategy in strategies:
         harvester.harvest(strategy["contract"])
 
     # Strategy shouldn't be harvestable
-    assert harvester.is_time_to_harvest(voter_proxy) == False
+    assert harvester.is_time_to_harvest(voter_proxy) is False
     for strategy in strategies:
-        assert harvester.is_time_to_harvest(strategy["contract"]) == False
+        assert harvester.is_time_to_harvest(strategy["contract"]) is False
 
     chain.sleep(hours(72))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(voter_proxy) == False
+    assert harvester.is_time_to_harvest(voter_proxy) is False
     for strategy in strategies:
-        assert harvester.is_time_to_harvest(strategy["contract"]) == False
+        assert harvester.is_time_to_harvest(strategy["contract"]) is False
     # Strategy should be harvestable again after 120 hours
     chain.sleep(hours(49))
     chain.mine(1)
-    assert harvester.is_time_to_harvest(voter_proxy) == True
+    assert harvester.is_time_to_harvest(voter_proxy) is True
     for strategy in strategies:
-        assert harvester.is_time_to_harvest(strategy["contract"]) == True
+        assert harvester.is_time_to_harvest(strategy["contract"]) is True
 
     harvester.harvest_mta(voter_proxy)
     for strategy in strategies:

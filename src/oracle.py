@@ -1,34 +1,34 @@
-from datetime import datetime, timezone
-from decimal import Decimal
-from hexbytes import HexBytes
-from traceback import format_exc
 import json
 import logging
 import os
+from datetime import datetime
+from datetime import timezone
+from traceback import format_exc
+
 import requests
-import sys
-from web3 import Web3, contract, exceptions
+from hexbytes import HexBytes
+from web3 import Web3
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../config"))
-)
-
-from enums import Network
-from utils import (
-    get_abi,
-    get_secret,
-    hours,
-    confirm_transaction,
-    get_hash_from_failed_tx_error,
-    send_success_to_discord,
-    send_oracle_error_to_discord,
-)
-from tx_utils import get_priority_fee, get_gas_price_of_tx, get_effective_gas_price
+from config.constants import DIGG_CENTRALIZED_ORACLE
+from config.constants import DIGG_CHAINLINK_FORWARDER
+from config.constants import ETH_DIGG_BTC_CHAINLINK
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import SUSHI_DIGG_WBTC
+from config.constants import SUSHI_SUBGRAPH
+from config.constants import UNIV2_DIGG_WBTC
+from config.constants import UNI_SUBGRAPH
+from config.enums import Network
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import confirm_transaction
+from src.utils import get_abi
+from src.utils import get_hash_from_failed_tx_error
+from src.utils import send_oracle_error_to_discord
+from src.utils import send_success_to_discord
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
-WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 GAS_LIMIT = 200_000
 NEGATIVE_THRESHOLD = 0.95
 
@@ -40,30 +40,30 @@ class Oracle:
         keeper_key=os.getenv("KEEPER_KEY"),
         web3=os.getenv("ETH_NODE_URL"),
     ):
-        self.logger = logging.getLogger("oracle")
+        self.logger = logging.getLogger(__name__)
         self.web3 = Web3(Web3.HTTPProvider(web3))
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("ETH_USD_CHAINLINK")),
+            address=self.web3.toChecksumAddress(ETH_ETH_USD_CHAINLINK),
             abi=get_abi(Network.Ethereum, "oracle"),
         )
         self.centralized_oracle = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("CENTRALIZED_ORACLE")),
+            address=self.web3.toChecksumAddress(DIGG_CENTRALIZED_ORACLE),
             abi=get_abi(Network.Ethereum, "digg_centralized_oracle"),
         )
         self.chainlink_forwarder = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("CHAINLINK_FORWARDER")),
+            address=self.web3.toChecksumAddress(DIGG_CHAINLINK_FORWARDER),
             abi=get_abi(Network.Ethereum, "chainlink_forwarder"),
         )
         self.digg_btc_chainlink = self.web3.eth.contract(
-            address=self.web3.toChecksumAddress(os.getenv("DIGG_BTC_CHAINLINK")),
+            address=self.web3.toChecksumAddress(ETH_DIGG_BTC_CHAINLINK),
             abi=get_abi(Network.Ethereum, "oracle"),
         )
 
     def is_negative_rebase(self):
         price = self.digg_btc_chainlink.functions.latestAnswer().call()
-        self.logger.info(f"price: [{price} - {price / 10**8}]")
+        self.logger.info(f"price: [{price} - {price / 10 ** 8}]")
         return price / 10 ** 8 < NEGATIVE_THRESHOLD
 
     def propose_centralized_report_push(self):
@@ -167,15 +167,12 @@ class Oracle:
         """Calculates 24 hour TWAP for digg based on sushi and uni wbtc / digg pools
 
         Returns:
-            [int]: average of 24 hour TWAP for sushi and uni wbtc / digg pools time 10^18 (digg decimal places)
+            [int]: average of 24 hour TWAP for sushi and
+            uni wbtc / digg pools time 10^18 (digg decimal places)
         """
 
-        uni_twap_data = self.send_twap_query(
-            "uni", os.getenv("UNI_SUBGRAPH"), os.getenv("UNI_PAIR")
-        )
-        sushi_twap_data = self.send_twap_query(
-            "sushi", os.getenv("SUSHI_SUBGRAPH"), os.getenv("SUSHI_PAIR")
-        )
+        uni_twap_data = self.send_twap_query("uni", UNI_SUBGRAPH, UNIV2_DIGG_WBTC)
+        sushi_twap_data = self.send_twap_query("sushi", SUSHI_SUBGRAPH, SUSHI_DIGG_WBTC)
 
         uni_prices = [
             float(x["reserve0"]) / float(x["reserve1"])
@@ -216,18 +213,18 @@ class Oracle:
         time_id = "hourStartUnix" if exchange == "uni" else "date"
 
         query = f"""
-        {{ 
-            pairHourDatas(where: 
+        {{
+            pairHourDatas(where:
                 {{
                 pair: \"{pair}\"
                 {time_id}_gte: {yesterday_timestamp}
                 {time_id}_lte: {today_timestamp}
                 }}
-            ) 
-            {{ 
-                id 
+            )
+            {{
+                id
                 {time_id}
-                reserve0 
+                reserve0
                 reserve1
             }}
         }}
@@ -263,24 +260,6 @@ class Oracle:
         )
         return today
 
-    def request_uma_report(self):
-        price_identifier = "DIGGBTC".encode("utf-8")
-        today_timestamp = round(self._get_today_report_datetime().timestamp())
-        ancillary_data = HexBytes(0)
-        currency = WETH_ADDRESS
-        reward = 0
-
-        """
-        function requestPrice(
-            bytes32 identifier,
-            uint256 timestamp,
-            bytes memory ancillaryData,
-            IERC20 currency,
-            uint256 reward
-        ) external virtual returns (uint256 totalBond);
-        """
-        pass
-
     def get_digg_twap_uma(self) -> float:
         return 0
 
@@ -300,15 +279,15 @@ class Oracle:
                 )
                 self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
-                    tx_type=f"Chainlink Forwarder",
+                    tx_type="Chainlink Forwarder",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                 )
             elif tx_hash != HexBytes(0):
-                send_success_to_discord(tx_type=f"Chainlink Forwarder", tx_hash=tx_hash)
+                send_success_to_discord(tx_type="Chainlink Forwarder", tx_hash=tx_hash)
         except Exception as e:
             self.logger.error(f"Error processing chainlink tx: {e}")
-            send_oracle_error_to_discord(tx_type=f"Chainlink Forwarder", error=e)
+            send_oracle_error_to_discord(tx_type="Chainlink Forwarder", error=e)
 
     def __send_chainlink_tx(self) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
