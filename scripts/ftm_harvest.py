@@ -1,6 +1,5 @@
 import logging
 import time
-from pathlib import Path
 
 from web3 import Web3
 
