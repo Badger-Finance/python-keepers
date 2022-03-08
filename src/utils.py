@@ -83,6 +83,13 @@ def get_secret(
             )
 
 
+def get_node_url(chain) -> str:
+    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
+    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
+    url = get_secret(secret_name, secret_key)
+    return url
+
+
 # TODO: Don't duplicate common abis for all chains
 def get_abi(chain: str, contract_id: str):
     with open(f"./abi/{ABI_DIRS[chain]}/{contract_id}.json") as f:
@@ -501,10 +508,3 @@ def get_token_price(
         ).json()
     token_price = prices.get(token_address, 0)
     return token_price
-
-
-def get_node_url(chain) -> str:
-    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
-    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
-    url = get_secret(secret_name, secret_key)
-    return url
