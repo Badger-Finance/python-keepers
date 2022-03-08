@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 from decimal import Decimal
+from typing import Optional
 
 import boto3
 import requests
@@ -23,10 +24,17 @@ from config.enums import Network
 
 logger = logging.getLogger(__name__)
 
+AWS_ERR_CODES = [
+    "DecryptionFailureException",
+    "InternalServiceErrorException",
+    "InvalidParameterException",
+    "ResourceNotFoundException",
+]
+
 
 def get_secret(
     secret_name: str, secret_key: str, region_name: str = "us-west-1"
-) -> str:
+) -> Optional[str]:
     """Retrieves secret from AWS secretsmanager.
     Args:
         secret_name (str): secret name in secretsmanager
@@ -54,19 +62,10 @@ def get_secret(
     # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
     # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
     # We rethrow the exception by default.
-
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
     except ClientError as e:
-        if e.response["Error"]["Code"] == "DecryptionFailureException":
-            raise e
-        elif e.response["Error"]["Code"] == "InternalServiceErrorException":
-            raise e
-        elif e.response["Error"]["Code"] == "InvalidParameterException":
-            raise e
-        elif e.response["Error"]["Code"] == "InvalidRequestException":
-            raise e
-        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
+        if e.response["Error"]["Code"] in AWS_ERR_CODES:
             raise e
     else:
         # Decrypts secret using the associated KMS CMK.
