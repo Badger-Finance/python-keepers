@@ -1,8 +1,11 @@
 import pytest
 from hexbytes import HexBytes
 
+from config.constants import BLOCKS_IN_A_DAY
+from config.constants import SECONDS_IN_A_DAY
 from config.enums import Network
 from src.utils import get_explorer
+from src.utils import seconds_to_blocks
 
 
 @pytest.mark.parametrize(
@@ -17,3 +20,8 @@ from src.utils import get_explorer
 def test_get_explorer(chain, expected_explorer_root):
     _, explorer_url = get_explorer(chain, HexBytes("0x123123"))
     assert expected_explorer_root in explorer_url
+
+
+def test_seconds_to_blocks():
+    assert seconds_to_blocks(100) == 8.101851851851851
+    assert seconds_to_blocks(0) == 0
