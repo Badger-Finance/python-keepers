@@ -340,13 +340,10 @@ def get_hash_from_failed_tx_error(
         return tx_hash
 
 
-def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
+def get_explorer(chain: Network, tx_hash: HexBytes) -> Optional[tuple[str, str]]:
     if chain == Network.Ethereum:
         explorer_name = "Etherscan"
         explorer_url = f"https://etherscan.io/tx/{tx_hash.hex()}"
-    elif chain == Network.BinanceSmartChain:
-        explorer_name = "Bscscan"
-        explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
     elif chain == Network.Polygon:
         explorer_name = "Polygonscan"
         explorer_url = f"https://polygonscan.com/tx/{tx_hash.hex()}"
@@ -356,8 +353,10 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     elif chain == Network.Fantom:
         explorer_name = "Ftmscan"
         explorer_url = f"https://ftmscan.com/tx/{tx_hash.hex()}"
+    else:
+        return None
 
-    return (explorer_name, explorer_url)
+    return explorer_name, explorer_url
 
 
 def get_last_harvest_times(
