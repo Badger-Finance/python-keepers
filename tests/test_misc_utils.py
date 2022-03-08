@@ -1,8 +1,6 @@
 import pytest
 from hexbytes import HexBytes
 
-from config.constants import BLOCKS_IN_A_DAY
-from config.constants import SECONDS_IN_A_DAY
 from config.enums import Network
 from src.utils import get_explorer
 from src.utils import seconds_to_blocks
