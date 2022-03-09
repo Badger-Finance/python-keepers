@@ -54,5 +54,5 @@ def test_send_oracle_error_to_discord_send_called(mocker):
     mocker.patch("src.utils.RequestsWebhookAdapter")
     webhook = mocker.patch("src.utils.Webhook.from_url")
 
-    send_oracle_error_to_discord(tx_type="whatever",error=Exception())
+    send_oracle_error_to_discord(tx_type="whatever", error=Exception())
     assert webhook.return_value.send.called
