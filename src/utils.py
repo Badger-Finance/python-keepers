@@ -4,6 +4,7 @@ import logging
 import os
 from decimal import Decimal
 from typing import Optional
+from typing import Union
 
 import boto3
 import requests
@@ -380,6 +381,7 @@ def get_last_harvest_times(
         keeper_acl (contract): Keeper ACL web3 contract instance.
         start_block (int, optional):
             Minimum block number to start fetching harvest timestamps from. Defaults to 0.
+        etherscan_key (str)
 
     Returns:
         dict: Dictionary of strategy addresses and their latest harvest timestamps.
@@ -499,14 +501,10 @@ def seconds_to_blocks(seconds: int) -> int:
 
 def get_token_price(
     token_address: str, currency: str, chain: str, use_staging: bool = False
-) -> int:
-    if use_staging:
-        prices = requests.get(
-            f"https://staging-api.badger.finance/v2/prices?currency={currency}&chain={chain}"
-        ).json()
-    else:
-        prices = requests.get(
-            f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
-        ).json()
-    token_price = prices.get(token_address, 0)
-    return token_price
+) -> Union[int]:
+    base_url = "https://staging-api.badger.finance" if use_staging else "https://api.badger.finance"
+    response = requests.get(
+        f"{base_url}/v2/prices?currency={currency}&chain={chain}"
+    )
+    response.raise_for_status()
+    return response.json().get(token_address, 0)
