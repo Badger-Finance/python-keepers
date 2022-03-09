@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from hexbytes import HexBytes
 
 from src.utils import send_error_to_discord
@@ -26,7 +28,8 @@ def test_send_success_to_discord_send_called(mocker):
 
     send_success_to_discord(
         tx_hash=HexBytes("0x123123"),
-        tx_type="whatever",
+        tx_type="Harvest",
+        gas_cost=Decimal(123),
     )
     assert webhook.return_value.send.called
 
@@ -36,7 +39,7 @@ def test_send_rebase_to_discord_send_called(mocker):
     mocker.patch("src.utils.RequestsWebhookAdapter")
     webhook = mocker.patch("src.utils.Webhook.from_url")
 
-    send_rebase_to_discord(tx_hash=HexBytes("0x123123"),)
+    send_rebase_to_discord(tx_hash=HexBytes("0x123123"), gas_cost=Decimal(123.0))
     assert webhook.return_value.send.called
 
 

@@ -1,9 +1,11 @@
 from unittest.mock import MagicMock
 
+import responses
 from hexbytes import HexBytes
 from web3 import exceptions
-
+from web3 import Web3
 from src.utils import confirm_transaction
+from src.utils import get_last_harvest_times
 
 
 def test_confirm_transaction():
@@ -60,3 +62,61 @@ def test_confirm_transaction_raises_unexpected():
     )
     assert not success
     assert tx_msg == f"Error waiting for {tx_hash.hex()}. Error: ."
+
+
+@responses.activate
+def test_get_last_harvest_times(mocker):
+    mocker.patch("src.utils.get_secret")
+    some_strategy = "0x111111"
+    expected_timestamp = "123123123"
+    responses.add(
+        responses.GET,
+        "https://api.etherscan.io/api",
+        json={
+            "result": [
+                {
+                    "to": "0xaffb3b889E48745Ce16E90433A61f4bCb95692Fd", "input": "",
+                    "timeStamp": expected_timestamp,
+                }
+            ]
+        },
+        status=200,
+    )
+    times = get_last_harvest_times(
+        MagicMock(
+            eth=MagicMock(
+                block_number=1234,
+            ),
+            toChecksumAddress=Web3.toChecksumAddress
+        ),
+        keeper_acl=MagicMock(  # noqa
+            address="0xaffb3b889E48745Ce16E90433A61f4bCb95692Fd",
+            decode_function_input=MagicMock(
+                return_value=("<Function harvest(address)>", {"strategy": some_strategy})
+            )
+        )
+    )
+    assert times == {some_strategy: int(expected_timestamp)}
+
+
+@responses.activate
+def test_get_last_harvest_times_empty_response(mocker):
+    """
+    Case when etherscan returns empty array of transactions
+    """
+    mocker.patch("src.utils.get_secret")
+    responses.add(
+        responses.GET,
+        "https://api.etherscan.io/api",
+        json={"result": []},
+        status=200,
+    )
+    assert get_last_harvest_times(
+        MagicMock(
+            eth=MagicMock(
+                block_number=1234,
+            ),
+            toChecksumAddress=Web3.toChecksumAddress
+        ),
+        keeper_acl=MagicMock()  # noqa
+    ) == {}
