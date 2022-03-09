@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 from decimal import Decimal
 from typing import Optional
 
@@ -92,7 +93,8 @@ def get_node_url(chain) -> str:
 
 # TODO: Don't duplicate common abis for all chains
 def get_abi(chain: str, contract_id: str):
-    with open(f"./abi/{ABI_DIRS[chain]}/{contract_id}.json") as f:
+    project_root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    with open(f"{project_root_dir}/abi/{ABI_DIRS[chain]}/{contract_id}.json") as f:
         return json.load(f)
 
 
