@@ -1,4 +1,6 @@
 # python-keepers
+Coverage: [![codecov](https://codecov.io/gh/Badger-Finance/python-keepers/branch/develop/graph/badge.svg?token=H8ULEZLN3Q)](https://codecov.io/gh/Badger-Finance/python-keepers)
+
 Python based keeper bots for Badger setts.
 
 ## Contributing

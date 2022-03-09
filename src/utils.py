@@ -1,7 +1,10 @@
 import base64
 import json
 import logging
+import os
 from decimal import Decimal
+from typing import Optional
+from typing import Union
 
 import boto3
 import requests
@@ -23,10 +26,17 @@ from config.enums import Network
 
 logger = logging.getLogger(__name__)
 
+AWS_ERR_CODES = [
+    "DecryptionFailureException",
+    "InternalServiceErrorException",
+    "InvalidParameterException",
+    "ResourceNotFoundException",
+]
+
 
 def get_secret(
     secret_name: str, secret_key: str, region_name: str = "us-west-1"
-) -> str:
+) -> Optional[str]:
     """Retrieves secret from AWS secretsmanager.
     Args:
         secret_name (str): secret name in secretsmanager
@@ -54,19 +64,10 @@ def get_secret(
     # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
     # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
     # We rethrow the exception by default.
-
     try:
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
     except ClientError as e:
-        if e.response["Error"]["Code"] == "DecryptionFailureException":
-            raise e
-        elif e.response["Error"]["Code"] == "InternalServiceErrorException":
-            raise e
-        elif e.response["Error"]["Code"] == "InvalidParameterException":
-            raise e
-        elif e.response["Error"]["Code"] == "InvalidRequestException":
-            raise e
-        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
+        if e.response["Error"]["Code"] in AWS_ERR_CODES:
             raise e
     else:
         # Decrypts secret using the associated KMS CMK.
@@ -75,16 +76,26 @@ def get_secret(
         if "SecretString" in get_secret_value_response:
             return json.loads(get_secret_value_response["SecretString"]).get(secret_key)
         else:
-            return base64.b64decode(get_secret_value_response["SecretBinary"]).get(
+            return json.loads(base64.b64decode(
+                get_secret_value_response["SecretBinary"]
+            ).decode(
+                "utf-8"
+            )).get(
                 secret_key
             )
 
-    return None
+
+def get_node_url(chain) -> str:
+    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
+    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
+    url = get_secret(secret_name, secret_key)
+    return url
 
 
 # TODO: Don't duplicate common abis for all chains
 def get_abi(chain: str, contract_id: str):
-    with open(f"./abi/{ABI_DIRS[chain]}/{contract_id}.json") as f:
+    project_root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    with open(f"{project_root_dir}/abi/{ABI_DIRS[chain]}/{contract_id}.json") as f:
         return json.load(f)
 
 
@@ -108,7 +119,7 @@ def send_error_to_discord(
     message: str = "Transaction timed out.",
     chain: str = None,
     keeper_address: str = None,
-):
+) -> None:
     try:
         webhook = Webhook.from_url(
             get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
@@ -321,7 +332,8 @@ def get_hash_from_failed_tx_error(
     sett_name: str = None,
     chain: str = None,
     keeper_address: str = None,
-) -> HexBytes:
+) -> Optional[HexBytes]:
+    tx_hash = None
     try:
         error_obj = json.loads(str(error).replace("'", '"'))
         send_error_to_discord(
@@ -339,13 +351,10 @@ def get_hash_from_failed_tx_error(
         return tx_hash
 
 
-def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
+def get_explorer(chain: Network, tx_hash: HexBytes) -> Optional[tuple[str, str]]:
     if chain == Network.Ethereum:
         explorer_name = "Etherscan"
         explorer_url = f"https://etherscan.io/tx/{tx_hash.hex()}"
-    elif chain == Network.BinanceSmartChain:
-        explorer_name = "Bscscan"
-        explorer_url = f"https://bscscan.io/tx/{tx_hash.hex()}"
     elif chain == Network.Polygon:
         explorer_name = "Polygonscan"
         explorer_url = f"https://polygonscan.com/tx/{tx_hash.hex()}"
@@ -355,8 +364,10 @@ def get_explorer(chain: str, tx_hash: HexBytes) -> tuple:
     elif chain == Network.Fantom:
         explorer_name = "Ftmscan"
         explorer_url = f"https://ftmscan.com/tx/{tx_hash.hex()}"
+    else:
+        return None
 
-    return (explorer_name, explorer_url)
+    return explorer_name, explorer_url
 
 
 def get_last_harvest_times(
@@ -371,6 +382,7 @@ def get_last_harvest_times(
         keeper_acl (contract): Keeper ACL web3 contract instance.
         start_block (int, optional):
             Minimum block number to start fetching harvest timestamps from. Defaults to 0.
+        etherscan_key (str)
 
     Returns:
         dict: Dictionary of strategy addresses and their latest harvest timestamps.
@@ -490,21 +502,10 @@ def seconds_to_blocks(seconds: int) -> int:
 
 def get_token_price(
     token_address: str, currency: str, chain: str, use_staging: bool = False
-) -> int:
-    if use_staging:
-        prices = requests.get(
-            f"https://staging-api.badger.finance/v2/prices?currency={currency}&chain={chain}"
-        ).json()
-    else:
-        prices = requests.get(
-            f"https://api.badger.finance/v2/prices?currency={currency}&chain={chain}"
-        ).json()
-    token_price = prices.get(token_address, 0)
-    return token_price
-
-
-def get_node_url(chain) -> str:
-    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
-    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
-    url = get_secret(secret_name, secret_key)
-    return url
+) -> Union[int]:
+    base_url = "https://staging-api.badger.finance" if use_staging else "https://api.badger.finance"
+    response = requests.get(
+        f"{base_url}/v2/prices?currency={currency}&chain={chain}"
+    )
+    response.raise_for_status()
+    return response.json().get(token_address, 0)
