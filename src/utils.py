@@ -332,7 +332,8 @@ def get_hash_from_failed_tx_error(
     sett_name: str = None,
     chain: str = None,
     keeper_address: str = None,
-) -> HexBytes:
+) -> Optional[HexBytes]:
+    tx_hash = None
     try:
         error_obj = json.loads(str(error).replace("'", '"'))
         send_error_to_discord(
