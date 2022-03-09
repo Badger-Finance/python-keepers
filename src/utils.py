@@ -119,7 +119,7 @@ def send_error_to_discord(
     message: str = "Transaction timed out.",
     chain: str = None,
     keeper_address: str = None,
-):
+) -> None:
     try:
         webhook = Webhook.from_url(
             get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
