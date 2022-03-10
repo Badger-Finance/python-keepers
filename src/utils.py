@@ -18,10 +18,8 @@ from web3 import contract
 from web3 import exceptions
 
 from config.constants import ABI_DIRS
-from config.constants import BLOCKS_IN_A_DAY
 from config.constants import MULTICHAIN_CONFIG
 from config.constants import NODE_URL_SECRET_NAMES
-from config.constants import SECONDS_IN_A_DAY
 from config.enums import Network
 
 logger = logging.getLogger(__name__)
@@ -97,18 +95,6 @@ def get_abi(chain: str, contract_id: str):
     project_root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     with open(f"{project_root_dir}/abi/{ABI_DIRS[chain]}/{contract_id}.json") as f:
         return json.load(f)
-
-
-def hours(num_hours: int) -> int:
-    """Returns duration of num_hours in seconds
-
-    Args:
-        num_hours (int): Number of hours to represent
-
-    Returns:
-        int: Number of seconds num_hours represents
-    """
-    return 3600 * num_hours
 
 
 def send_error_to_discord(
@@ -494,10 +480,6 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
             strategies.append(strategy)
 
     return strategies, vaults
-
-
-def seconds_to_blocks(seconds: int) -> int:
-    return seconds / SECONDS_IN_A_DAY * BLOCKS_IN_A_DAY
 
 
 def get_token_price(

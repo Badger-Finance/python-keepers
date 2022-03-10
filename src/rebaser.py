@@ -18,7 +18,7 @@ from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
 from src.utils import confirm_transaction
 from src.utils import get_hash_from_failed_tx_error
-from src.utils import hours
+from src.misc_utils import hours
 from src.utils import send_rebase_error_to_discord
 from src.utils import send_rebase_to_discord
 

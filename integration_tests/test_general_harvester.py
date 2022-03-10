@@ -19,8 +19,8 @@ from integration_tests.utils import test_key
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
 from src.utils import get_last_harvest_times
-from src.utils import hours
-from src.utils import seconds_to_blocks
+from src.misc_utils import hours
+from src.misc_utils import seconds_to_blocks
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(
     MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]

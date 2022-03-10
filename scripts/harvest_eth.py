@@ -22,8 +22,8 @@ from src.tx_utils import get_latest_base_fee
 from src.utils import get_abi
 from src.utils import get_last_harvest_times
 from src.utils import get_secret
-from src.utils import hours
-from src.utils import seconds_to_blocks
+from src.misc_utils import hours
+from src.misc_utils import seconds_to_blocks
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
