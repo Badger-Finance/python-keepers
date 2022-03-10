@@ -13,8 +13,8 @@ from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
 from src.web3_utils import confirm_transaction
 from src.utils import get_abi
-from src.utils import send_error_to_discord
-from src.utils import send_success_to_discord
+from src.discord_utils import send_error_to_discord
+from src.discord_utils import send_success_to_discord
 
 logging.basicConfig(level=logging.INFO)
 
