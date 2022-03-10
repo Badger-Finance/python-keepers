@@ -5,7 +5,7 @@ from web3 import Web3
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.earner import Earner
-from src.utils import get_secret
+from src.aws import get_secret
 from src.web3_utils import get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)

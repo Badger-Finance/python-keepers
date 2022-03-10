@@ -7,7 +7,7 @@ from config.constants import POLY_OLD_STRATEGY
 from config.enums import Network
 from src.earner import Earner
 from src.utils import get_node_url
-from src.utils import get_secret
+from src.aws import get_secret
 from src.web3_utils import get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)

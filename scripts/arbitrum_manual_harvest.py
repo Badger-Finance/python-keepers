@@ -9,7 +9,7 @@ from config.enums import Network
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
 from src.utils import get_node_url
-from src.utils import get_secret
+from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

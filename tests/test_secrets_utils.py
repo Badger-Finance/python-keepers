@@ -6,13 +6,13 @@ from botocore.exceptions import ClientError
 
 from config.enums import Network
 from src.utils import get_node_url
-from src.utils import get_secret
+from src.aws import get_secret
 
 
 def test_get_secret_happy(mocker):
     secret_string = '{"some_key": "secret_value"}'
     mocker.patch(
-        "src.utils.boto3.session.Session",
+        "src.aws.boto3.session.Session",
         return_value=MagicMock(
             client=MagicMock(
                 return_value=MagicMock(
@@ -30,7 +30,7 @@ def test_get_secret_happy_binary(mocker):
     binary_secret_string = '{"some_key": "secret_value"}'
     string_bytes = binary_secret_string.encode("ascii")
     mocker.patch(
-        "src.utils.boto3.session.Session",
+        "src.aws.boto3.session.Session",
         return_value=MagicMock(
             client=MagicMock(
                 return_value=MagicMock(
@@ -46,7 +46,7 @@ def test_get_secret_happy_binary(mocker):
 
 def test_get_secret_client_raises(mocker):
     mocker.patch(
-        "src.utils.boto3.session.Session",
+        "src.aws.boto3.session.Session",
         return_value=MagicMock(
             client=MagicMock(
                 return_value=MagicMock(
@@ -72,7 +72,7 @@ def test_get_secret_client_raises(mocker):
 def test_get_node_url(chain, mocker):
     secret_string = '{"NODE_URL": "secret_value"}'
     mocker.patch(
-        "src.utils.boto3.session.Session",
+        "src.aws.boto3.session.Session",
         return_value=MagicMock(
             client=MagicMock(
                 return_value=MagicMock(

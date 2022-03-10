@@ -8,7 +8,7 @@ from web3 import exceptions
 
 from config.constants import MULTICHAIN_CONFIG
 from src.utils import get_abi
-from src.utils import get_secret
+from src.aws import get_secret
 
 logger = logging.getLogger(__name__)
 

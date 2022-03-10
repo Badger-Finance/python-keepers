@@ -19,7 +19,7 @@ from src.earner import Earner
 from src.tx_utils import get_latest_base_fee
 from src.utils import get_abi
 from src.utils import get_node_url
-from src.utils import get_secret
+from src.aws import get_secret
 from src.web3_utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)

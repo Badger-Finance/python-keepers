@@ -10,7 +10,7 @@ from config.enums import Network
 from src.eth.rebalancer import Rebalancer
 from src.utils import get_abi
 from src.utils import get_node_url
-from src.utils import get_secret
+from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

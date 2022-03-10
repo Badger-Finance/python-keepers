@@ -20,7 +20,7 @@ from src.general_harvester import GeneralHarvester
 from src.tx_utils import get_latest_base_fee
 from src.utils import get_abi
 from src.web3_utils import get_last_harvest_times
-from src.utils import get_secret
+from src.aws import get_secret
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
 
