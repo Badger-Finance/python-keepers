@@ -4,7 +4,6 @@ import logging
 import os
 from decimal import Decimal
 from typing import Optional
-from typing import Union
 
 import boto3
 import requests
@@ -462,7 +461,7 @@ def get_strategy_from_vault(
     return strategy_contract, vault_contract
 
 
-def get_strategies_and_vaults(node: Web3, chain: str) -> list:
+def get_strategies_and_vaults(node: Web3, chain: str) -> tuple:
     strategies = []
     vaults = []
 
@@ -480,14 +479,3 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> list:
             strategies.append(strategy)
 
     return strategies, vaults
-
-
-def get_token_price(
-    token_address: str, currency: str, chain: str, use_staging: bool = False
-) -> Union[int]:
-    base_url = "https://staging-api.badger.finance" if use_staging else "https://api.badger.finance"
-    response = requests.get(
-        f"{base_url}/v2/prices?currency={currency}&chain={chain}"
-    )
-    response.raise_for_status()
-    return response.json().get(token_address, 0)
