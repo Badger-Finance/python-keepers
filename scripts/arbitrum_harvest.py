@@ -7,7 +7,7 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.general_harvester import GeneralHarvester
 from src.utils import get_secret
-from src.utils import get_strategies_from_registry
+from src.web3_utils import get_strategies_from_registry
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -18,10 +18,10 @@ from src.misc_utils import seconds_to_blocks
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
-from src.utils import confirm_transaction
+from src.web3_utils import confirm_transaction
 from src.utils import get_abi
 from src.utils import get_hash_from_failed_tx_error
-from src.utils import get_last_harvest_times
+from src.web3_utils import get_last_harvest_times
 from src.token_utils import get_token_price
 from src.utils import send_error_to_discord
 from src.utils import send_success_to_discord

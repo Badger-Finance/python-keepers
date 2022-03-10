@@ -18,7 +18,7 @@ from integration_tests.utils import test_address
 from integration_tests.utils import test_key
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
-from src.utils import get_last_harvest_times
+from src.web3_utils import get_last_harvest_times
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
 
