@@ -5,7 +5,6 @@ from eth_account.account import Account
 from flashbots import flashbot
 from web3 import Web3
 
-from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_CVX_CRV_HELPER_STRATEGY
 from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import ETH_IBBTC_CRV_STRATEGY
