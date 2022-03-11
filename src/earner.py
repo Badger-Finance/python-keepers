@@ -13,15 +13,15 @@ from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import EARN_PCT_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
 from config.enums import Network
+from src.token_utils import get_token_price
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
-from src.utils import confirm_transaction
 from src.utils import get_abi
-from src.utils import get_hash_from_failed_tx_error
-from src.utils import get_token_price
-from src.utils import send_error_to_discord
-from src.utils import send_success_to_discord
+from src.discord_utils import get_hash_from_failed_tx_error
+from src.discord_utils import send_error_to_discord
+from src.discord_utils import send_success_to_discord
+from src.web3_utils import confirm_transaction
 
 logging.basicConfig(level=logging.INFO)
 
