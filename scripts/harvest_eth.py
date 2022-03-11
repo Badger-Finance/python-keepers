@@ -5,7 +5,6 @@ from eth_account.account import Account
 from flashbots import flashbot
 from web3 import Web3
 
-from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_CVX_CRV_HELPER_STRATEGY
 from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import ETH_IBBTC_CRV_STRATEGY
@@ -20,10 +19,10 @@ from config.enums import Network
 from src.general_harvester import GeneralHarvester
 from src.tx_utils import get_latest_base_fee
 from src.utils import get_abi
-from src.utils import get_last_harvest_times
-from src.utils import get_secret
-from src.utils import hours
-from src.utils import seconds_to_blocks
+from src.web3_utils import get_last_harvest_times
+from src.aws import get_secret
+from src.misc_utils import hours
+from src.misc_utils import seconds_to_blocks
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

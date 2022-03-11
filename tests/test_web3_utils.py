@@ -4,8 +4,8 @@ import responses
 from hexbytes import HexBytes
 from web3 import exceptions
 from web3 import Web3
-from src.utils import confirm_transaction
-from src.utils import get_last_harvest_times
+from src.web3_utils import confirm_transaction
+from src.web3_utils import get_last_harvest_times
 
 
 def test_confirm_transaction():
@@ -66,7 +66,7 @@ def test_confirm_transaction_raises_unexpected():
 
 @responses.activate
 def test_get_last_harvest_times(mocker):
-    mocker.patch("src.utils.get_secret")
+    mocker.patch("src.web3_utils.get_secret")
     some_strategy = "0x111111"
     expected_timestamp = "123123123"
     responses.add(
@@ -104,7 +104,7 @@ def test_get_last_harvest_times_empty_response(mocker):
     """
     Case when etherscan returns empty array of transactions
     """
-    mocker.patch("src.utils.get_secret")
+    mocker.patch("src.web3_utils.get_secret")
     responses.add(
         responses.GET,
         "https://api.etherscan.io/api",

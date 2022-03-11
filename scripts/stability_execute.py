@@ -9,7 +9,7 @@ from config.constants import ETH_STABILIZE_STRATEGY
 from config.enums import Network
 from src.eth.stability_executor import StabilityExecutor
 from src.utils import get_abi
-from src.utils import get_secret
+from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

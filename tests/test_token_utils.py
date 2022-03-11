@@ -3,7 +3,7 @@ import responses
 from requests import HTTPError
 
 from config.enums import Network
-from src.utils import get_token_price
+from src.token_utils import get_token_price
 
 
 @responses.activate

@@ -4,8 +4,8 @@ from hexbytes import HexBytes
 from config.enums import Network
 from src.utils import get_abi
 from src.utils import get_explorer
-from src.utils import hours
-from src.utils import seconds_to_blocks
+from src.misc_utils import hours
+from src.misc_utils import seconds_to_blocks
 
 
 @pytest.mark.parametrize(

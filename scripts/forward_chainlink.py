@@ -4,7 +4,7 @@ from time import time
 from config.enums import Network
 from src.oracle import Oracle
 from src.utils import get_node_url
-from src.utils import get_secret
+from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

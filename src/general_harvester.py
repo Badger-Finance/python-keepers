@@ -13,18 +13,18 @@ from config.constants import GAS_LIMITS
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.harvester import IHarvester
+from src.misc_utils import hours
+from src.misc_utils import seconds_to_blocks
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
-from src.utils import confirm_transaction
+from src.web3_utils import confirm_transaction
 from src.utils import get_abi
-from src.utils import get_hash_from_failed_tx_error
-from src.utils import get_last_harvest_times
-from src.utils import get_token_price
-from src.utils import hours
-from src.utils import seconds_to_blocks
-from src.utils import send_error_to_discord
-from src.utils import send_success_to_discord
+from src.discord_utils import get_hash_from_failed_tx_error
+from src.web3_utils import get_last_harvest_times
+from src.token_utils import get_token_price
+from src.discord_utils import send_error_to_discord
+from src.discord_utils import send_success_to_discord
 
 logging.basicConfig(level=logging.INFO)
 

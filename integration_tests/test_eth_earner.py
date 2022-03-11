@@ -14,7 +14,7 @@ from integration_tests.utils import test_address
 from integration_tests.utils import test_key
 from src.earner import Earner
 from src.utils import get_abi
-from src.utils import get_strategies_and_vaults
+from src.web3_utils import get_strategies_and_vaults
 
 logger = logging.getLogger(__name__)
 

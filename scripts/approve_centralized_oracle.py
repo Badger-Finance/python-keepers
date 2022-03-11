@@ -2,7 +2,7 @@ import logging
 from time import time
 
 from src.oracle import Oracle
-from src.utils import get_secret
+from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
 

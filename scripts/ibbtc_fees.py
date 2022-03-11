@@ -3,7 +3,7 @@ import logging
 from config.enums import Network
 from src.ibbtc_fee_collector import ibBTCFeeCollector
 from src.utils import get_node_url
-from src.utils import get_secret
+from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
 
