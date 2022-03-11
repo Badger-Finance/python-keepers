@@ -42,6 +42,17 @@ strategies = [
     ETH_RENBTC_CRV_STRATEGY,
 ]
 
+OLD_STRATEGIES = {
+    "native.renCrv": "0x6582a5b139fc1c6360846efdc4440d51aad4df7b",
+    "native.sbtcCrv": "0xf1ded284e891943b3e9c657d7fc376b86164ffc2",
+    "native.tbtcCrv": "0x522bb024c339a12be1a47229546f288c40b62d29",
+    "native.hbtcCrv": "0xff26f400e57bf726822eacbb64fa1c52f1f27988",
+    "native.pbtcCrv": "0x1C1fD689103bbFD701b3B7D41A3807F12814033D",
+    "native.obtcCrv": "0x2bb864cdb4856ab2d148c5ca52dd7ccec126d138",
+    "native.bbtcCrv": "0x4f3e7a4566320b2709fd1986f2e9f84053d3e2a0",
+    "native.tricrypto2": "0x2eB6479c2f033360C0F4575A88e3b8909Cbc6a03",
+}
+
 rewards_manager_strategies = {ETH_SLP_BADGER_WBTC_STRATEGY, ETH_SLP_DIGG_WBTC_STRATEGY}
 
 
@@ -160,7 +171,7 @@ if __name__ == "__main__":
         discord_url=discord_url,
     )
 
-    for strategy_address in strategies:
+    for strategy_address in OLD_STRATEGIES.values():
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
             abi=get_abi(Network.Ethereum, "strategy"),
