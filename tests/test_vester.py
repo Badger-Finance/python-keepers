@@ -50,6 +50,7 @@ def test_vest_pending_tx(mock_arb_vester, mocker):
     confirm_transaction = mocker.patch(
         "src.vester.confirm_transaction", return_value=(False, False)
     )
+    mock_arb_vester._send_vest_tx = MagicMock(return_value="0xArEALhaSHvaLUE")
     mock_arb_vester.vest()
     assert confirm_transaction.called
     assert success_message.called
