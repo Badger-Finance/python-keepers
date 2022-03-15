@@ -55,10 +55,8 @@ def get_secret(
         if "SecretString" in get_secret_value_response:
             return json.loads(get_secret_value_response["SecretString"]).get(secret_key)
         else:
-            return json.loads(base64.b64decode(
-                get_secret_value_response["SecretBinary"]
-            ).decode(
-                "utf-8"
-            )).get(
-                secret_key
-            )
+            return json.loads(
+                base64.b64decode(get_secret_value_response["SecretBinary"]).decode(
+                    "utf-8"
+                )
+            ).get(secret_key)

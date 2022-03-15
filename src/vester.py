@@ -19,9 +19,7 @@ from src.discord_utils import send_error_to_discord
 from src.utils import get_abi
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
-CHAIN_CURRENCY = {
-    Network.Arbitrum: ARB_BADGER
-}
+CHAIN_CURRENCY = {Network.Arbitrum: ARB_BADGER}
 
 
 class Vester:
@@ -115,7 +113,9 @@ class Vester:
                 options["gasPrice"] = self.__get_effective_gas_price()
                 self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
 
-            tx = self.vesting_contract.functions.release(CHAIN_CURRENCY[self.chain]).buildTransaction(options)
+            tx = self.vesting_contract.functions.release(
+                CHAIN_CURRENCY[self.chain]
+            ).buildTransaction(options)
             signed_tx = self.web3.eth.account.sign_transaction(
                 tx, private_key=self.keeper_key
             )

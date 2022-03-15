@@ -31,10 +31,13 @@ def test_get_latest_base_fee_hex_fee():
 def test_get_hash_from_failed_tx_error(mocker):
     discord = mocker.patch("src.discord_utils.send_error_to_discord")
     tx_hash = "0x123123"
-    assert get_hash_from_failed_tx_error(
-        ValueError({'data': {tx_hash: 123}}),
-        "Harvest",
-    ) == tx_hash
+    assert (
+        get_hash_from_failed_tx_error(
+            ValueError({"data": {tx_hash: 123}}),
+            "Harvest",
+        )
+        == tx_hash
+    )
     assert discord.called
 
 
@@ -47,7 +50,10 @@ def test_get_hash_from_failed_tx_error_raises(mocker):
         side_effect=Exception,
     )
     tx_hash = "0x123123"
-    assert get_hash_from_failed_tx_error(
-        ValueError({'data': {tx_hash: 123}}),
-        "Harvest",
-    ) == HexBytes(0)
+    assert (
+        get_hash_from_failed_tx_error(
+            ValueError({"data": {tx_hash: 123}}),
+            "Harvest",
+        )
+        == HexBytes(0)
+    )
