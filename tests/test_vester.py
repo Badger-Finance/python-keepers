@@ -39,6 +39,9 @@ def test_vest(mock_arb_vester, mocker):
     confirm_transaction = mocker.patch(
         "src.vester.confirm_transaction", return_value=(True, True)
     )
+    gas_price = mocker.patch(
+        "src.vester.get_gas_price_of_tx", return_value=1
+    )
     mock_arb_vester.vest()
     assert confirm_transaction.called
     assert success_message.called
