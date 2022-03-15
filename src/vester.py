@@ -1,15 +1,12 @@
-import json
 import logging
 import os
 import requests
-import time
 
 from hexbytes import HexBytes
 from web3 import Web3
 
 from config.constants import ARB_BADGER
 from config.constants import ARB_VESTER
-from config.constants import ARB_ETH_USD_CHAINLINK
 from config.constants import GAS_LIMITS
 from config.enums import Network
 from src.tx_utils import get_effective_gas_price
@@ -17,7 +14,6 @@ from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
 from src.web3_utils import confirm_transaction
 from src.discord_utils import get_hash_from_failed_tx_error
-from src.misc_utils import hours
 from src.discord_utils import send_success_to_discord
 from src.discord_utils import send_error_to_discord
 from src.utils import get_abi
@@ -69,7 +65,7 @@ class Vester:
                     self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
                 send_success_to_discord(
-                    tx_type=f"Release Vested Badger to Tree",
+                    tx_type="Release Vested Badger to Tree",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
@@ -77,7 +73,7 @@ class Vester:
                 )
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(
-                    tx_type=f"Release Vested Badger to Tree",
+                    tx_type="Release Vested Badger to Tree",
                     tx_hash=tx_hash,
                     gas_cost=gas_price_of_tx,
                     chain=self.chain,
