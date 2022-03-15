@@ -73,7 +73,6 @@ class Vester:
                 send_success_to_discord(
                     tx_type="Release Vested Badger to Tree",
                     tx_hash=tx_hash,
-                    gas_cost=gas_price_of_tx,
                     chain=self.chain,
                     url=self.discord_url,
                 )

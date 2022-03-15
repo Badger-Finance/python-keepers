@@ -56,7 +56,7 @@ def test_vest_pending_tx(mock_arb_vester, mocker):
 
 
 def test_vest_error(mock_arb_vester, mocker):
-    mock_arb_vester.__send_vest_tx = MagicMock(side_effect=Exception)
+    mocker.patch("src.vester.__send_vest_tx", side_effect=Exception)
     error_message = mocker.patch("src.vester.send_error_to_discord")
     mock_arb_vester.vest()
     assert error_message.called
