@@ -49,14 +49,14 @@ class Vester:
         self.discord_url = discord_url
 
     def vest(self):
-        self.__process_vest_release()
+        self._process_vest_release()
 
-    def __process_vest_release(self):
+    def _process_vest_release(self):
         """Private function to create, broadcast, confirm tx on eth and then send
         transaction to Discord for monitoring
         """
         try:
-            tx_hash = self.__send_vest_tx()
+            tx_hash = self._send_vest_tx()
             succeeded, _ = confirm_transaction(self.web3, tx_hash)
             if succeeded:
                 gas_price_of_tx = get_gas_price_of_tx(
@@ -86,7 +86,7 @@ class Vester:
                 keeper_address=self.keeper_address,
             )
 
-    def __send_vest_tx(self) -> HexBytes:
+    def _send_vest_tx(self) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
 
         Raises:
@@ -107,9 +107,9 @@ class Vester:
             }
             if self.chain == Network.Ethereum:
                 options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
-                options["maxFeePerGas"] = self.__get_effective_gas_price()
+                options["maxFeePerGas"] = self._get_effective_gas_price()
             else:
-                options["gasPrice"] = self.__get_effective_gas_price()
+                options["gasPrice"] = self._get_effective_gas_price()
                 self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
 
             tx = self.vesting_contract.functions.release(
@@ -127,7 +127,7 @@ class Vester:
         finally:
             return tx_hash
 
-    def __get_effective_gas_price(self):
+    def _get_effective_gas_price(self):
         if self.chain == Network.Polygon:
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
