@@ -31,10 +31,10 @@ class Vester:
         keeper_key=os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         vesting_contract_address: str = ARB_VESTER,
-        web3=os.getenv("ETH_NODE_URL"),
+        node_url=os.getenv("ETH_NODE_URL"),
     ):
         self.logger = logging.getLogger(__name__)
-        self.web3 = Web3(Web3.HTTPProvider(web3))  # get secret here
+        self.web3 = Web3(Web3.HTTPProvider(node_url))  # get secret here
         self.chain = chain
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here

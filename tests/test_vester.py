@@ -15,7 +15,10 @@ def mock_arb_vester():
         keeper_address=test_keeper_address,
         keeper_key="dummykey",
         base_oracle_address=ARB_ETH_USD_CHAINLINK,
-        web3=MagicMock(
+        node_url="dummynode.com",
+    )
+    vester.web3 = (
+        MagicMock(
             eth=MagicMock(
                 wait_for_transaction_receipt=MagicMock(return_value={}),
                 get_transaction_count=MagicMock(return_value={}),
