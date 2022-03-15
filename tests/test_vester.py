@@ -8,7 +8,7 @@ from tests.utils import test_keeper_address
 
 @pytest.fixture
 def mock_arb_vester():
-    return Vester(
+    vester = Vester(
         Network.Arbitrum,
         "dummy.discord.com",
         keeper_address=test_keeper_address,
@@ -25,6 +25,14 @@ def mock_arb_vester():
             )
         )
     )
+    vester.vesting_contract = MagicMock(
+        functions=MagicMock(
+            release=MagicMock(
+                buildTransaction=MagicMock()
+            )
+        )
+    )
+    return vester
 
 def test_vest(mock_arb_vester, mocker):
     success_message = mocker.patch("src.vester.send_success_to_discord")
