@@ -50,7 +50,7 @@ class Vester:
         )
         self.vesting_contract = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(vesting_contract_address),
-            abi=get_abi(self.chain, "digg_orchestrator"),
+            abi=get_abi(self.chain, "vester"),
         )
         self.discord_url = discord_url
 
