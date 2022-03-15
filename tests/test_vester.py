@@ -36,5 +36,7 @@ def mock_arb_vester():
 
 def test_vest(mock_arb_vester, mocker):
     success_message = mocker.patch("src.vester.send_success_to_discord")
+    confirm_transaction = mocker.patch("src.vester.confirm_transaction")
     mock_arb_vester.vest()
+    assert confirm_transaction.called
     assert success_message.called
