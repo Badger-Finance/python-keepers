@@ -50,6 +50,11 @@ Cadence: Every 5 min from 19:00 UTC - 20:59 UTC
 Chain: Ethereum
 Cadence: Every 5 min from 20:10 UTC - 20:59 UTC
 ```
+#### bveCVX Earner
+```
+Chain: Ethereum
+Cadence: Weekly
+```
 ## testing:
 
 Set `WEB3_INFURA_PROJECT_ID` environment variable in terminal before running script.
