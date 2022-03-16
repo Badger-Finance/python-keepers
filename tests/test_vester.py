@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from config.constants import ARB_ETH_USD_CHAINLINK
 from config.enums import Network
@@ -35,6 +36,7 @@ def mock_arb_vester():
     yield vester
 
 
+# TODO: Parametrize this for other chains once needed
 def test_vest_happy(mock_arb_vester, mocker):
     success_message = mocker.patch("src.vester.send_success_to_discord")
     confirm_transaction = mocker.patch(

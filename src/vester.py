@@ -35,6 +35,7 @@ class Vester:
         vesting_contract_address: str = ARB_VESTER,
         node_url=os.getenv("ETH_NODE_URL"),
     ):
+        assert node_url
         self.web3 = Web3(Web3.HTTPProvider(node_url))  # get secret here
         self.chain = chain
         self.keeper_key = keeper_key  # get secret here
