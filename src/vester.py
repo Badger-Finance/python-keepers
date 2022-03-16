@@ -21,6 +21,8 @@ from src.utils import get_abi
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
 CHAIN_CURRENCY = {Network.Arbitrum: ARB_BADGER}
 
+logger = logging.getLogger(__name__)
+
 
 class Vester:
     def __init__(
@@ -33,7 +35,6 @@ class Vester:
         vesting_contract_address: str = ARB_VESTER,
         node_url=os.getenv("ETH_NODE_URL"),
     ):
-        self.logger = logging.getLogger(__name__)
         self.web3 = Web3(Web3.HTTPProvider(node_url))  # get secret here
         self.chain = chain
         self.keeper_key = keeper_key  # get secret here
@@ -77,7 +78,7 @@ class Vester:
                     url=self.discord_url,
                 )
         except Exception as e:
-            self.logger.error(f"Error processing release tx: {e}")
+            logger.error(f"Error processing release tx: {e}")
             send_error_to_discord(
                 "Badger",
                 "Vest",
@@ -110,7 +111,7 @@ class Vester:
                 options["maxFeePerGas"] = self._get_effective_gas_price()
             else:
                 options["gasPrice"] = self._get_effective_gas_price()
-                self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
+                logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
 
             tx = self.vesting_contract.functions.release(
                 CHAIN_CURRENCY[self.chain]
@@ -120,14 +121,15 @@ class Vester:
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending vesting release tx: {e}")
+            logger.error(f"Error in sending vesting release tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
-                e, self.logger, keeper_address=self.keeper_address
+                e, "Vester", keeper_address=self.keeper_address
             )
         finally:
             return tx_hash
 
-    def _get_effective_gas_price(self):
+    def _get_effective_gas_price(self) -> float:
+        gas_price = 0
         if self.chain == Network.Polygon:
             response = requests.get("https://gasstation-mainnet.matic.network").json()
             gas_price = self.web3.toWei(int(response.get("fast") * 1.1), "gwei")
