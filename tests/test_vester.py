@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from config.constants import ARB_ETH_USD_CHAINLINK
 from config.enums import Network
 from src.vester import Vester
-from tests.utils import test_keeper_address
+from tests.utils import TEST_KEEPER_ADDRESS
 
 
 @pytest.fixture
@@ -12,7 +12,7 @@ def mock_arb_vester():
     vester = Vester(
         Network.Arbitrum,
         "dummy.discord.com",
-        keeper_address=test_keeper_address,
+        keeper_address=TEST_KEEPER_ADDRESS,
         keeper_key="dummykey",
         base_oracle_address=ARB_ETH_USD_CHAINLINK,
         node_url="dummynode.com",
