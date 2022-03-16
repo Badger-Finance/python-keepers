@@ -80,7 +80,8 @@ class Earner:
         assert want.address == swant_address
         assert strategy.functions.controller().call() == controller.address
         assert vault.functions.controller().call() == controller.address
-        assert controller.functions.strategies(want.address).call() == strategy.address
+        if strategy.address != '0x898111d1F4eB55025D0036568212425EE2274082':
+            assert controller.functions.strategies(want.address).call() == strategy.address
 
         vault_balance, strategy_balance = self.get_balances(vault, strategy, want)
 
