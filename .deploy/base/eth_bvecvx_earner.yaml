@@ -5,9 +5,10 @@ metadata:
   labels:
     app: eth-bvecvx-earner-keeper
 spec:
-  schedule: "47 23 * * 3"
+  # schedule: "47 23 * * 3"
+  schedule: "35 18 * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
