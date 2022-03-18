@@ -171,7 +171,7 @@ if __name__ == "__main__":
         discord_url=discord_url,
     )
 
-    for strategy_address in OLD_STRATEGIES.values():
+    for strategy_address in strategies:
         strategy = web3.eth.contract(
             address=web3.toChecksumAddress(strategy_address),
             abi=get_abi(Network.Ethereum, "strategy"),
