@@ -21,7 +21,7 @@ def test_get_token_price_prod():
     token_price = get_token_price(
         token_address="0x3472a5a71965499acd81997a54bba8d852c6e53d",
         currency="usd",
-        chain=Network.Ethereum
+        chain=Network.Ethereum,
     )
     assert token_price == price
 
@@ -43,7 +43,7 @@ def test_get_token_price_staging():
         token_address="0x3472a5a71965499acd81997a54bba8d852c6e53d",
         currency="usd",
         chain=Network.Ethereum,
-        use_staging=True
+        use_staging=True,
     )
     assert token_price == price
 
@@ -65,5 +65,5 @@ def test_get_token_price_raises():
             token_address="0x3472a5a71965499acd81997a54bba8d852c6e53d",
             currency="usd",
             chain=Network.Ethereum,
-            use_staging=True
+            use_staging=True,
         )

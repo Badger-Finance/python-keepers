@@ -15,7 +15,7 @@ from src.misc_utils import seconds_to_blocks
         (Network.Polygon, "https://polygonscan.com"),
         (Network.Arbitrum, "https://arbiscan.io/"),
         (Network.Fantom, "https://ftmscan.com/"),
-    ]
+    ],
 )
 def test_get_explorer(chain, expected_explorer_root):
     _, explorer_url = get_explorer(chain, HexBytes("0x123123"))
@@ -33,8 +33,7 @@ def test_hours():
 
 
 @pytest.mark.parametrize(
-    "chain",
-    [Network.Ethereum, Network.Polygon, Network.Arbitrum, Network.Fantom]
+    "chain", [Network.Ethereum, Network.Polygon, Network.Arbitrum, Network.Fantom]
 )
 def test_get_abi(chain):
     abi = get_abi(chain, "keeper_acl")
