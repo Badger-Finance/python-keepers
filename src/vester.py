@@ -110,9 +110,9 @@ class Vester:
             if self.chain == Network.Ethereum:
                 options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
                 options["maxFeePerGas"] = self._get_effective_gas_price()
+                logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
             else:
                 options["gasPrice"] = self._get_effective_gas_price()
-                logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
 
             tx = self.vesting_contract.functions.release(
                 CHAIN_CURRENCY[self.chain]
