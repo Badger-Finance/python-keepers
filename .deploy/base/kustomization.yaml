@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - arb_earner.yaml
   - arb_harvester.yaml
+  - arb_vester.yaml
   - cake_harvester.yaml
   - chainlink_forwarder.yaml
   - earner.yaml

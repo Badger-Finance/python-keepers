@@ -11,9 +11,7 @@ from src.web3_utils import get_last_harvest_times
 def test_confirm_transaction():
     tx_hash = HexBytes("0x123123")
     success, tx_msg = confirm_transaction(
-        MagicMock(
-            eth=MagicMock(wait_for_transaction_receipt=MagicMock())
-        ),
+        MagicMock(eth=MagicMock(wait_for_transaction_receipt=MagicMock())),
         tx_hash=tx_hash,
     )
     assert success
@@ -25,13 +23,17 @@ def test_confirm_transaction_raises():
     success, tx_msg = confirm_transaction(
         MagicMock(
             eth=MagicMock(
-                wait_for_transaction_receipt=MagicMock(side_effect=exceptions.TimeExhausted)
+                wait_for_transaction_receipt=MagicMock(
+                    side_effect=exceptions.TimeExhausted
+                )
             )
         ),
         tx_hash=tx_hash,
     )
     assert not success
-    assert tx_msg == f"Transaction {tx_hash.hex()} timed out, not included in block yet."
+    assert (
+        tx_msg == f"Transaction {tx_hash.hex()} timed out, not included in block yet."
+    )
 
 
 def test_confirm_transaction_raises__max_block():
@@ -39,12 +41,14 @@ def test_confirm_transaction_raises__max_block():
     success, tx_msg = confirm_transaction(
         MagicMock(
             eth=MagicMock(
-                wait_for_transaction_receipt=MagicMock(side_effect=exceptions.TimeExhausted),
+                wait_for_transaction_receipt=MagicMock(
+                    side_effect=exceptions.TimeExhausted
+                ),
                 block_number=1234,
             )
         ),
         tx_hash=tx_hash,
-        max_block=123
+        max_block=123,
     )
     assert not success
     assert tx_msg == f"Transaction {tx_hash.hex()} was not included in the block."
@@ -54,9 +58,7 @@ def test_confirm_transaction_raises_unexpected():
     tx_hash = HexBytes("0x123123")
     success, tx_msg = confirm_transaction(
         MagicMock(
-            eth=MagicMock(
-                wait_for_transaction_receipt=MagicMock(side_effect=Exception)
-            )
+            eth=MagicMock(wait_for_transaction_receipt=MagicMock(side_effect=Exception))
         ),
         tx_hash=tx_hash,
     )
@@ -75,7 +77,8 @@ def test_get_last_harvest_times(mocker):
         json={
             "result": [
                 {
-                    "to": "0xaffb3b889E48745Ce16E90433A61f4bCb95692Fd", "input": "",
+                    "to": "0xaffb3b889E48745Ce16E90433A61f4bCb95692Fd",
+                    "input": "",
                     "timeStamp": expected_timestamp,
                 }
             ]
@@ -87,14 +90,17 @@ def test_get_last_harvest_times(mocker):
             eth=MagicMock(
                 block_number=1234,
             ),
-            toChecksumAddress=Web3.toChecksumAddress
+            toChecksumAddress=Web3.toChecksumAddress,
         ),
         keeper_acl=MagicMock(  # noqa
             address="0xaffb3b889E48745Ce16E90433A61f4bCb95692Fd",
             decode_function_input=MagicMock(
-                return_value=("<Function harvest(address)>", {"strategy": some_strategy})
-            )
-        )
+                return_value=(
+                    "<Function harvest(address)>",
+                    {"strategy": some_strategy},
+                )
+            ),
+        ),
     )
     assert times == {some_strategy: int(expected_timestamp)}
 
@@ -111,12 +117,15 @@ def test_get_last_harvest_times_empty_response(mocker):
         json={"result": []},
         status=200,
     )
-    assert get_last_harvest_times(
-        MagicMock(
-            eth=MagicMock(
-                block_number=1234,
+    assert (
+        get_last_harvest_times(
+            MagicMock(
+                eth=MagicMock(
+                    block_number=1234,
+                ),
+                toChecksumAddress=Web3.toChecksumAddress,
             ),
-            toChecksumAddress=Web3.toChecksumAddress
-        ),
-        keeper_acl=MagicMock()  # noqa
-    ) == {}
+            keeper_acl=MagicMock(),  # noqa
+        )
+        == {}
+    )
