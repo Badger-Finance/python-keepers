@@ -18,7 +18,7 @@ if __name__ == "__main__":
     discord_url = get_secret(
         "keepers/harvester/arbitrum/info-webhook", "DISCORD_WEBHOOK_URL"
     )
-    node_url = get_node_url(Network.Arbitrum)
+    node_url = "https://arb1.arbitrum.io/rpc"
 
     vester = Vester(
         Network.Arbitrum,
