@@ -3,7 +3,6 @@ import logging
 from config.constants import ARB_ETH_USD_CHAINLINK, ARB_VESTER
 from config.enums import Network
 from src.vester import Vester
-from src.utils import get_node_url
 from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
