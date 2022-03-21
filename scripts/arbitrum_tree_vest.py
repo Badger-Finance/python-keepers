@@ -3,7 +3,6 @@ import logging
 from config.constants import ARB_ETH_USD_CHAINLINK, ARB_VESTER
 from config.enums import Network
 from src.vester import Vester
-from src.utils import get_node_url
 from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +17,7 @@ if __name__ == "__main__":
     discord_url = get_secret(
         "keepers/harvester/arbitrum/info-webhook", "DISCORD_WEBHOOK_URL"
     )
-    node_url = get_node_url(Network.Arbitrum)
+    node_url = "https://arb1.arbitrum.io/rpc"
 
     vester = Vester(
         Network.Arbitrum,
