@@ -119,7 +119,7 @@ def confirm_transaction(
 
 
 def get_last_harvest_times(
-        web3: Web3, keeper_acl: contract, start_block: int = 0,
+        web3: Web3, keeper_acl: contract.Contract, start_block: int = 0,
         chain: Optional[Network] = Network.Ethereum,
 ) -> Optional[Dict]:
     """Fetches the latest harvest timestamps
@@ -140,8 +140,8 @@ def get_last_harvest_times(
         api_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
         url = "https://api.etherscan.io/api"
     elif chain == Network.Fantom:
-        url = "https://api.ftmscan.com/api"
         api_key = get_secret("keepers/etherscan", "FTMSCAN_TOKEN")
+        url = "https://api.ftmscan.com/api"
     else:
         logger.warning(f"Unknown chain {chain}. Can't fetch harvest times")
         return
