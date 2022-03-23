@@ -31,9 +31,7 @@ MSTABLE_STRATEGIES = [ETH_MBTC_HBTC_STRATEGY, ETH_IBMBTC_STRATEGY]
 
 
 def mock_get_last_harvest_times(web3, keeper_acl, start_block):
-    return get_last_harvest_times(
-        web3, keeper_acl, start_block, etherscan_key=os.getenv("ETHERSCAN_TOKEN")
-    )
+    return get_last_harvest_times(web3, keeper_acl, start_block)
 
 
 def mock_send_discord(
