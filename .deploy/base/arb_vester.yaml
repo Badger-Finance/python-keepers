@@ -5,7 +5,7 @@ metadata:
   labels:
     app: arb-vester-keeper
 spec:
-  schedule: "0 20 4 * *"
+  schedule: "0 20 * * 4"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
