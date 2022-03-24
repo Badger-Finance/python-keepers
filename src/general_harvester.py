@@ -78,7 +78,7 @@ class GeneralHarvester(IHarvester):
 
     def is_time_to_harvest(
         self,
-        strategy: contract,
+        strategy: contract.Contract,
         harvest_interval_threshold: int = MAX_TIME_BETWEEN_HARVESTS,
     ) -> bool:
         """Calculates the time between harvests for the supplied strategy and returns true if
@@ -101,7 +101,7 @@ class GeneralHarvester(IHarvester):
             last_harvest = self.last_harvest_times[strategy.address]
             current_time = self.web3.eth.get_block("latest")["timestamp"]
             self.logger.info(
-                f"Time since last harvest: {(current_time - last_harvest)/3600}"
+                f"Time since last harvest: {(current_time - last_harvest) / 3600}"
             )
 
             return current_time - last_harvest > harvest_interval_threshold
