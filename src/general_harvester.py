@@ -110,7 +110,7 @@ class GeneralHarvester(IHarvester):
 
     def harvest(
         self,
-        strategy: contract,
+        strategy: contract.Contract,
     ):
         """Orchestration function that harvests outstanding rewards.
 
