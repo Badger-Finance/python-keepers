@@ -1,4 +1,3 @@
-import os
 from decimal import Decimal
 
 import pytest
@@ -17,10 +16,10 @@ from config.enums import Network
 from integration_tests.utils import test_address
 from integration_tests.utils import test_key
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi
-from src.web3_utils import get_last_harvest_times
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
+from src.utils import get_abi
+from src.web3_utils import get_last_harvest_times
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(
     MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]
