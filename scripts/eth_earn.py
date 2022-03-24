@@ -2,6 +2,7 @@ import logging
 
 from web3 import Web3
 
+from config.constants import ETH_BADGER_WBTC_CRV_VAULT
 from config.constants import ETH_BBTC_VAULT
 from config.constants import ETH_BVECVX_CVX_LP_VAULT
 from config.constants import ETH_FRAX_CRV_VAULT
@@ -33,6 +34,7 @@ INVALID_VAULTS = [
     ETH_TBTC_VAULT,
     ETH_PBTC_VAULT,
     ETH_BBTC_VAULT,
+    ETH_BADGER_WBTC_CRV_VAULT,
 ]
 
 
