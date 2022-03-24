@@ -140,7 +140,7 @@ def get_last_harvest_times(
         api_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
         url = "https://api.etherscan.io/api"
     elif chain == Network.Fantom:
-        api_key = get_secret("keepers/etherscan", "FTMSCAN_TOKEN")
+        api_key = get_secret("keepers/ftmscan", "FTMSCAN_TOKEN")
         url = "https://api.ftmscan.com/api"
     else:
         logger.warning(f"Unknown chain {chain}. Can't fetch harvest times")
