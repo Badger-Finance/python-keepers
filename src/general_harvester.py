@@ -56,7 +56,7 @@ class GeneralHarvester(IHarvester):
             address=self.web3.toChecksumAddress(keeper_acl),
             abi=get_abi(self.chain, "keeper_acl"),
         )
-        self.base_usd_oracle = self.web3.eth.contract(
+        self.base_usd_oracle: Contract = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
         )
