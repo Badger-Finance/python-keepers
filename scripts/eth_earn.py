@@ -34,7 +34,6 @@ INVALID_VAULTS = [
     ETH_TBTC_VAULT,
     ETH_PBTC_VAULT,
     ETH_BBTC_VAULT,
-    ETH_BADGER_WBTC_CRV_VAULT,
 ]
 
 
@@ -65,6 +64,7 @@ if __name__ == "__main__":
         vault_addresses.append(ETH_IBBTC_CRV_LP_VAULT)
         vault_addresses.append(ETH_FRAX_CRV_VAULT)
         vault_addresses.append(ETH_MIM_CRV_VAULT)
+        vault_addresses.append(ETH_BADGER_WBTC_CRV_VAULT)
 
         for address in vault_addresses:
             if address not in INVALID_VAULTS:
