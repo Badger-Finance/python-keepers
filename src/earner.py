@@ -65,11 +65,6 @@ class Earner:
             strategy.address, EARN_OVERRIDE_THRESHOLD
         )
 
-        # handle skipping outside of earn call, only call this on setts we want to earn
-        controller = self.web3.eth.contract(
-            address=vault.functions.controller().call(),
-            abi=get_abi(self.chain, "controller"),
-        )
         want = self.web3.eth.contract(
             address=vault.functions.token().call(), abi=get_abi(self.chain, "erc20")
         )
@@ -78,9 +73,6 @@ class Earner:
         swant_address = strategy.functions.want().call()
         self.logger.info(f"{want.address} == {swant_address}")
         assert want.address == swant_address
-        assert strategy.functions.controller().call() == controller.address
-        assert vault.functions.controller().call() == controller.address
-        assert controller.functions.strategies(want.address).call() == strategy.address
 
         vault_balance, strategy_balance = self.get_balances(vault, strategy, want)
 

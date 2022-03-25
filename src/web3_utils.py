@@ -9,7 +9,7 @@ from web3 import contract
 from web3 import exceptions
 
 from config.constants import MULTICHAIN_CONFIG
-from config.enums import Network
+from config.enums import Network, VaultVersion
 from src.utils import get_abi
 from src.aws import get_secret
 
@@ -35,20 +35,25 @@ def get_strategies_from_registry(node: Web3, chain: str) -> list:
 
 
 def get_strategy_from_vault(
-    node: Web3, chain: str, vault_address: str
+    node: Web3, chain: str, vault_address: str, version: VaultVersion = VaultVersion.v1
 ) -> (contract, contract):
     vault_contract = node.eth.contract(
         address=vault_address, abi=get_abi(chain, "vault")
     )
 
     token_address = vault_contract.functions.token().call()
-    controller_address = vault_contract.functions.controller().call()
+    if version == VaultVersion.v1_5:
+        strategy_address = vault_contract.functions.strategy().call()
+    else:
+        controller_address = vault_contract.functions.controller().call()
 
-    controller_contract = node.eth.contract(
-        address=controller_address, abi=get_abi(chain, "controller")
-    )
+        controller_contract = node.eth.contract(
+            address=controller_address, abi=get_abi(chain, "controller")
+        )
 
-    strategy_address = controller_contract.functions.strategies(token_address).call()
+        strategy_address = controller_contract.functions.strategies(
+            token_address
+        ).call()
 
     # TODO: handle v1 vs v2 strategy abi
     strategy_contract = node.eth.contract(
@@ -119,8 +124,10 @@ def confirm_transaction(
 
 
 def get_last_harvest_times(
-        web3: Web3, keeper_acl: contract.Contract, start_block: int = 0,
-        chain: Optional[Network] = Network.Ethereum,
+    web3: Web3,
+    keeper_acl: contract.Contract,
+    start_block: int = 0,
+    chain: Optional[Network] = Network.Ethereum,
 ) -> Optional[Dict]:
     """Fetches the latest harvest timestamps
         of strategies from Etherscan API which occur after `start_block`.
