@@ -23,3 +23,11 @@ class Currency(str, Enum):
 
     def __str__(self):
         return self.value
+
+
+class VaultVersion(str, Enum):
+    v1_5 = "1.5"
+    v1 = "1"
+
+    def __str__(self):
+        return self.value

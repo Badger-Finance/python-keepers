@@ -4,7 +4,7 @@ from web3 import Web3
 
 from config.constants import FTM_VAULTS_1, FTM_VAULTS_15
 from config.constants import MULTICHAIN_CONFIG
-from config.enums import Network
+from config.enums import Network, VaultVersion
 from src.earner import Earner
 from src.aws import get_secret
 from src.web3_utils import get_strategy_from_vault
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
         for vault_address in FTM_VAULTS_15:
             strategy, vault = get_strategy_from_vault(
-                node, chain, vault_address, version="1.5"
+                node, chain, vault_address, version=VaultVersion.v1_5
             )
             strategies.append(strategy)
             vaults.append(vault)
