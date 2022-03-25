@@ -2,7 +2,7 @@ import logging
 
 from web3 import Web3
 
-from config.constants import FTM_VAULTS
+from config.constants import FTM_VAULTS_1, FTM_VAULTS_15
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.earner import Earner
@@ -44,8 +44,15 @@ if __name__ == "__main__":
         )
         strategies = []
         vaults = []
-        for vault_address in FTM_VAULTS:
+        for vault_address in FTM_VAULTS_1:
             strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+            strategies.append(strategy)
+            vaults.append(vault)
+
+        for vault_address in FTM_VAULTS_15:
+            strategy, vault = get_strategy_from_vault(
+                node, chain, vault_address, version="1.5"
+            )
             strategies.append(strategy)
             vaults.append(vault)
 
