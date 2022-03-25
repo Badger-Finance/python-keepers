@@ -1,4 +1,3 @@
-import os
 from decimal import Decimal
 
 import pytest
@@ -17,10 +16,10 @@ from config.enums import Network
 from integration_tests.utils import test_address
 from integration_tests.utils import test_key
 from src.general_harvester import GeneralHarvester
-from src.utils import get_abi
-from src.web3_utils import get_last_harvest_times
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
+from src.utils import get_abi
+from src.web3_utils import get_last_harvest_times
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(
     MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]
@@ -32,9 +31,7 @@ REWARDS_MANAGER = web3.toChecksumAddress(
 
 
 def mock_get_last_harvest_times(web3, keeper_acl, start_block):
-    return get_last_harvest_times(
-        web3, keeper_acl, start_block, etherscan_key=os.getenv("ETHERSCAN_TOKEN")
-    )
+    return get_last_harvest_times(web3, keeper_acl, start_block)
 
 
 def mock_send_discord(
@@ -259,7 +256,6 @@ def test_is_time_to_harvest_rewards_manager(
         harvester.web3,
         harvester.keeper_acl,
         start_block=harvester.web3.eth.block_number - seconds_to_blocks(hours(120)),
-        etherscan_key=os.getenv("ETHERSCAN_TOKEN"),
     )
     rewards_manager_strategy.functions.getName().call()
     accounts[0].transfer(keeper_address, "10 ether")

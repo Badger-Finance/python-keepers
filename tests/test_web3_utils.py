@@ -1,9 +1,12 @@
 from unittest.mock import MagicMock
 
+import pytest
 import responses
 from hexbytes import HexBytes
 from web3 import exceptions
 from web3 import Web3
+
+from config.enums import Network
 from src.web3_utils import confirm_transaction
 from src.web3_utils import get_last_harvest_times
 
@@ -67,13 +70,20 @@ def test_confirm_transaction_raises_unexpected():
 
 
 @responses.activate
-def test_get_last_harvest_times(mocker):
+@pytest.mark.parametrize(
+    "chain, mock_scan_url",
+    [
+        (Network.Ethereum, "https://api.etherscan.io/api"),
+        (Network.Fantom, "https://api.ftmscan.com/api"),
+    ]
+)
+def test_get_last_harvest_times(mocker, chain, mock_scan_url):
     mocker.patch("src.web3_utils.get_secret")
     some_strategy = "0x111111"
     expected_timestamp = "123123123"
     responses.add(
         responses.GET,
-        "https://api.etherscan.io/api",
+        mock_scan_url,
         json={
             "result": [
                 {
@@ -101,19 +111,28 @@ def test_get_last_harvest_times(mocker):
                 )
             ),
         ),
+        chain=chain
     )
     assert times == {some_strategy: int(expected_timestamp)}
 
 
 @responses.activate
-def test_get_last_harvest_times_empty_response(mocker):
+@responses.activate
+@pytest.mark.parametrize(
+    "chain, mock_scan_url",
+    [
+        (Network.Ethereum, "https://api.etherscan.io/api"),
+        (Network.Fantom, "https://api.ftmscan.com/api"),
+    ]
+)
+def test_get_last_harvest_times_empty_response(mocker, chain, mock_scan_url):
     """
     Case when etherscan returns empty array of transactions
     """
     mocker.patch("src.web3_utils.get_secret")
     responses.add(
         responses.GET,
-        "https://api.etherscan.io/api",
+        mock_scan_url,
         json={"result": []},
         status=200,
     )
@@ -126,6 +145,7 @@ def test_get_last_harvest_times_empty_response(mocker):
                 toChecksumAddress=Web3.toChecksumAddress,
             ),
             keeper_acl=MagicMock(),  # noqa
+            chain=chain,
         )
         == {}
     )

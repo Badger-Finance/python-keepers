@@ -7,6 +7,7 @@ import requests
 from hexbytes import HexBytes
 from web3 import Web3
 from web3 import contract
+from web3.contract import Contract
 
 from config.constants import BASE_CURRENCIES
 from config.constants import GAS_LIMITS
@@ -37,7 +38,7 @@ NUM_FLASHBOTS_BUNDLES = 6
 class GeneralHarvester(IHarvester):
     def __init__(
         self,
-        chain: str = Network.Ethereum,
+        chain: Network = Network.Ethereum,
         web3: Web3 = None,
         keeper_acl: str = os.getenv("KEEPER_ACL"),
         keeper_address: str = os.getenv("KEEPER_ADDRESS"),
@@ -51,21 +52,22 @@ class GeneralHarvester(IHarvester):
         self.web3 = web3
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
-        self.keeper_acl = self.web3.eth.contract(
+        self.keeper_acl: Contract = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(keeper_acl),
             abi=get_abi(self.chain, "keeper_acl"),
         )
-        self.base_usd_oracle = self.web3.eth.contract(
+        self.base_usd_oracle: Contract = self.web3.eth.contract(
             address=self.web3.toChecksumAddress(base_oracle_address),
             abi=get_abi(self.chain, "oracle"),
         )
         # Times of last harvest
-        if self.chain == Network.Ethereum:
+        if self.chain in [Network.Ethereum, Network.Fantom]:
             self.last_harvest_times = get_last_harvest_times(
                 self.web3,
                 self.keeper_acl,
                 start_block=self.web3.eth.block_number
                 - seconds_to_blocks(MAX_TIME_BETWEEN_HARVESTS),
+                chain=self.chain,
             )
         else:
             # Don't care about poly/arbitrum
@@ -76,7 +78,7 @@ class GeneralHarvester(IHarvester):
 
     def is_time_to_harvest(
         self,
-        strategy: contract,
+        strategy: contract.Contract,
         harvest_interval_threshold: int = MAX_TIME_BETWEEN_HARVESTS,
     ) -> bool:
         """Calculates the time between harvests for the supplied strategy and returns true if
@@ -92,14 +94,13 @@ class GeneralHarvester(IHarvester):
             bool: True if time since last harvest is > harvest_interval_threshold, else False
         """
         # Only care about harvest gas costs on eth
-        if self.chain != Network.Ethereum:
+        if self.chain not in [Network.Ethereum, Network.Fantom]:
             return True
-
         try:
             last_harvest = self.last_harvest_times[strategy.address]
             current_time = self.web3.eth.get_block("latest")["timestamp"]
             self.logger.info(
-                f"Time since last harvest: {(current_time - last_harvest)/3600}"
+                f"Time since last harvest: {(current_time - last_harvest) / 3600}"
             )
 
             return current_time - last_harvest > harvest_interval_threshold
@@ -108,7 +109,7 @@ class GeneralHarvester(IHarvester):
 
     def harvest(
         self,
-        strategy: contract,
+        strategy: contract.Contract,
     ):
         """Orchestration function that harvests outstanding rewards.
 

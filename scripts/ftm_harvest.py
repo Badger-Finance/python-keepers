@@ -6,35 +6,15 @@ from web3 import Web3
 from config.constants import FTM_VAULTS
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
-from src.general_harvester import GeneralHarvester
 from src.aws import get_secret
+from src.general_harvester import GeneralHarvester
+from src.misc_utils import hours
 from src.web3_utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-def safe_harvest(harvester, strategy) -> str:
-    try:
-        strategy_name = strategy.functions.getName().call()
-        logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
-        harvester.harvest(strategy)
-        return "Success!"
-    except Exception as e:
-        logger.error(f"Error running harvest: {e}")
-    logger.info("Trying to run harvestNoReturn")
-    try:
-        harvester.harvest_no_return(strategy)
-        return "Success!"
-    except Exception as e:
-        logger.error(f"Error running harvestNoReturn: {e}")
-
-    logger.info("Tend first, then harvest")
-    try:
-        harvester.tend_then_harvest(strategy)
-        return "Success!"
-    except Exception as e:
-        logger.error(f"Error running tend_then_harvest: {e}")
+HOURS_96 = hours(96)
 
 
 if __name__ == "__main__":
@@ -71,7 +51,8 @@ if __name__ == "__main__":
             # safe_harvest(harvester, strategy)
             strategy_name = strategy.functions.getName().call()
             logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
-            harvester.harvest(strategy)
+            if harvester.is_time_to_harvest(strategy, HOURS_96):
+                harvester.harvest(strategy)
 
             # Sleep for a few blocks in between harvests
             time.sleep(30)
