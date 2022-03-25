@@ -96,7 +96,6 @@ class GeneralHarvester(IHarvester):
         # Only care about harvest gas costs on eth
         if self.chain not in [Network.Ethereum, Network.Fantom]:
             return True
-
         try:
             last_harvest = self.last_harvest_times[strategy.address]
             current_time = self.web3.eth.get_block("latest")["timestamp"]
