@@ -14,7 +14,7 @@ from src.web3_utils import get_strategy_from_vault
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-HOURS_96 = hours(96)
+HOURS_12 = hours(12)
 
 
 if __name__ == "__main__":
@@ -51,7 +51,7 @@ if __name__ == "__main__":
             # safe_harvest(harvester, strategy)
             strategy_name = strategy.functions.getName().call()
             logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
-            if harvester.is_time_to_harvest(strategy, HOURS_96):
+            if harvester.is_time_to_harvest(strategy, HOURS_12):
                 harvester.harvest(strategy)
 
             # Sleep for a few blocks in between harvests
