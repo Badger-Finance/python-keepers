@@ -75,7 +75,7 @@ def test_confirm_transaction_raises_unexpected():
     [
         (Network.Ethereum, "https://api.etherscan.io/api"),
         (Network.Fantom, "https://api.ftmscan.com/api"),
-    ]
+    ],
 )
 def test_get_last_harvest_times(mocker, chain, mock_scan_url):
     mocker.patch("src.web3_utils.get_secret")
@@ -111,7 +111,7 @@ def test_get_last_harvest_times(mocker, chain, mock_scan_url):
                 )
             ),
         ),
-        chain=chain
+        chain=chain,
     )
     assert times == {some_strategy: int(expected_timestamp)}
 
@@ -123,7 +123,7 @@ def test_get_last_harvest_times(mocker, chain, mock_scan_url):
     [
         (Network.Ethereum, "https://api.etherscan.io/api"),
         (Network.Fantom, "https://api.ftmscan.com/api"),
-    ]
+    ],
 )
 def test_get_last_harvest_times_empty_response(mocker, chain, mock_scan_url):
     """
