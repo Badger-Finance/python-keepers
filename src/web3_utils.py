@@ -1,4 +1,6 @@
 import logging
+from typing import Dict
+from typing import Optional
 
 import requests
 from hexbytes import HexBytes
@@ -7,6 +9,7 @@ from web3 import contract
 from web3 import exceptions
 
 from config.constants import MULTICHAIN_CONFIG
+from config.enums import Network
 from src.utils import get_abi
 from src.aws import get_secret
 
@@ -116,8 +119,9 @@ def confirm_transaction(
 
 
 def get_last_harvest_times(
-    web3: Web3, keeper_acl: contract, start_block: int = 0, etherscan_key: str = None
-):
+        web3: Web3, keeper_acl: contract.Contract, start_block: int = 0,
+        chain: Optional[Network] = Network.Ethereum,
+) -> Optional[Dict]:
     """Fetches the latest harvest timestamps
         of strategies from Etherscan API which occur after `start_block`.
     NOTE: Temporary function until Harvested events are emitted from all strategies.
@@ -127,15 +131,21 @@ def get_last_harvest_times(
         keeper_acl (contract): Keeper ACL web3 contract instance.
         start_block (int, optional):
             Minimum block number to start fetching harvest timestamps from. Defaults to 0.
-        etherscan_key (str)
+        chain (Network)
 
     Returns:
         dict: Dictionary of strategy addresses and their latest harvest timestamps.
     """
-    if etherscan_key is None:
-        etherscan_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
+    if chain == Network.Ethereum:
+        api_key = get_secret("keepers/etherscan", "ETHERSCAN_TOKEN")
+        url = "https://api.etherscan.io/api"
+    elif chain == Network.Fantom:
+        api_key = get_secret("keepers/ftmscan", "FTMSCAN_TOKEN")
+        url = "https://api.ftmscan.com/api"
+    else:
+        logger.warning(f"Unknown chain {chain}. Can't fetch harvest times")
+        return
 
-    endpoint = "https://api.etherscan.io/api"
     payload = {
         "module": "account",
         "action": "txlist",
@@ -143,10 +153,10 @@ def get_last_harvest_times(
         "startblock": start_block,
         "endblock": web3.eth.block_number,
         "sort": "desc",
-        "apikey": etherscan_key,
+        "apikey": api_key,
     }
     try:
-        response = requests.get(endpoint, params=payload)
+        response = requests.get(url, params=payload)
         response.raise_for_status()  # Raise HTTP errors
 
         data = response.json()
