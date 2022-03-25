@@ -37,14 +37,16 @@ def get_strategies_from_registry(node: Web3, chain: str) -> list:
 def get_strategy_from_vault(
     node: Web3, chain: str, vault_address: str, version: VaultVersion = VaultVersion.v1
 ) -> (contract, contract):
-    vault_contract = node.eth.contract(
-        address=vault_address, abi=get_abi(chain, "vault")
-    )
-
-    token_address = vault_contract.functions.token().call()
     if version == VaultVersion.v1_5:
+        vault_contract = node.eth.contract(
+            address=vault_address, abi=get_abi(chain, "vault_v1_5")
+        )
         strategy_address = vault_contract.functions.strategy().call()
     else:
+        vault_contract = node.eth.contract(
+            address=vault_address, abi=get_abi(chain, "vault")
+        )
+        token_address = vault_contract.functions.token().call()
         controller_address = vault_contract.functions.controller().call()
 
         controller_contract = node.eth.contract(
