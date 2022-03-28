@@ -18,7 +18,7 @@ spec:
           - name: flashbots-harvester-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "-m", "scripts.harvest_eth"]
+            command: ["python", "-m", "scripts.eth_harvest"]
             env:
               - name: LOG_LEVEL
                 value: "info"
