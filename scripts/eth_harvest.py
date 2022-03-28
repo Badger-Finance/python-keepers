@@ -62,6 +62,14 @@ rewards_manager_strategies = {ETH_SLP_BADGER_WBTC_STRATEGY, ETH_SLP_DIGG_WBTC_ST
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
     logger.info(f"Checking harvests for {strategy_name} {strategy.address}")
+    if (
+        strategy.address == ETH_BADGER_WBTC_CRV_STRATEGY
+        and harvester.is_time_to_harvest(strategy, HOURS_24)
+        and latest_base_fee < int(100e9)
+    ):
+        logger.info(f"Been longer than 24 hours and base fee < 100 for {strategy_name}")
+        res = safe_harvest(harvester, strategy_name, strategy)
+        logger.info(res)
     # regular thresholds for rest of vaults
     if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
         logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")
