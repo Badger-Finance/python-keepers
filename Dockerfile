@@ -8,6 +8,7 @@ RUN apt-get remove linux-libc-dev -y
 RUN apt-get remove libssl-dev -y
 RUN apt-get remove libtiff5 libtiffxx5 -y
 RUN apt-get update -y
+RUN apt-get install libc-bin>=2.31-13+deb11u3 libmariadb3>=1:10.5.15-0+deb11u1 libxml2>=2.9.10+dfsg-6.7+deb11u1 mariadb-common>=1:10.5.15-0+deb11u1
 RUN apt-get install libssl-dev>=1.1.1k-1+deb11u2 libssl1.1>=1.1.1k-1+deb11u2 openssl>=1.1.1k-1+deb11u2 -y
 RUN apt-get install libexpat1>=2.2.10-2+deb11u1 -y
 RUN apt-get install libsasl2-2>=2.1.27+dfsg-2.1+deb11u1 -y
