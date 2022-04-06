@@ -29,7 +29,7 @@ GAS_LIMITS = {
     Network.Ethereum: 1_500_000,
     Network.Polygon: 1_000_000,
     Network.Arbitrum: 3_000_000,
-    Network.Fantom: 3_500_000,
+    Network.Fantom: 6_000_000,
 }
 EARN_EXCEPTIONS = {ETH_BVECVX_STRATEGY: 20}
 
