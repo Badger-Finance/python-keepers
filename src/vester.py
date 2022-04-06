@@ -6,7 +6,7 @@ from hexbytes import HexBytes
 from web3 import Web3
 
 from config.constants import ARB_BADGER
-from config.constants import ARB_VESTER
+from config.constants import ARB_VESTER_Q2_22
 from config.constants import GAS_LIMITS
 from config.enums import Network
 from src.tx_utils import get_effective_gas_price
@@ -32,7 +32,7 @@ class Vester:
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
-        vesting_contract_address: str = ARB_VESTER,
+        vesting_contract_address: str = ARB_VESTER_Q2_22,
         node_url=os.getenv("ETH_NODE_URL"),
     ):
         assert node_url
