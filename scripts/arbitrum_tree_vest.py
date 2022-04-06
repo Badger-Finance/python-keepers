@@ -1,6 +1,6 @@
 import logging
 
-from config.constants import ARB_ETH_USD_CHAINLINK, ARB_VESTER
+from config.constants import ARB_ETH_USD_CHAINLINK, ARB_VESTER_Q2_22
 from config.enums import Network
 from src.vester import Vester
 from src.aws import get_secret
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         keeper_address=keeper_address,
         keeper_key=keeper_key,
         base_oracle_address=ARB_ETH_USD_CHAINLINK,
-        vesting_contract_address=ARB_VESTER,
+        vesting_contract_address=ARB_VESTER_Q2_22,
         node_url=node_url,
     )
 
