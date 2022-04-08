@@ -14,7 +14,6 @@ from config.constants import ETH_KEEPER_ACL
 from config.constants import ETH_RENBTC_CRV_STRATEGY
 from config.constants import ETH_SLP_BADGER_WBTC_STRATEGY
 from config.constants import ETH_SLP_DIGG_WBTC_STRATEGY
-from config.constants import ETH_TBTC_CRV_STRATEGY
 from config.constants import ETH_TRICRYPTO_STRATEGY
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
@@ -38,6 +37,7 @@ strategies = [
     ETH_IBBTC_CRV_STRATEGY,
     ETH_CVX_CRV_HELPER_STRATEGY,
     ETH_BVECVX_STRATEGY,
+    ETH_RENBTC_CRV_STRATEGY,
     ETH_TRICRYPTO_STRATEGY,
     ETH_BADGER_WBTC_CRV_STRATEGY,
 ]
