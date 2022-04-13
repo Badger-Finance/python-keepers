@@ -144,18 +144,16 @@ def test_get_tx_options(mocker):
     assert get_tx_options(web3, Network.Arbitrum, HexBytes(0).hex()) == arb_options
     assert get_tx_options(web3, Network.Fantom, HexBytes(0).hex()) == ftm_options
 
+
 def test_sign_and_send_tx(mocker):
     web3 = MagicMock(
         eth=MagicMock(
             account=MagicMock(
                 sign_transaction=MagicMock(
-                    return_value=MagicMock(
-                        hash=HexBytes(45).hex(),
-                        rawTransaction={}
-                    )
+                    return_value=MagicMock(hash=HexBytes(45).hex(), rawTransaction={})
                 )
             ),
-            send_raw_transaction=MagicMock()
+            send_raw_transaction=MagicMock(),
         ),
     )
 
