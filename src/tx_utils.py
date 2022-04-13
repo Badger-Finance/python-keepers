@@ -8,6 +8,7 @@ from hexbytes import HexBytes
 from typing import Dict
 from web3 import contract
 from web3 import exceptions
+from web3 import Web3
 
 from config.constants import GAS_LIMITS
 from config.enums import Network
