@@ -1,9 +1,7 @@
-import pytest
 import responses
 
 from hexbytes import HexBytes
 from unittest.mock import MagicMock
-from web3 import Web3
 
 from config.constants import GAS_LIMITS
 from config.enums import Network

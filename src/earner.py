@@ -18,7 +18,6 @@ from config.enums import Network
 from src.token_utils import get_token_price
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
-from src.tx_utils import get_priority_fee
 from src.tx_utils import get_tx_options
 from src.tx_utils import sign_and_send_tx
 from src.utils import get_abi
@@ -83,9 +82,7 @@ class Earner:
         if self.should_earn(override_threshold, vault_balance, strategy_balance):
             self.__process_earn(vault, sett_name)
             if vault.address == FTM_OXD_BVEOXD_VAULT:
-                bveoxd_vote(
-                    self.web3, self.keeper_key, self.base_usd_oracle, self.discord_url
-                )
+                self.bveoxd_vote()
 
     def get_balances(
         self, vault: contract, strategy: contract, want: contract

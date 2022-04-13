@@ -6,7 +6,6 @@ import traceback
 from decimal import Decimal
 from hexbytes import HexBytes
 from typing import Dict
-from web3 import Web3
 from web3 import contract
 from web3 import exceptions
 
