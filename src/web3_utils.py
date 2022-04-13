@@ -1,9 +1,9 @@
 import logging
+import requests
+
+from hexbytes import HexBytes
 from typing import Dict
 from typing import Optional
-
-import requests
-from hexbytes import HexBytes
 from web3 import Web3
 from web3 import contract
 from web3 import exceptions
