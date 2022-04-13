@@ -26,7 +26,6 @@ from src.discord_utils import get_hash_from_failed_tx_error
 from src.discord_utils import send_error_to_discord
 from src.discord_utils import send_success_to_discord
 from src.web3_utils import confirm_transaction
-from src.web3_utils import bveoxd_vote
 
 logging.basicConfig(level=logging.INFO)
 
