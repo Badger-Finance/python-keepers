@@ -1,6 +1,8 @@
 from config.enums import Currency
 from config.enums import Network
 
+BOTSQUAD_KEEPER = "0xF8dbb94608E72A3C4cEeAB4ad495ac51210a341e"
+
 ETH_DIGG_BTC_CHAINLINK = "0x418a6c98cd5b8275955f08f0b8c1c6838c8b1685"
 ETH_ETH_USD_CHAINLINK = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
 ETH_BTC_ETH_CHAINLINK = "0xdeb288F737066589598e9214E782fa5A8eD689e8"
@@ -61,6 +63,7 @@ ETH_BADGER_WBTC_CRV_VAULT = "0xeC1c717A3b02582A4Aa2275260C583095536b613"
 FTM_KEEPER_ACL = "0x0680b32b52C5ca8C731490c0C576337058f39337"
 FTM_GAS_ORACLE = "0xf4766552D15AE4d256Ad41B6cf2933482B0680dc"
 FTM_REGISTRY = "0xFda7eB6f8b7a9e9fCFd348042ae675d1d652454f"
+FTM_BVEOXD_VOTER = "0xDC4fbbc2f2E78BFDb94391103f6532C00648B069"
 
 FTM_SMM_USDC_DAI_STRATEGY = "0x89e48a9eb3f6018cb612e923bf190ef475787c0a"
 FTM_SMM_BOO_XBOO_STRATEGY = "0x60129B2b762952Dfe8b21f40ee8aa3B2A4623546"
@@ -185,6 +188,7 @@ MULTICHAIN_CONFIG = {
         "vault_owner": [OPS_DEPLOYER_2],
         "registry": REGISTRY,
         "earn": {"invalid_strategies": []},
+        "keeper": BOTSQUAD_KEEPER,
     },
     Network.Arbitrum: {
         "gas_oracle": ARB_ETH_USD_CHAINLINK,
@@ -199,6 +203,7 @@ MULTICHAIN_CONFIG = {
         "registry": REGISTRY,
         "earn": {"invalid_strategies": []},
         "harvest": {"invalid_strategies": []},
+        "keeper": BOTSQUAD_KEEPER,
     },
     Network.Ethereum: {
         "gas_oracle": ETH_ETH_USD_CHAINLINK,
@@ -216,6 +221,7 @@ MULTICHAIN_CONFIG = {
                 ETH_BBADGER_STRATEGY,
             ]
         },
+        "keeper": BOTSQUAD_KEEPER,
     },
     Network.Fantom: {
         "gas_oracle": FTM_GAS_ORACLE,
@@ -224,6 +230,7 @@ MULTICHAIN_CONFIG = {
         "registry": FTM_REGISTRY,
         "earn": {"invalid_strategies": []},
         "harvest": {"invalid_strategies": []},
+        "keeper": BOTSQUAD_KEEPER,
     },
 }
 
