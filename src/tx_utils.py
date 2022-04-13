@@ -1,12 +1,16 @@
 # TODO: Move this module as a shared functionality to badger utils lib
 import logging
-from decimal import Decimal
+import requests
+import traceback
 
+from decimal import Decimal
 from hexbytes import HexBytes
+from typing import Dict
 from web3 import Web3
 from web3 import contract
 from web3 import exceptions
 
+from config.constants import GAS_LIMITS
 from config.enums import Network
 
 logger = logging.getLogger(__name__)
@@ -112,3 +116,43 @@ def get_priority_fee(
 
     logger.info(f"priority fee: {priority_fee}")
     return priority_fee
+
+
+def get_gas_price(web3: Web3, chain: Network) -> int:
+    if chain == Network.Polygon:
+        response = requests.get("https://gasstation-mainnet.matic.network").json()
+        gas_price = web3.toWei(int(response.get("fast") * 1.1), "gwei")
+    elif chain == Network.Ethereum:
+        gas_price = get_effective_gas_price(web3)
+    elif chain in [Network.Arbitrum, Network.Fantom]:
+        gas_price = int(1.1 * web3.eth.gas_price)
+
+    return gas_price
+
+
+def get_tx_options(web3: Web3, chain: Network, address: str) -> Dict:
+    options = {
+        "nonce": web3.eth.get_transaction_count(address),
+        "from": address,
+        "gas": GAS_LIMITS[chain],
+    }
+    if chain == Network.Ethereum:
+        options["maxPriorityFeePerGas"] = get_priority_fee(web3)
+        options["maxFeePerGas"] = get_gas_price(web3, chain)
+    else:
+        options["gasPrice"] = get_gas_price(web3, chain)
+
+    return options
+
+
+def sign_and_send_tx(web3: Web3, tx: contract.TxParams, signer_key: str) -> HexBytes:
+    try:
+        signed_tx = web3.eth.account.sign_transaction(tx, private_key=signer_key)
+        tx_hash = signed_tx.hash
+        logger.info(f"attempted tx_hash: {tx_hash}")
+        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    except Exception:
+        logger.error(f"Error in sending vote tx: {traceback.format_exc()}")
+        tx_hash = HexBytes(0)
+
+    return tx_hash
