@@ -12,11 +12,14 @@ from config.constants import BASE_CURRENCIES
 from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import EARN_PCT_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
+from config.constants import FTM_BVEOXD_VOTER
+from config.constants import FTM_OXD_BVEOXD_VAULT
 from config.enums import Network
 from src.token_utils import get_token_price
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
-from src.tx_utils import get_priority_fee
+from src.tx_utils import get_tx_options
+from src.tx_utils import sign_and_send_tx
 from src.utils import get_abi
 from src.discord_utils import get_hash_from_failed_tx_error
 from src.discord_utils import send_error_to_discord
@@ -78,6 +81,8 @@ class Earner:
 
         if self.should_earn(override_threshold, vault_balance, strategy_balance):
             self.__process_earn(vault, sett_name)
+            if vault.address == FTM_OXD_BVEOXD_VAULT:
+                self.bveoxd_vote()
 
     def get_balances(
         self, vault: contract, strategy: contract, want: contract
@@ -264,16 +269,53 @@ class Earner:
         Returns:
             dict: tx dictionary
         """
-        options = {
-            "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
-            "from": self.keeper_address,
-            "gas": GAS_LIMITS[self.chain],
-        }
-        if self.chain == Network.Ethereum:
-            options["maxPriorityFeePerGas"] = get_priority_fee(self.web3)
-            options["maxFeePerGas"] = self.__get_gas_price()
-        else:
-            options["gasPrice"] = self.__get_gas_price()
+        options = get_tx_options(self.web3, self.chain, self.keeper_address)
         return self.keeper_acl.functions.earn(strategy_address).buildTransaction(
             options
         )
+
+    def bveoxd_vote(
+        self,
+    ) -> None:
+        voter = self.web3.eth.contract(
+            address=FTM_BVEOXD_VOTER, abi=get_abi(Network.Fantom, "bveoxd_voter")
+        )
+
+        try:
+            options = get_tx_options(self.web3, self.chain, self.keeper_address)
+            tx = voter.functions.vote().buildTransaction(options)
+            tx_hash = sign_and_send_tx(self.web3, tx, self.keeper_key)
+        except Exception:
+            self.logger.error(f"Error in sending vote tx: {traceback.format_exc()}")
+            tx_hash = HexBytes(0)
+
+        try:
+            succeeded, _ = confirm_transaction(self.web3, tx_hash)
+            if succeeded:
+                gas_price_of_tx = get_gas_price_of_tx(
+                    self.web3, self.base_usd_oracle, tx_hash, self.chain
+                )
+                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                send_success_to_discord(
+                    tx_type="Vote bveOXD",
+                    tx_hash=tx_hash,
+                    gas_cost=gas_price_of_tx,
+                    chain=self.chain,
+                    url=self.discord_url,
+                )
+            elif tx_hash != HexBytes(0):
+                send_success_to_discord(
+                    tx_type="Vote bveOXD",
+                    tx_hash=tx_hash,
+                    chain=self.chain,
+                    url=self.discord_url,
+                )
+        except Exception as e:
+            self.logger.error(f"Error processing earn tx: {e}")
+            send_error_to_discord(
+                "bveOXD",
+                "Vote bveOXD",
+                error=e,
+                chain=self.chain,
+                keeper_address=self.keeper_address,
+            )

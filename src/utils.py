@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from typing import Optional
+from typing import Tuple
 
 from hexbytes import HexBytes
 
@@ -27,7 +28,7 @@ def get_abi(chain: str, contract_id: str):
         return json.load(f)
 
 
-def get_explorer(chain: Network, tx_hash: HexBytes) -> Optional[tuple[str, str]]:
+def get_explorer(chain: Network, tx_hash: HexBytes) -> Optional[Tuple[str, str]]:
     if chain == Network.Ethereum:
         explorer_name = "Etherscan"
         explorer_url = f"https://etherscan.io/tx/{tx_hash.hex()}"
