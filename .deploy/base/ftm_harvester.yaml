@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ftm-harvester-keeper
 spec:
-  schedule: "50 1 * * *"
+  schedule: "13 0 * * 3"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
