@@ -5,7 +5,7 @@ metadata:
   labels:
     app: ftm-earner-keeper
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "0 */6 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
