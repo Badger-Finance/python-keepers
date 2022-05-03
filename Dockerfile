@@ -12,7 +12,7 @@ RUN apt-get install libc-bin>=2.31-13+deb11u3 libmariadb3>=1:10.5.15-0+deb11u1 l
 RUN apt-get install libssl-dev>=1.1.1k-1+deb11u2 libssl1.1>=1.1.1k-1+deb11u2 openssl>=1.1.1k-1+deb11u2 -y
 RUN apt-get install libexpat1>=2.2.10-2+deb11u1 -y
 RUN apt-get install libsasl2-2>=2.1.27+dfsg-2.1+deb11u1 -y
-RUN apt-get install linux-libc-dev>=5.10.92-2 libc6-dev -y
+RUN apt-get install linux-libc-dev>=5.10.113-1 libc6-dev -y
 RUN apt-get install libtiff5>=4.2.0-1+deb11u1 -y
 RUN apt-get install zlib1g>=1:1.2.11.dfsg-2+deb11u1 -y
 RUN apt-get install gzip>=1.10-4+deb11u1 -y
