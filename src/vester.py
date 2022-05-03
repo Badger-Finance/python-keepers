@@ -7,6 +7,7 @@ from web3 import Web3
 
 from config.constants import ARB_BADGER
 from config.constants import ARB_VESTER_Q2_22
+from config.constants import ETH_BADGER
 from config.constants import GAS_LIMITS
 from config.enums import Network
 from src.tx_utils import get_effective_gas_price
@@ -19,7 +20,7 @@ from src.discord_utils import send_error_to_discord
 from src.utils import get_abi
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
-CHAIN_CURRENCY = {Network.Arbitrum: ARB_BADGER}
+CHAIN_CURRENCY = {Network.Arbitrum: ARB_BADGER, Network.Ethereum: ETH_BADGER}
 
 logger = logging.getLogger(__name__)
 
