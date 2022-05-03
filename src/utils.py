@@ -14,7 +14,7 @@ from src.aws import get_secret
 logger = logging.getLogger(__name__)
 
 
-def get_node_url(chain) -> str:
+def get_node_url(chain: Network) -> str:
     secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
     secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
     url = get_secret(secret_name, secret_key)
