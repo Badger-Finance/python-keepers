@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: eth-vester-keeper
+  labels:
+    app: eth-vester-keeper
+spec:
+  schedule: "0 20 * * 4"
+  startingDeadlineSeconds: 300
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: eth-vester-keeper
+          containers:
+          - name: eth-vester-keeper
+            image: IMAGE_NAME
+            imagePullPolicy: IfNotPresent
+            command: ["python", "-m", "scripts.eth_tree_vest"]
+            env:
+              - name: LOG_LEVEL
+                value: 'info'
+          restartPolicy: OnFailure
+      backoffLimit: 3

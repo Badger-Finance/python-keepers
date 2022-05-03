@@ -21,3 +21,4 @@ resources:
   - service_account.yaml
   - stability_executor.yaml
   - eth_tender.yaml
+  - eth_vester.yaml
