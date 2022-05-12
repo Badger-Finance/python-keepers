@@ -10,7 +10,7 @@ from src.discord_utils import send_success_to_discord
 
 
 def test_send_error_to_discord_send_called(mocker):
-    mocker.patch("src.discord_utils.get_secret")
+    secret = mocker.patch("src.discord_utils.get_secret")
     mocker.patch("src.discord_utils.RequestsWebhookAdapter")
     webhook = mocker.patch("src.discord_utils.Webhook.from_url")
     send_error_to_discord(
@@ -19,6 +19,22 @@ def test_send_error_to_discord_send_called(mocker):
         tx_hash=HexBytes("0x123123"),
     )
     assert webhook.return_value.send.called
+    assert secret.called
+
+
+def test_send_error_to_discord_send_secret_not_called_url_provided(mocker):
+    secret = mocker.patch("src.discord_utils.get_secret")
+    mocker.patch("src.discord_utils.RequestsWebhookAdapter")
+    webhook = mocker.patch("src.discord_utils.Webhook.from_url")
+    send_error_to_discord(
+        sett_name="whatever",
+        tx_type="whatever",
+        tx_hash=HexBytes("0x123123"),
+        webhook_url="some_hook"
+    )
+    assert webhook.return_value.send.called
+    assert not secret.return_value.called
+    assert not secret.called
 
 
 def test_send_success_to_discord_send_called(mocker):
