@@ -1,12 +1,39 @@
 from decimal import Decimal
 
+from discord import InvalidArgument
 from hexbytes import HexBytes
 
+from src.discord_utils import send_critical_error_to_discord
 from src.discord_utils import send_error_to_discord
 from src.discord_utils import send_oracle_error_to_discord
 from src.discord_utils import send_rebase_error_to_discord
 from src.discord_utils import send_rebase_to_discord
 from src.discord_utils import send_success_to_discord
+
+
+def test_send_critical_error_to_discord_send_called(mocker):
+    secret = mocker.patch("src.discord_utils.get_secret")
+    mocker.patch("src.discord_utils.RequestsWebhookAdapter")
+    webhook = mocker.patch("src.discord_utils.Webhook.from_url")
+    send_critical_error_to_discord(
+        sett_name="whatever",
+        tx_type="whatever",
+        chain="Ethereum",
+    )
+    assert webhook.return_value.send.called
+    assert secret.called
+
+
+def test_send_critical_error_to_discord_send_not_called_invalid_url(mocker):
+    mocker.patch("src.discord_utils.get_secret")
+    mocker.patch("src.discord_utils.RequestsWebhookAdapter")
+    webhook = mocker.patch("src.discord_utils.Webhook.from_url", side_effect=InvalidArgument)
+    send_critical_error_to_discord(
+        sett_name="whatever",
+        tx_type="whatever",
+        chain="Ethereum",
+    )
+    assert not webhook.return_value.send.called
 
 
 def test_send_error_to_discord_send_called(mocker):

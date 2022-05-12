@@ -50,7 +50,6 @@ class Earner:
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         web3: Web3 = None,
         discord_url: str = None,
-        critical_alert_url: Optional[str] = None,
     ):
         self.logger = logging.getLogger(__name__)
         self.chain = chain
