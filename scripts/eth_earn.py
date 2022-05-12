@@ -76,7 +76,9 @@ if __name__ == "__main__":
         keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
         keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
         discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
-
+        critical_alert_url_bvecvx = get_secret(
+            "keepers/critical-alert-webhook", "DISCORD_WEBHOOK_URL"
+        )
         earner = Earner(
             chain=chain,
             keeper_acl=MULTICHAIN_CONFIG[chain]["keeper_acl"],
