@@ -1,6 +1,7 @@
 import logging
 import os
 import traceback
+from typing import Optional
 from typing import Tuple
 
 import requests
@@ -9,6 +10,7 @@ from web3 import Web3
 from web3 import contract
 
 from config.constants import BASE_CURRENCIES
+from config.constants import CRITICAL_VAULTS
 from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import EARN_PCT_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
@@ -47,6 +49,7 @@ class Earner:
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         web3: Web3 = None,
         discord_url: str = None,
+        critical_alert_url: Optional[str] = None,
     ):
         self.logger = logging.getLogger(__name__)
         self.chain = chain
@@ -62,6 +65,7 @@ class Earner:
             abi=get_abi(self.chain, "oracle"),
         )
         self.discord_url = discord_url
+        self.discord_critical_alert_url = critical_alert_url
 
     def earn(self, vault: contract, strategy: contract, sett_name: str = None):
         override_threshold = EARN_EXCEPTIONS.get(
@@ -210,13 +214,23 @@ class Earner:
                 )
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
-            send_error_to_discord(
-                sett_name,
-                "Earn",
-                error=e,
-                chain=self.chain,
-                keeper_address=self.keeper_address,
-            )
+            if vault and vault.address in CRITICAL_VAULTS:
+                send_error_to_discord(
+                    sett_name,
+                    "Earn",
+                    error=e,
+                    chain=self.chain,
+                    keeper_address=self.keeper_address,
+                    webhook_url=self.discord_critical_alert_url,
+                )
+            else:
+                send_error_to_discord(
+                    sett_name,
+                    "Earn",
+                    error=e,
+                    chain=self.chain,
+                    keeper_address=self.keeper_address,
+                )
 
     def __send_earn_tx(self, vault: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.

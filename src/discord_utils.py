@@ -21,13 +21,19 @@ def send_error_to_discord(
     message: str = "Transaction timed out.",
     chain: str = None,
     keeper_address: str = None,
+    webhook_url: Optional[str] = None,
 ) -> None:
     try:
-        webhook = Webhook.from_url(
-            get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
-            adapter=RequestsWebhookAdapter(),
-        )
-
+        if webhook_url:
+            webhook = Webhook.from_url(
+                webhook_url,
+                adapter=RequestsWebhookAdapter(),
+            )
+        else:
+            webhook = Webhook.from_url(
+                get_secret("keepers/alerts-webhook", "DISCORD_WEBHOOK_URL"),
+                adapter=RequestsWebhookAdapter(),
+            )
         embed = Embed(
             title=f"**{tx_type} Failed for {sett_name}**",
             description=f"{sett_name} Sett {tx_type} Details",
