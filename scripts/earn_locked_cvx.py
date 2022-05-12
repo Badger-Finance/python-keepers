@@ -22,9 +22,6 @@ if __name__ == "__main__":
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    critical_alert_url_bvecvx = get_secret(
-        "keepers/critical-alert-webhook", "DISCORD_WEBHOOK_URL"
-    )
     earner = Earner(
         chain=chain,
         keeper_acl=MULTICHAIN_CONFIG.get(chain).get("keeper_acl"),
@@ -32,7 +29,6 @@ if __name__ == "__main__":
         keeper_key=keeper_key,
         web3=node,
         base_oracle_address=MULTICHAIN_CONFIG.get(chain).get("gas_oracle"),
-        critical_alert_url=critical_alert_url_bvecvx,
     )
 
     strategy = node.eth.contract(

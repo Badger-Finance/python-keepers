@@ -17,6 +17,7 @@ from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import FTM_BVEOXD_VOTER
 from config.constants import FTM_OXD_BVEOXD_VAULT
 from config.enums import Network
+from src.discord_utils import send_critical_error_to_discord
 from src.token_utils import get_token_price
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
@@ -65,7 +66,6 @@ class Earner:
             abi=get_abi(self.chain, "oracle"),
         )
         self.discord_url = discord_url
-        self.discord_critical_alert_url = critical_alert_url
 
     def earn(self, vault: contract, strategy: contract, sett_name: str = None):
         override_threshold = EARN_EXCEPTIONS.get(
@@ -215,14 +215,7 @@ class Earner:
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
             if vault and vault.address in CRITICAL_VAULTS:
-                send_error_to_discord(
-                    sett_name,
-                    "Earn",
-                    error=e,
-                    chain=self.chain,
-                    keeper_address=self.keeper_address,
-                    webhook_url=self.discord_critical_alert_url,
-                )
+                send_critical_error_to_discord(sett_name, "Earn", chain=self.chain)
             else:
                 send_error_to_discord(
                     sett_name,

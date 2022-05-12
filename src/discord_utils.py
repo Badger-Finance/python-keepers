@@ -3,14 +3,37 @@ from decimal import Decimal
 from typing import Optional
 
 from discord import Embed
+from discord import InvalidArgument
 from discord import RequestsWebhookAdapter
 from discord import Webhook
 from hexbytes import HexBytes
 
+from config.constants import DiscordRoles
 from config.enums import Network
 from src.aws import get_secret
 from src.utils import get_explorer
 from src.utils import logger
+
+
+def send_critical_error_to_discord(
+    sett_name: str,
+    tx_type: str,
+    chain: str = None,
+) -> None:
+    webhook_url = get_secret(
+        "keepers/critical-alert-webhook", "DISCORD_WEBHOOK_URL"
+    )
+    try:
+        webhook = Webhook.from_url(
+            webhook_url,
+            adapter=RequestsWebhookAdapter(),
+        )
+    except InvalidArgument:
+        logger.error("Discord Webhook URL is not configured")
+        return
+    message = f"Operation {tx_type} failed for Sett {sett_name} " \
+              f"{DiscordRoles.CriticalErrorRole.value}"
+    webhook.send(content=message, username=f"{chain} {sett_name} {tx_type}er")
 
 
 def send_error_to_discord(
