@@ -1,6 +1,5 @@
-from enum import Enum
-
 from config.enums import Currency
+from config.enums import DiscordRoles
 from config.enums import Network
 
 BOTSQUAD_KEEPER = "0xF8dbb94608E72A3C4cEeAB4ad495ac51210a341e"
@@ -63,12 +62,9 @@ ETH_FRAX_CRV_VAULT = "0x15cBC4ac1e81c97667780fE6DAdeDd04a6EEB47B"
 ETH_MIM_CRV_VAULT = "0x19E4d89e0cB807ea21B8CEF02df5eAA99A110dA5"
 ETH_BADGER_WBTC_CRV_VAULT = "0xeC1c717A3b02582A4Aa2275260C583095536b613"
 
-CRITICAL_VAULTS = [ETH_BVECVX_STRATEGY]
-
-
-class DiscordRoles(Enum):
-    RewardsPod = "<@&804147406043086850>"
-    CriticalErrorRole = "<@&974386521148891166>"
+CRITICAL_VAULTS = {
+    ETH_BVECVX_STRATEGY: DiscordRoles.CriticalErrorRole.value
+}
 
 
 FTM_KEEPER_ACL = "0x0680b32b52C5ca8C731490c0C576337058f39337"

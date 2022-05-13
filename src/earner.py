@@ -212,7 +212,7 @@ class Earner:
                 )
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
-            if vault and vault.address in CRITICAL_VAULTS:
+            if vault and vault.address in CRITICAL_VAULTS.keys():
                 send_critical_error_to_discord(sett_name, "Earn", chain=self.chain)
             else:
                 send_error_to_discord(

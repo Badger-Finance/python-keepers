@@ -8,7 +8,8 @@ from discord import RequestsWebhookAdapter
 from discord import Webhook
 from hexbytes import HexBytes
 
-from config.constants import DiscordRoles
+from config.constants import CRITICAL_VAULTS
+from config.constants import ETH_BVECVX_STRATEGY
 from config.enums import Network
 from src.aws import get_secret
 from src.utils import get_explorer
@@ -32,7 +33,7 @@ def send_critical_error_to_discord(
         logger.error("Discord Webhook URL is not configured")
         return
     message = f"Operation {tx_type} failed for Sett {sett_name} " \
-              f"{DiscordRoles.CriticalErrorRole.value}"
+              f"{CRITICAL_VAULTS[ETH_BVECVX_STRATEGY]}"
     webhook.send(content=message, username=f"{chain} {sett_name} {tx_type}er")
 
 
