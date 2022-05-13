@@ -22,7 +22,6 @@ if __name__ == "__main__":
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-
     earner = Earner(
         chain=chain,
         keeper_acl=MULTICHAIN_CONFIG.get(chain).get("keeper_acl"),

@@ -31,3 +31,8 @@ class VaultVersion(str, Enum):
 
     def __str__(self):
         return self.value
+
+
+class DiscordRoles(Enum):
+    RewardsPod = "<@&804147406043086850>"
+    CriticalErrorRole = "<@&974386521148891166>"

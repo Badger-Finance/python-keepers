@@ -9,21 +9,23 @@ from web3 import Web3
 from web3 import contract
 
 from config.constants import BASE_CURRENCIES
+from config.constants import CRITICAL_VAULTS
 from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import EARN_PCT_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import FTM_BVEOXD_VOTER
 from config.constants import FTM_OXD_BVEOXD_VAULT
 from config.enums import Network
+from src.discord_utils import get_hash_from_failed_tx_error
+from src.discord_utils import send_critical_error_to_discord
+from src.discord_utils import send_error_to_discord
+from src.discord_utils import send_success_to_discord
 from src.token_utils import get_token_price
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_tx_options
 from src.tx_utils import sign_and_send_tx
 from src.utils import get_abi
-from src.discord_utils import get_hash_from_failed_tx_error
-from src.discord_utils import send_error_to_discord
-from src.discord_utils import send_success_to_discord
 from src.web3_utils import confirm_transaction
 
 logging.basicConfig(level=logging.INFO)
@@ -210,13 +212,18 @@ class Earner:
                 )
         except Exception as e:
             self.logger.error(f"Error processing earn tx: {e}")
-            send_error_to_discord(
-                sett_name,
-                "Earn",
-                error=e,
-                chain=self.chain,
-                keeper_address=self.keeper_address,
-            )
+            if vault and vault.address in CRITICAL_VAULTS.keys():
+                send_critical_error_to_discord(
+                    sett_name, "Earn", chain=self.chain, role=CRITICAL_VAULTS[ETH_BVECVX_STRATEGY]
+                )
+            else:
+                send_error_to_discord(
+                    sett_name,
+                    "Earn",
+                    error=e,
+                    chain=self.chain,
+                    keeper_address=self.keeper_address,
+                )
 
     def __send_earn_tx(self, vault: contract) -> HexBytes:
         """Sends transaction to ETH node for confirmation.
