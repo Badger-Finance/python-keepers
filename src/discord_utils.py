@@ -20,7 +20,10 @@ def send_critical_error_to_discord(
     sett_name: str,
     tx_type: str,
     chain: str = None,
+    role: Optional[str] = None,
 ) -> None:
+    if not role:
+        role = CRITICAL_VAULTS[ETH_BVECVX_STRATEGY]
     webhook_url = get_secret(
         "keepers/critical-alert-webhook", "DISCORD_WEBHOOK_URL"
     )
@@ -32,8 +35,7 @@ def send_critical_error_to_discord(
     except InvalidArgument:
         logger.error("Discord Webhook URL is not configured")
         return
-    message = f"Operation {tx_type} failed for Sett {sett_name} " \
-              f"{CRITICAL_VAULTS[ETH_BVECVX_STRATEGY]}"
+    message = f"Operation {tx_type} failed for Sett {sett_name} {role}"
     webhook.send(content=message, username=f"{chain} {sett_name} {tx_type}er")
 
 
