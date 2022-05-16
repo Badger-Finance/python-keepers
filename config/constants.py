@@ -242,7 +242,7 @@ MULTICHAIN_CONFIG = {
 }
 
 NODE_URL_SECRET_NAMES = {
-    Network.Ethereum: {"name": "quiknode/eth-node-url", "key": "NODE_URL"},
+    Network.Ethereum: [{"name": "quiknode/eth-node-url", "key": "NODE_URL"}],
     Network.Polygon: {"name": "quiknode/poly-node-url", "key": "NODE_URL"},
     Network.Fantom: {"name": "chainstack/ftm-url", "key": "NODE_URL"},
 }
