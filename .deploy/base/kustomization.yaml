@@ -11,7 +11,6 @@ resources:
   - eth_earner.yaml
   - ftm_earner.yaml
   - ftm_harvester.yaml
-  - general_harvester.yaml
   - flashbots_harvester.yaml
   - ibbtc_fee_collector.yaml
   - propose_centralized_oracle.yaml
