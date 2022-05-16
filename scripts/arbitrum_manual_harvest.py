@@ -8,7 +8,7 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
-from src.utils import get_node_url
+from src.utils import get_healthy_node
 from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
@@ -30,12 +30,10 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_node_url(Network.Arbitrum)
+    web3 = get_healthy_node(Network.Arbitrum)
     discord_url = get_secret(
         "keepers/harvester/arbitrum/info-webhook", "DISCORD_WEBHOOK_URL"
     )
-
-    web3 = Web3(Web3.HTTPProvider(node_url))
 
     harvester = GeneralHarvester(
         web3=web3,

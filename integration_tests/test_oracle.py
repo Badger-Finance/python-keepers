@@ -12,6 +12,7 @@ from integration_tests.utils import test_address
 from integration_tests.utils import test_key
 from src.oracle import Oracle
 from src.utils import get_abi
+from src.utils import get_healthy_node
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ def oracle() -> Oracle:
     oracle = Oracle(
         keeper_address=test_address,
         keeper_key=test_key,
+        web3=get_healthy_node(Network.Ethereum)
     )
     oracle.web3 = web3
     return oracle

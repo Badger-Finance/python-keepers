@@ -3,7 +3,7 @@ import logging
 from config.constants import ETH_ETH_USD_CHAINLINK, ETH_REMDRIPPER_Q2_22
 from config.enums import Network
 from src.aws import get_secret
-from src.utils import get_node_url
+from src.utils import get_healthy_node
 from src.vester import Vester
 
 logging.basicConfig(level=logging.INFO)
@@ -18,16 +18,16 @@ if __name__ == "__main__":
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
     discord_url = get_secret("keepers/info-webhook", "DISCORD_WEBHOOK_URL")
-    node_url = get_node_url(chain)
+    web3 = get_healthy_node(chain)
 
     vester = Vester(
+        web3,
         chain,
         discord_url,
         keeper_address=keeper_address,
         keeper_key=keeper_key,
         base_oracle_address=ETH_ETH_USD_CHAINLINK,
         vesting_contract_address=ETH_REMDRIPPER_Q2_22,
-        node_url=node_url,
     )
 
     logger.info("+-----Sending vested rem assets to tree on Ethereum-----+")
