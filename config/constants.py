@@ -242,9 +242,42 @@ MULTICHAIN_CONFIG = {
 }
 
 NODE_URL_SECRET_NAMES = {
-    Network.Ethereum: [{"name": "quiknode/eth-node-url", "key": "NODE_URL"}],
-    Network.Polygon: [{"name": "quiknode/poly-node-url", "key": "NODE_URL"}],
-    Network.Fantom: [{"name": "chainstack/ftm-url", "key": "NODE_URL"}],
+    Network.Ethereum: [
+        {
+            "name": "quiknode/eth-node-url",
+            "key": "NODE_URL"
+        },
+        {
+            "name": "alchemy/eth-node-url",
+            "key": "NODE_URL"
+        },
+    ],
+    Network.Polygon: [
+        {
+            "name": "quiknode/poly-node-url",
+            "key": "POLY_NODE_URL",
+        },
+        {
+            "name": "alchemy/poly-node-url",
+            "key": "POLY_NODE_URL",
+        },
+    ],
+    Network.Arbitrum: [
+        {
+            "name": "moralis/arbitrum-node-url",
+            "key": "ARBITRUM_NODE_URL",
+        },
+        {
+            "name": "alchemy/arbitrum-node-url",
+            "key": "ARBITRUM_NODE_URL",
+        },
+    ],
+    Network.Fantom: [
+        {
+            "name": "chainstack/ftm-url",
+            "key": "NODE_URL"
+        }
+    ],
 }
 
 ABI_DIRS = {
