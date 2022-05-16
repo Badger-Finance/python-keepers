@@ -1,4 +1,5 @@
 import base64
+import json
 from unittest.mock import MagicMock
 
 import pytest
@@ -68,9 +69,13 @@ def test_get_secret_client_raises(mocker):
         get_secret("some_secret_name", "some_key")
 
 
-@pytest.mark.parametrize("chain", [Network.Ethereum, Network.Polygon, Network.Fantom])
-def test_get_healthy_node(chain, mocker):
-    secret_string = '{"NODE_URL": "secret_value"}'
+@pytest.mark.parametrize("chain, node_key", [
+    (Network.Ethereum, "NODE_URL"),
+    (Network.Polygon, "POLY_NODE_URL"),
+    (Network.Fantom, "NODE_URL"),
+])
+def test_get_healthy_node(chain, node_key, mocker):
+    secret_string = json.dumps({node_key: "secret_value"})
     mocker.patch(
         "src.aws.boto3.session.Session",
         return_value=MagicMock(
