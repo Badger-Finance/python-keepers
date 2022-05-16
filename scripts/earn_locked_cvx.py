@@ -1,15 +1,13 @@
 import logging
 
-from web3 import Web3
-
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_BVECVX_VAULT
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
+from src.aws import get_secret
 from src.earner import Earner
 from src.utils import get_abi
-from src.utils import get_node_url
-from src.aws import get_secret
+from src.utils import get_healthy_node
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     chain = Network.Ethereum
-    node_url = get_node_url(chain)
-    node = Web3(Web3.HTTPProvider(node_url))
+    web3 = get_healthy_node(chain)
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
@@ -27,7 +24,7 @@ if __name__ == "__main__":
         keeper_acl=MULTICHAIN_CONFIG.get(chain).get("keeper_acl"),
         keeper_address=keeper_address,
         keeper_key=keeper_key,
-        web3=node,
+        web3=web3,
         base_oracle_address=MULTICHAIN_CONFIG.get(chain).get("gas_oracle"),
     )
 

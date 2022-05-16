@@ -1,19 +1,16 @@
 import logging
 
-from web3 import Web3
-
 from config.constants import MULTICHAIN_CONFIG
-from config.constants import POLY_OLD_STRATEGY
 from config.enums import Network
-from src.earner import Earner
-from src.utils import get_node_url
 from src.aws import get_secret
+from src.earner import Earner
+from src.utils import get_healthy_node
 from src.web3_utils import get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-INVALID_STRATS = [POLY_OLD_STRATEGY]
+INVALID_STRATS = []
 
 
 def safe_earn(earner, sett_name, vault, strategy):
@@ -25,8 +22,7 @@ def safe_earn(earner, sett_name, vault, strategy):
 
 if __name__ == "__main__":
     for chain in [Network.Polygon]:
-        node_url = get_node_url(chain)
-        node = Web3(Web3.HTTPProvider(node_url))
+        node = get_healthy_node(chain)
 
         strategies, vaults = get_strategies_and_vaults(node, chain)
 

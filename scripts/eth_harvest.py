@@ -157,7 +157,6 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    # node_url = get_node_url(Network.Ethereum)
     node_url = "https://rpc.flashbots.net"
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")

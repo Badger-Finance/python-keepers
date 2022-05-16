@@ -3,15 +3,14 @@ import time
 
 from eth_account.account import Account
 from flashbots import flashbot
-from web3 import Web3
 
 from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import ETH_KEEPER_ACL
 from config.enums import Network
+from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
-from src.utils import get_node_url
-from src.aws import get_secret
+from src.utils import get_healthy_node
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,13 +45,10 @@ if __name__ == "__main__":
     # Load secrets
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
-    node_url = get_node_url(Network.Ethereum)
+    web3 = get_healthy_node(Network.Ethereum)
     flashbots_signer = Account.from_key(
         get_secret("keepers/flashbots/test-signer", "FLASHBOTS_SIGNER_KEY")
     )
-    # flashbots_signer = Account.create()
-
-    web3 = Web3(Web3.HTTPProvider(node_url))
 
     # Account which signifies your identify to flashbots network
     flashbot(web3, flashbots_signer)

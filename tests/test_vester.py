@@ -9,14 +9,14 @@ from tests.utils import TEST_KEEPER_ADDRESS
 
 
 @pytest.fixture
-def mock_arb_vester():
+def mock_arb_vester(mocker):
     vester = Vester(
+        MagicMock(),
         Network.Arbitrum,
         "dummy.discord.com",
         keeper_address=TEST_KEEPER_ADDRESS,
         keeper_key="dummykey",
         base_oracle_address=ARB_ETH_USD_CHAINLINK,
-        node_url="dummynode.com",
     )
     vester.web3 = MagicMock(
         eth=MagicMock(
