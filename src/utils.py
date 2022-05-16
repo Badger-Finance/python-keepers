@@ -20,8 +20,8 @@ class NoHealthyNode(Exception):
 
 
 def get_node_url(chain: Network) -> str:
-    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
-    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
+    secret_name = NODE_URL_SECRET_NAMES[chain][0]["name"]
+    secret_key = NODE_URL_SECRET_NAMES[chain][0]["key"]
     url = get_secret(secret_name, secret_key)
     return url
 
