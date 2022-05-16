@@ -28,10 +28,10 @@ if __name__ == "__main__":
         base_oracle_address=MULTICHAIN_CONFIG.get(chain).get("gas_oracle"),
     )
 
-    strategy = node.eth.contract(
+    strategy = web3.eth.contract(
         address=ETH_BVECVX_STRATEGY, abi=get_abi(chain, "strategy")
     )
-    vault = node.eth.contract(address=ETH_BVECVX_VAULT, abi=get_abi(chain, "vault"))
+    vault = web3.eth.contract(address=ETH_BVECVX_VAULT, abi=get_abi(chain, "vault"))
 
     strat_name = "Badger Vested Escrow Convex Token"
 

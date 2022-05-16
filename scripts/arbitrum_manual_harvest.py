@@ -1,15 +1,13 @@
 import logging
 import time
 
-from web3 import Web3
-
 from config.constants import ARB_SWAPR_WBTC_WETH_STRATEGY
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
+from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
 from src.utils import get_healthy_node
-from src.aws import get_secret
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
