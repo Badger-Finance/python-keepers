@@ -2,7 +2,9 @@ import pytest
 from brownie import *
 
 import integration_tests.utils as test_utils
+from config.enums import Network
 from src.ibbtc_fee_collector import ibBTCFeeCollector
+from src.utils import get_healthy_node
 
 
 @pytest.mark.require_network("mainnet-fork")
@@ -15,7 +17,7 @@ def collector() -> ibBTCFeeCollector:
     return ibBTCFeeCollector(
         keeper_address=test_utils.test_address,
         keeper_key=test_utils.test_key,
-        web3="http://127.0.0.1:8545",
+        web3=get_healthy_node(Network.Ethereum),
     )
 
 
