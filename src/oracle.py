@@ -36,12 +36,12 @@ NEGATIVE_THRESHOLD = 0.95
 class Oracle:
     def __init__(
         self,
+        web3: Web3,
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
-        web3=os.getenv("ETH_NODE_URL"),
     ):
         self.logger = logging.getLogger(__name__)
-        self.web3 = Web3(Web3.HTTPProvider(web3))
+        self.web3 = web3
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
         self.eth_usd_oracle = self.web3.eth.contract(

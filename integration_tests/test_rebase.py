@@ -5,6 +5,7 @@ from brownie import *
 
 from integration_tests.utils import *
 from src.rebaser import Rebaser
+from src.utils import get_healthy_node
 
 os.environ["DISCORD_WEBHOOK_URL"] = os.getenv("TEST_DISCORD_WEBHOOK_URL")
 os.environ["ETH_USD_CHAINLINK"] = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
@@ -26,7 +27,7 @@ def rebaser() -> Rebaser:
     return Rebaser(
         keeper_address=test_address,
         keeper_key=test_key,
-        web3="http://127.0.0.1:8545",
+        web3=get_healthy_node(Network.Ethereum),
     )
 
 
