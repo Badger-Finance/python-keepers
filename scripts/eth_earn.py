@@ -1,7 +1,5 @@
 import logging
 
-from web3 import Web3
-
 from config.constants import ETH_BADGER_WBTC_CRV_VAULT
 from config.constants import ETH_BBTC_VAULT
 from config.constants import ETH_BVECVX_CVX_LP_VAULT
@@ -16,11 +14,11 @@ from config.constants import ETH_TRICRYPTO_VAULT
 from config.constants import ETH_YVWBTC_VAULT
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
+from src.aws import get_secret
 from src.earner import Earner
 from src.tx_utils import get_latest_base_fee
 from src.utils import get_abi
-from src.utils import get_node_url
-from src.aws import get_secret
+from src.utils import get_healthy_node
 from src.web3_utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
@@ -46,8 +44,7 @@ def safe_earn(earner, sett_name, vault, strategy):
 
 if __name__ == "__main__":
     for chain in [Network.Ethereum]:
-        node_url = get_node_url(chain)
-        node = Web3(Web3.HTTPProvider(node_url))
+        node = get_healthy_node(chain)
 
         registry = node.eth.contract(
             address=node.toChecksumAddress(MULTICHAIN_CONFIG[chain]["registry"]),

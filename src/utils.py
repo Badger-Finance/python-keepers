@@ -5,6 +5,7 @@ from typing import Optional
 from typing import Tuple
 
 from hexbytes import HexBytes
+from web3 import Web3
 
 from config.constants import ABI_DIRS
 from config.constants import NODE_URL_SECRET_NAMES
@@ -14,11 +15,25 @@ from src.aws import get_secret
 logger = logging.getLogger(__name__)
 
 
-def get_node_url(chain: Network) -> str:
-    secret_name = NODE_URL_SECRET_NAMES[chain]["name"]
-    secret_key = NODE_URL_SECRET_NAMES[chain]["key"]
-    url = get_secret(secret_name, secret_key)
-    return url
+class NoHealthyNode(Exception):
+    pass
+
+
+def get_healthy_node(chain: Network) -> Web3:
+    node_credentials = NODE_URL_SECRET_NAMES[chain]
+    for node_credential in node_credentials:
+        secret_name = node_credential["name"]
+        secret_key = node_credential["key"]
+        url = get_secret(secret_name, secret_key)
+        if not url:
+            continue
+        node = Web3(Web3.HTTPProvider(url))
+        try:
+            node.eth.get_block_number()
+            return node
+        except Exception as e:
+            logger.error(e)
+    raise NoHealthyNode(f"No healthy nodes for chain: {chain}")
 
 
 # TODO: Don't duplicate common abis for all chains

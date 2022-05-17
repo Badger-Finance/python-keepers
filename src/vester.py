@@ -28,16 +28,15 @@ logger = logging.getLogger(__name__)
 class Vester:
     def __init__(
         self,
+        web3: Web3,
         chain: Network,
         discord_url: str,
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         vesting_contract_address: str = ARB_VESTER_Q2_22,
-        node_url=os.getenv("ETH_NODE_URL"),
     ):
-        assert node_url
-        self.web3 = Web3(Web3.HTTPProvider(node_url))  # get secret here
+        self.web3 = web3
         self.chain = chain
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here

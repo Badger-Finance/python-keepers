@@ -25,12 +25,12 @@ FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 class ibBTCFeeCollector:
     def __init__(
         self,
+        web3: Web3,
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
-        web3=os.getenv("ETH_NODE_URL"),
     ):
         self.logger = logging.getLogger(__name__)
-        self.web3 = Web3(Web3.HTTPProvider(web3))  # get secret here
+        self.web3 = web3
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
         self.eth_usd_oracle = self.web3.eth.contract(
