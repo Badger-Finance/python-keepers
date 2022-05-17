@@ -4,20 +4,11 @@ resources:
   - arb_earner.yaml
   - arb_harvester.yaml
   - arb_vester.yaml
-  - cake_harvester.yaml
-  - chainlink_forwarder.yaml
-  - earner.yaml
   - eth_bvecvx_earner.yaml
   - eth_earner.yaml
+  - eth_vester.yaml
+  - flashbots_harvester.yaml
   - ftm_earner.yaml
   - ftm_harvester.yaml
-  - flashbots_harvester.yaml
   - ibbtc_fee_collector.yaml
-  - propose_centralized_oracle.yaml
-  - rebase.yaml
-  - rebalancer.yaml
-  - service.yaml
   - service_account.yaml
-  - stability_executor.yaml
-  - eth_tender.yaml
-  - eth_vester.yaml
