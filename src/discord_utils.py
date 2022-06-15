@@ -24,9 +24,7 @@ def send_critical_error_to_discord(
 ) -> None:
     if not role:
         role = CRITICAL_VAULTS[ETH_BVECVX_STRATEGY]
-    webhook_url = get_secret(
-        "keepers/critical-alert-webhook", "DISCORD_WEBHOOK_URL"
-    )
+    webhook_url = get_secret("keepers/critical-alert-webhook", "DISCORD_WEBHOOK_URL")
     try:
         webhook = Webhook.from_url(
             webhook_url,
