@@ -62,7 +62,7 @@ def oracle() -> Oracle:
     oracle = Oracle(
         keeper_address=test_address,
         keeper_key=test_key,
-        web3=get_healthy_node(Network.Ethereum)
+        web3=get_healthy_node(Network.Ethereum),
     )
     oracle.web3 = web3
     return oracle

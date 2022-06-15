@@ -27,7 +27,9 @@ def test_send_critical_error_to_discord_send_called(mocker):
 def test_send_critical_error_to_discord_send_not_called_invalid_url(mocker):
     mocker.patch("src.discord_utils.get_secret")
     mocker.patch("src.discord_utils.RequestsWebhookAdapter")
-    webhook = mocker.patch("src.discord_utils.Webhook.from_url", side_effect=InvalidArgument)
+    webhook = mocker.patch(
+        "src.discord_utils.Webhook.from_url", side_effect=InvalidArgument
+    )
     send_critical_error_to_discord(
         sett_name="whatever",
         tx_type="whatever",
@@ -57,7 +59,7 @@ def test_send_error_to_discord_send_secret_not_called_url_provided(mocker):
         sett_name="whatever",
         tx_type="whatever",
         tx_hash=HexBytes("0x123123"),
-        webhook_url="some_hook"
+        webhook_url="some_hook",
     )
     assert webhook.return_value.send.called
     assert not secret.return_value.called

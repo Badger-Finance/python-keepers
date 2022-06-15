@@ -69,11 +69,14 @@ def test_get_secret_client_raises(mocker):
         get_secret("some_secret_name", "some_key")
 
 
-@pytest.mark.parametrize("chain, node_key", [
-    (Network.Ethereum, "NODE_URL"),
-    (Network.Polygon, "POLY_NODE_URL"),
-    (Network.Fantom, "NODE_URL"),
-])
+@pytest.mark.parametrize(
+    "chain, node_key",
+    [
+        (Network.Ethereum, "NODE_URL"),
+        (Network.Polygon, "POLY_NODE_URL"),
+        (Network.Fantom, "NODE_URL"),
+    ],
+)
 def test_get_healthy_node(chain, node_key, mocker):
     secret_string = json.dumps({node_key: "secret_value"})
     mocker.patch(
@@ -91,10 +94,10 @@ def test_get_healthy_node(chain, node_key, mocker):
         ),
     )
     web3_mock = mocker.patch(
-        'src.utils.Web3',
+        "src.utils.Web3",
         return_value=MagicMock(
             eth=MagicMock(get_block_number=MagicMock(return_value={}))
-        )
+        ),
     )
     assert get_healthy_node(chain) is not None
     assert web3_mock.return_value.eth.get_block_number.called
@@ -118,10 +121,10 @@ def test_get_healthy_node_no_healthy_node(chain, mocker):
         ),
     )
     mocker.patch(
-        'src.utils.Web3',
+        "src.utils.Web3",
         return_value=MagicMock(
             eth=MagicMock(get_block_number=MagicMock(side_effect=ValueError))
-        )
+        ),
     )
     with pytest.raises(NoHealthyNode):
         get_healthy_node(chain)
