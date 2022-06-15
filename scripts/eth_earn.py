@@ -2,7 +2,10 @@ import logging
 
 from config.constants import ETH_BADGER_WBTC_CRV_VAULT
 from config.constants import ETH_BBTC_VAULT
+from config.constants import ETH_BDIGG_VAULT
 from config.constants import ETH_BVECVX_CVX_LP_VAULT
+from config.constants import ETH_DIGG_WBTC_SUSHI_VAULT
+from config.constants import ETH_DIGG_WBTC_UNI_VAULT
 from config.constants import ETH_FRAX_CRV_VAULT
 from config.constants import ETH_IBBTC_CRV_LP_VAULT
 from config.constants import ETH_IBBTC_SUSHI_VAULT
@@ -32,6 +35,9 @@ INVALID_VAULTS = [
     ETH_TBTC_VAULT,
     ETH_PBTC_VAULT,
     ETH_BBTC_VAULT,
+    ETH_BDIGG_VAULT,
+    ETH_DIGG_WBTC_SUSHI_VAULT,
+    ETH_DIGG_WBTC_UNI_VAULT,
 ]
 
 

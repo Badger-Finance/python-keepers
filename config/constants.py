@@ -61,10 +61,11 @@ ETH_BBTC_VAULT = "0x5Dce29e92b1b939F8E8C60DcF15BDE82A85be4a9"
 ETH_FRAX_CRV_VAULT = "0x15cBC4ac1e81c97667780fE6DAdeDd04a6EEB47B"
 ETH_MIM_CRV_VAULT = "0x19E4d89e0cB807ea21B8CEF02df5eAA99A110dA5"
 ETH_BADGER_WBTC_CRV_VAULT = "0xeC1c717A3b02582A4Aa2275260C583095536b613"
+ETH_BDIGG_VAULT = "0x7e7E112A68d8D2E221E11047a72fFC1065c38e1a"
+ETH_DIGG_WBTC_UNI_VAULT = "0xC17078FDd324CC473F8175Dc5290fae5f2E84714"
+ETH_DIGG_WBTC_SUSHI_VAULT = "0x88128580ACdD9c04Ce47AFcE196875747bF2A9f6"
 
-CRITICAL_VAULTS = {
-    ETH_BVECVX_STRATEGY: DiscordRoles.CriticalErrorRole.value
-}
+CRITICAL_VAULTS = {ETH_BVECVX_STRATEGY: DiscordRoles.CriticalErrorRole.value}
 
 
 FTM_KEEPER_ACL = "0x0680b32b52C5ca8C731490c0C576337058f39337"
@@ -230,14 +231,8 @@ MULTICHAIN_CONFIG = {
 
 NODE_URL_SECRET_NAMES = {
     Network.Ethereum: [
-        {
-            "name": "quiknode/eth-node-url",
-            "key": "NODE_URL"
-        },
-        {
-            "name": "alchemy/eth-node-url",
-            "key": "NODE_URL"
-        },
+        {"name": "quiknode/eth-node-url", "key": "NODE_URL"},
+        {"name": "alchemy/eth-node-url", "key": "NODE_URL"},
     ],
     Network.Polygon: [
         {
@@ -259,12 +254,7 @@ NODE_URL_SECRET_NAMES = {
             "key": "ARBITRUM_NODE_URL",
         },
     ],
-    Network.Fantom: [
-        {
-            "name": "chainstack/ftm-url",
-            "key": "NODE_URL"
-        }
-    ],
+    Network.Fantom: [{"name": "chainstack/ftm-url", "key": "NODE_URL"}],
 }
 
 ABI_DIRS = {

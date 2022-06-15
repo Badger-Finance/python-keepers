@@ -214,7 +214,10 @@ class Earner:
             self.logger.error(f"Error processing earn tx: {e}")
             if vault and vault.address in CRITICAL_VAULTS.keys():
                 send_critical_error_to_discord(
-                    sett_name, "Earn", chain=self.chain, role=CRITICAL_VAULTS[ETH_BVECVX_STRATEGY]
+                    sett_name,
+                    "Earn",
+                    chain=self.chain,
+                    role=CRITICAL_VAULTS[ETH_BVECVX_STRATEGY],
                 )
             else:
                 send_error_to_discord(

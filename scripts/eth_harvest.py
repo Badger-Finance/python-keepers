@@ -54,7 +54,7 @@ strategies = [
 #     "native.tricrypto2": "0x2eB6479c2f033360C0F4575A88e3b8909Cbc6a03",
 # }
 
-rewards_manager_strategies = {ETH_SLP_BADGER_WBTC_STRATEGY, ETH_SLP_DIGG_WBTC_STRATEGY}
+rewards_manager_strategies = {ETH_SLP_BADGER_WBTC_STRATEGY}
 
 
 def conditional_harvest(harvester, strategy_name, strategy) -> str:
