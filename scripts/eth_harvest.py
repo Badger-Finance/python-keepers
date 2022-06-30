@@ -6,6 +6,7 @@ from flashbots import flashbot
 from web3 import Web3
 
 from config.constants import ETH_BADGER_WBTC_CRV_STRATEGY
+from config.constants import ETH_BAURA_BAL_STRATEGY
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_CVX_CRV_HELPER_STRATEGY
 from config.constants import ETH_ETH_USD_CHAINLINK
@@ -39,6 +40,7 @@ strategies = [
     ETH_RENBTC_CRV_STRATEGY,
     ETH_TRICRYPTO_STRATEGY,
     ETH_BADGER_WBTC_CRV_STRATEGY,
+    ETH_BAURA_BAL_STRATEGY,
 ]
 
 # Old strategies may need to be harvested in the future, keep as reference
