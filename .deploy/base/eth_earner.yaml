@@ -6,7 +6,7 @@ metadata:
     app: eth-earner-keeper
 spec:
   # cron to run every hour
-  schedule: "10 * * * *"
+  schedule: "45 * * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
