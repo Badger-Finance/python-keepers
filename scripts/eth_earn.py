@@ -18,6 +18,7 @@ from config.constants import ETH_TRICRYPTO_VAULT
 from config.constants import ETH_YVWBTC_VAULT
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
+from config.enums import VaultVersion
 from src.aws import get_secret
 from src.earner import Earner
 from src.tx_utils import get_latest_base_fee
@@ -60,21 +61,33 @@ if __name__ == "__main__":
 
         vaults = []
         strategies = []
-        vault_addresses = registry.functions.getFilteredProductionVaults("v1", 1).call()
-        vault_addresses.extend(
+
+        vault_addresses_v1 = registry.functions.getFilteredProductionVaults(
+            "v1", 1
+        ).call()
+        vault_addresses_v1.extend(
             registry.functions.getFilteredProductionVaults("v1", 2).call()
         )
-        vault_addresses.append(ETH_BVECVX_CVX_LP_VAULT)
-        vault_addresses.append(ETH_IBBTC_CRV_LP_VAULT)
-        vault_addresses.append(ETH_FRAX_CRV_VAULT)
-        vault_addresses.append(ETH_MIM_CRV_VAULT)
-        vault_addresses.append(ETH_BADGER_WBTC_CRV_VAULT)
-        vault_addresses.append(ETH_AURA_BAL_VAULT)
+        vault_addresses_v1.append(ETH_BVECVX_CVX_LP_VAULT)
+        vault_addresses_v1.append(ETH_IBBTC_CRV_LP_VAULT)
+        vault_addresses_v1.append(ETH_FRAX_CRV_VAULT)
+        vault_addresses_v1.append(ETH_MIM_CRV_VAULT)
+        vault_addresses_v1.append(ETH_BADGER_WBTC_CRV_VAULT)
 
-        for address in vault_addresses:
+        for address in vault_addresses_v1:
             if address not in INVALID_VAULTS:
                 logger.info(f"address: {address}")
                 strategy, vault = get_strategy_from_vault(node, chain, address)
+                strategies.append(strategy)
+                vaults.append(vault)
+
+        vault_addresses_v1_5 = [ETH_AURA_BAL_VAULT]
+        for address in vault_addresses_v1_5:
+            if address not in INVALID_VAULTS:
+                logger.info(f"address: {address}")
+                strategy, vault = get_strategy_from_vault(
+                    node, chain, address, version=VaultVersion.v1_5
+                )
                 strategies.append(strategy)
                 vaults.append(vault)
 
