@@ -1,5 +1,6 @@
 import logging
 
+from config.constants import ETH_AURA_BAL_VAULT
 from config.constants import ETH_BADGER_WBTC_CRV_VAULT
 from config.constants import ETH_BBTC_VAULT
 from config.constants import ETH_BDIGG_VAULT
@@ -68,6 +69,7 @@ if __name__ == "__main__":
         vault_addresses.append(ETH_FRAX_CRV_VAULT)
         vault_addresses.append(ETH_MIM_CRV_VAULT)
         vault_addresses.append(ETH_BADGER_WBTC_CRV_VAULT)
+        vault_addresses.append(ETH_AURA_BAL_VAULT)
 
         for address in vault_addresses:
             if address not in INVALID_VAULTS:
