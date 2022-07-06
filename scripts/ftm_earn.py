@@ -2,6 +2,7 @@ import logging
 
 from web3 import Web3
 
+from config.constants import FTM_OXD_BVEOXD_VAULT
 from config.constants import FTM_VAULTS_1, FTM_VAULTS_15
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network, VaultVersion
@@ -11,6 +12,8 @@ from src.web3_utils import get_strategy_from_vault
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+INVALID_VAULTS = [FTM_OXD_BVEOXD_VAULT]
 
 
 def safe_earn(earner, vault, strategy):
@@ -45,16 +48,18 @@ if __name__ == "__main__":
         strategies = []
         vaults = []
         for vault_address in FTM_VAULTS_1:
-            strategy, vault = get_strategy_from_vault(node, chain, vault_address)
-            strategies.append(strategy)
-            vaults.append(vault)
+            if vault_address not in INVALID_VAULTS:
+                strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+                strategies.append(strategy)
+                vaults.append(vault)
 
         for vault_address in FTM_VAULTS_15:
-            strategy, vault = get_strategy_from_vault(
-                node, chain, vault_address, version=VaultVersion.v1_5
-            )
-            strategies.append(strategy)
-            vaults.append(vault)
+            if vault_address not in INVALID_VAULTS:
+                strategy, vault = get_strategy_from_vault(
+                    node, chain, vault_address, version=VaultVersion.v1_5
+                )
+                strategies.append(strategy)
+                vaults.append(vault)
 
         for strategy, vault in zip(strategies, vaults):
             if (
