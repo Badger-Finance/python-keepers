@@ -47,17 +47,19 @@ if __name__ == "__main__":
         )
         strategies = []
         vaults = []
-        for vault_address in FTM_VAULTS_1 and vault_address not in INVALID_VAULTS:
-            strategy, vault = get_strategy_from_vault(node, chain, vault_address)
-            strategies.append(strategy)
-            vaults.append(vault)
+        for vault_address in FTM_VAULTS_1:
+            if vault_address not in INVALID_VAULTS:
+                strategy, vault = get_strategy_from_vault(node, chain, vault_address)
+                strategies.append(strategy)
+                vaults.append(vault)
 
-        for vault_address in FTM_VAULTS_15 and vault_address not in INVALID_VAULTS:
-            strategy, vault = get_strategy_from_vault(
-                node, chain, vault_address, version=VaultVersion.v1_5
-            )
-            strategies.append(strategy)
-            vaults.append(vault)
+        for vault_address in FTM_VAULTS_15:
+            if vault_address not in INVALID_VAULTS:
+                strategy, vault = get_strategy_from_vault(
+                    node, chain, vault_address, version=VaultVersion.v1_5
+                )
+                strategies.append(strategy)
+                vaults.append(vault)
 
         for strategy, vault in zip(strategies, vaults):
             if (
