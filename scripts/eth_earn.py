@@ -1,6 +1,8 @@
 import logging
 
 from config.constants import ETH_AURA_BAL_VAULT
+from config.constants import ETH_B_BB_A_USD_AURA_VAULT
+from config.constants import ETH_20WBTC_80BADGER_AURA_VAULT
 from config.constants import ETH_BADGER_WBTC_CRV_VAULT
 from config.constants import ETH_BBTC_VAULT
 from config.constants import ETH_BDIGG_VAULT
@@ -85,7 +87,11 @@ if __name__ == "__main__":
                 strategies.append(strategy)
                 vaults.append(vault)
 
-        vault_addresses_v1_5 = [ETH_AURA_BAL_VAULT]
+        vault_addresses_v1_5 = [
+            ETH_AURA_BAL_VAULT,
+            ETH_B_BB_A_USD_AURA_VAULT,
+            ETH_20WBTC_80BADGER_AURA_VAULT,
+        ]
         for address in vault_addresses_v1_5:
             if address not in INVALID_VAULTS:
                 logger.info(f"address: {address}")
