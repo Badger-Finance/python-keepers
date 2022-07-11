@@ -15,6 +15,8 @@ RUN apt-get install linux-libc-dev>=5.10.113-1 libc6-dev -y
 RUN apt-get install libtiff5>=4.2.0-1+deb11u1 -y
 RUN apt-get install zlib1g>=1:1.2.11.dfsg-2+deb11u1 -y
 RUN apt-get install gzip>=1.10-4+deb11u1 -y
+RUN apt-get install libfreetype6>=2.10.4+dfsg-1+deb11u1
+RUN apt-get install libfribidi0>=1.0.8-2+deb11u1
 RUN apt-get install git -y
 COPY requirements.txt .
 RUN pip install -r requirements.txt
