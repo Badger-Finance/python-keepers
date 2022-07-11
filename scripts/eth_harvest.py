@@ -9,6 +9,7 @@ from config.constants import ETH_BADGER_WBTC_CRV_STRATEGY
 from config.constants import ETH_AURABAL_STRATEGY
 from config.constants import ETH_B_BB_A_USD_AURA_STRATEGY
 from config.constants import ETH_20WBTC_80BADGER_AURA_STRATEGY
+from config.constants import ETH_33AURABAL_33WETH_33GRAVIAURA_STRATEGY
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_CVX_CRV_HELPER_STRATEGY
 from config.constants import ETH_ETH_USD_CHAINLINK
@@ -47,6 +48,7 @@ strategies = [
     ETH_GRAVIAURA_STRATEGY,
     ETH_B_BB_A_USD_AURA_STRATEGY,
     ETH_20WBTC_80BADGER_AURA_STRATEGY,
+    ETH_33AURABAL_33WETH_33GRAVIAURA_STRATEGY,
 ]
 
 # Old strategies may need to be harvested in the future, keep as reference
