@@ -30,15 +30,18 @@ if __name__ == "__main__":
         base_oracle_address=MULTICHAIN_CONFIG.get(chain).get("gas_oracle"),
     )
 
-    # strategy = web3.eth.contract(
-    #     address=ETH_BVECVX_STRATEGY, abi=get_abi(chain, "strategy")
-    # )
-    # vault = web3.eth.contract(address=ETH_BVECVX_VAULT, abi=get_abi(chain, "vault"))
+    strategy = web3.eth.contract(
+        address=ETH_BVECVX_STRATEGY, abi=get_abi(chain, "strategy")
+    )
+    vault = web3.eth.contract(address=ETH_BVECVX_VAULT, abi=get_abi(chain, "vault"))
 
-    # bvecvx_strat_name = "Badger Vested Escrow Convex Token"
+    bvecvx_strat_name = "Badger Vested Escrow Convex Token"
 
-    # logger.info(f"+-----Earning {bvecvx_strat_name}-----+")
-    # earner.earn(vault, strategy, bvecvx_strat_name)
+    logger.info(f"+-----Earning {bvecvx_strat_name}-----+")
+    try:
+        earner.earn(vault, strategy, bvecvx_strat_name)
+    except Exception:
+        logger.error("ERROR EARNING BVECVX")
 
     graviaura_strategy = web3.eth.contract(
         address=ETH_GRAVIAURA_STRATEGY, abi=get_abi(chain, "strategy")
