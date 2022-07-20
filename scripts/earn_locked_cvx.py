@@ -40,7 +40,7 @@ if __name__ == "__main__":
     logger.info(f"+-----Earning {bvecvx_strat_name}-----+")
     try:
         earner.earn(vault, strategy, bvecvx_strat_name)
-    except:
+    except Exception:
         logger.error("ERROR EARNING BVECVX")
 
     graviaura_strategy = web3.eth.contract(

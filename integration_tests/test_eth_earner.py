@@ -8,8 +8,6 @@ from brownie import web3
 from hexbytes import HexBytes
 
 from config.constants import EARN_OVERRIDE_THRESHOLD
-from config.constants import ETH_BVECVX_STRATEGY
-from config.constants import ETH_BVECVX_VAULT
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from integration_tests.utils import test_address
