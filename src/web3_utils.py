@@ -4,6 +4,7 @@ import requests
 from hexbytes import HexBytes
 from typing import Dict
 from typing import Optional
+from typing import Tuple
 from web3 import Web3
 from web3 import contract
 from web3 import exceptions
@@ -87,7 +88,7 @@ def get_strategies_and_vaults(node: Web3, chain: str) -> tuple:
 
 def confirm_transaction(
     web3: Web3, tx_hash: HexBytes, timeout: int = 120, max_block: int = None
-) -> tuple[bool, str]:
+) -> Tuple[bool, str]:
     """Waits for transaction to appear within
         a given timeframe or before a given block (if specified), and then times out.
 

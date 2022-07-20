@@ -13,6 +13,7 @@ from config.constants import CRITICAL_VAULTS
 from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import EARN_PCT_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
+from config.constants import ETH_BVECVX_VAULT
 from config.constants import FTM_BVEOXD_VOTER
 from config.constants import FTM_OXD_BVEOXD_VAULT
 from config.enums import Network
@@ -82,6 +83,8 @@ class Earner:
         vault_balance, strategy_balance = self.get_balances(vault, strategy, want)
 
         if self.should_earn(override_threshold, vault_balance, strategy_balance):
+            if vault.address == ETH_BVECVX_VAULT:
+                self.bvecvx_unlock()
             self.__process_earn(vault, sett_name)
             if vault.address == FTM_OXD_BVEOXD_VAULT:
                 self.bveoxd_vote()
@@ -284,9 +287,7 @@ class Earner:
             options
         )
 
-    def bveoxd_vote(
-        self,
-    ) -> None:
+    def bveoxd_vote(self) -> None:
         voter = self.web3.eth.contract(
             address=FTM_BVEOXD_VOTER, abi=get_abi(Network.Fantom, "bveoxd_voter")
         )
@@ -329,3 +330,54 @@ class Earner:
                 chain=self.chain,
                 keeper_address=self.keeper_address,
             )
+
+    def bvecvx_unlock(self) -> None:
+        unlocker = self.web3.eth.contract(
+            address=ETH_BVECVX_STRATEGY,
+            abi=get_abi(Network.Ethereum, "bvecvx_unlock_upkeep"),
+        )
+
+        should_unlock = unlocker.functions.checkUpkeep(HexBytes(0)).call()[
+            0
+        ]  # returns Tuple[bool, calldata], get bool
+        self.logger.info(f"should_unlock: {should_unlock}")
+        if should_unlock:
+            try:
+                options = get_tx_options(self.web3, self.chain, self.keeper_address)
+                tx = unlocker.functions.performUpkeep(HexBytes(0)).buildTransaction(
+                    options
+                )
+                tx_hash = sign_and_send_tx(self.web3, tx, self.keeper_key)
+            except Exception:
+                self.logger.error(f"Error in sending vote tx: {traceback.format_exc()}")
+                tx_hash = HexBytes(0)
+
+            try:
+                succeeded, _ = confirm_transaction(self.web3, tx_hash)
+                if succeeded:
+                    gas_price_of_tx = get_gas_price_of_tx(
+                        self.web3, self.base_usd_oracle, tx_hash, self.chain
+                    )
+                    self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                    send_success_to_discord(
+                        tx_type="Unlock bveCVX",
+                        tx_hash=tx_hash,
+                        gas_cost=gas_price_of_tx,
+                        chain=self.chain,
+                        url=self.discord_url,
+                    )
+                elif tx_hash != HexBytes(0):
+                    send_success_to_discord(
+                        tx_type="Unlock bveCVX",
+                        tx_hash=tx_hash,
+                        chain=self.chain,
+                        url=self.discord_url,
+                    )
+            except Exception as e:
+                self.logger.error(f"Error processing earn tx: {e}")
+                send_critical_error_to_discord(
+                    "bveCVX",
+                    "Unlock bveCVX",
+                    chain=self.chain,
+                    role=CRITICAL_VAULTS[ETH_BVECVX_STRATEGY],
+                )

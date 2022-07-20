@@ -8,6 +8,8 @@ from brownie import web3
 from hexbytes import HexBytes
 
 from config.constants import EARN_OVERRIDE_THRESHOLD
+from config.constants import ETH_BVECVX_STRATEGY
+from config.constants import ETH_BVECVX_VAULT
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from integration_tests.utils import test_address
@@ -120,3 +122,9 @@ def test_earn(keeper_address, earner):
         else:
             assert vault_before == vault_after
             assert strategy_before == strategy_after
+
+
+@pytest.mark.require_network("hardhat-fork")
+def test_bvecvx_unlock(keeper_address, earner):
+    accounts[1].transfer(keeper_address, "10 ether")
+    earner.bvecvx_unlock()
