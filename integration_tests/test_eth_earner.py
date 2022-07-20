@@ -8,6 +8,7 @@ from brownie import web3
 from hexbytes import HexBytes
 
 from config.constants import EARN_OVERRIDE_THRESHOLD
+from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from integration_tests.utils import test_address
@@ -125,4 +126,23 @@ def test_earn(keeper_address, earner):
 @pytest.mark.require_network("hardhat-fork")
 def test_bvecvx_unlock(keeper_address, earner):
     accounts[1].transfer(keeper_address, "10 ether")
+
+    unlocker = Contract.from_explorer(ETH_BVECVX_STRATEGY)
+    locker = Contract.from_explorer("0x72a19342e8F1838460eBFCCEf09F6585e32db86E")
+
+    should_unlock = unlocker.checkUpkeep(HexBytes(0))
+
+    locked_bal_before = locker.lockedBalanceOf(unlocker.address)
+
     earner.bvecvx_unlock()
+
+    locked_bal_after = locker.lockedBalanceOf(unlocker.address)
+
+    if should_unlock:
+        assert locked_bal_after < locked_bal_before
+        # run again since we should have no expired locks
+        locked_bal_before = locker.lockedBalanceOf(unlocker.address)
+        earner.bvecvx_unlock()
+        locked_bal_after = locker.lockedBalanceOf(unlocker.address)
+
+    assert locked_bal_before == locked_bal_after
