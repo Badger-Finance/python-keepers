@@ -28,6 +28,7 @@ class Currency(str, Enum):
 class VaultVersion(str, Enum):
     v1_5 = "1.5"
     v1 = "1"
+    v2 = "2"
 
     def __str__(self):
         return self.value
@@ -36,3 +37,13 @@ class VaultVersion(str, Enum):
 class DiscordRoles(Enum):
     RewardsPod = "<@&804147406043086850>"
     CriticalErrorRole = "<@&974386521148891166>"
+
+
+class VaultStatus(Enum):
+    Discontinued = 0
+    Experimental = 1
+    Guarded = 2
+    Open = 3
+
+    def __str__(self):
+        return self.value

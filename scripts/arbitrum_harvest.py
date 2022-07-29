@@ -1,37 +1,41 @@
 import logging
 import time
 
-from web3 import Web3
+from hexbytes import HexBytes
+from web3 import Web3, contract
 
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.general_harvester import GeneralHarvester
 from src.aws import get_secret
-from src.web3_utils import get_strategies_from_registry
+from src.web3_utils import get_strategies_and_vaults
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# TODO: Add conditional harvest logic
-def safe_harvest(harvester, strategy) -> str:
+def safe_harvest(
+    harvester: GeneralHarvester,
+    strategy_contract: contract,
+    strategy_address: HexBytes,
+    strategy_name: str,
+) -> str:
     try:
-        strategy_name = strategy.functions.getName().call()
-        logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
-        harvester.harvest(strategy)
+        logger.info(f"+-----Harvesting {strategy_name} {strategy_address}-----+")
+        harvester.harvest(strategy_contract)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running harvest: {e}")
     logger.info("Trying to run harvestNoReturn")
     try:
-        harvester.harvest_no_return(strategy)
+        harvester.harvest_no_return(strategy_contract)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running harvestNoReturn: {e}")
 
     logger.info("Tend first, then harvest")
     try:
-        harvester.tend_then_harvest(strategy)
+        harvester.tend_then_harvest(strategy_contract)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running tend_then_harvest: {e}")
@@ -60,14 +64,16 @@ if __name__ == "__main__":
         discord_url=discord_url,
     )
 
-    strategies = get_strategies_from_registry(web3, Network.Arbitrum)
+    strategies, _ = get_strategies_and_vaults(web3, Network.Arbitrum)
 
     for strategy in strategies:
         if (
-            strategy.address
+            strategy["address"]
             not in MULTICHAIN_CONFIG[Network.Arbitrum]["harvest"]["invalid_strategies"]
         ):
-            safe_harvest(harvester, strategy)
+            safe_harvest(
+                harvester, strategy["contract"], strategy["address"], strategy["name"]
+            )
 
             # Sleep for a few blocks in between harvests
             time.sleep(30)
