@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def safe_harvest(
-    harvester,
+    harvester: GeneralHarvester,
     strategy_contract: contract,
     strategy_address: HexBytes,
     strategy_name: str,
