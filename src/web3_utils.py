@@ -3,6 +3,7 @@ import requests
 
 from hexbytes import HexBytes
 from typing import Dict
+from typing import List
 from typing import Optional
 from typing import Tuple
 from web3 import Web3
@@ -11,6 +12,7 @@ from web3 import exceptions
 
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network, VaultVersion
+from src.registry_utils import get_production_vaults
 from src.utils import get_abi
 from src.aws import get_secret
 
@@ -66,22 +68,31 @@ def get_strategy_from_vault(
     return strategy_contract, vault_contract
 
 
-def get_strategies_and_vaults(node: Web3, chain: str) -> tuple:
+def get_strategies_and_vaults(node: Web3, chain: str) -> Tuple[List[Dict], List[Dict]]:
     strategies = []
     vaults = []
 
-    registry = node.eth.contract(
-        address=node.toChecksumAddress(MULTICHAIN_CONFIG[chain]["registry"]),
-        abi=get_abi(chain, "registry"),
-    )
+    vaults_by_version = get_production_vaults(node, chain)
 
-    for vault_owner in MULTICHAIN_CONFIG[chain]["vault_owner"]:
-        vault_owner = node.toChecksumAddress(vault_owner)
+    for version in vaults_by_version.keys():
+        for vault_address in vaults_by_version[version].keys():
+            strategy, vault = get_strategy_from_vault(
+                node, chain, vault_address, version=version
+            )
 
-        for vault_address in registry.functions.getVaults("v1", vault_owner).call():
-            strategy, vault = get_strategy_from_vault(node, chain, vault_address)
-            vaults.append(vault)
-            strategies.append(strategy)
+            vault_data = {
+                "address": vault_address,
+                "contract": vault,
+                "name": vaults_by_version[version][vault_address]["name"],
+            }
+            vaults.append(vault_data)
+
+            strategy_data = {
+                "address": strategy.address,
+                "contract": strategy,
+                "name": vaults_by_version[version][vault_address]["name"],
+            }
+            strategies.append(strategy_data)
 
     return strategies, vaults
 

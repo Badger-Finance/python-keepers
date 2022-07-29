@@ -23,8 +23,8 @@ def get_vault_version(version: str) -> VaultVersion:
 
 
 def get_production_vaults(web3: Web3, chain: Network) -> Dict:
-    registry = web3.eth.contract(REGISTRY_V2, get_abi(chain, "registry_v2"))
-    vaults = registry.getProductionVaults()
+    registry = web3.eth.contract(address=REGISTRY_V2, abi=get_abi(chain, "registry_v2"))
+    vaults = registry.functions.getProductionVaults().call()
     formatted_vaults = format_vaults(vaults)
     production_vaults = defaultdict(dict)
     for version in formatted_vaults.keys():

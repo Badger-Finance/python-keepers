@@ -1,6 +1,6 @@
 import logging
 
-from web3 import Web3
+from web3 import Web3, contract
 
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
@@ -12,11 +12,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def safe_earn(earner, vault, strategy):
+def safe_earn(earner: Earner, vault: contract, strategy: contract, strategy_name: str):
     try:
-        sett_name = strategy.functions.getName().call()
-        logger.info(f"+-----Earning {sett_name}-----+")
-        earner.earn(vault, strategy, sett_name=sett_name)
+        logger.info(f"+-----Earning {strategy_name}-----+")
+        earner.earn(vault, strategy, sett_name=strategy_name)
     except Exception as e:
         logger.error(f"Error running earn: {e}")
 
@@ -47,7 +46,9 @@ if __name__ == "__main__":
 
         for strategy, vault in zip(strategies, vaults):
             if (
-                strategy.address
+                strategy["address"]
                 not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
             ):
-                safe_earn(earner, vault, strategy)
+                safe_earn(
+                    earner, vault["contract"], strategy["contract"], strategy["name"]
+                )
