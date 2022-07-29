@@ -12,11 +12,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def safe_earn(earner, vault, strategy):
+def safe_earn(earner, vault, strategy, name):
     try:
-        sett_name = strategy.functions.getName().call()
-        logger.info(f"+-----Earning {sett_name}-----+")
-        earner.earn(vault, strategy, sett_name=sett_name)
+        logger.info(f"+-----Earning {name}-----+")
+        earner.earn(vault, strategy, sett_name=name)
     except Exception as e:
         logger.error(f"Error running earn: {e}")
 
@@ -47,7 +46,9 @@ if __name__ == "__main__":
 
         for strategy, vault in zip(strategies, vaults):
             if (
-                strategy.address
+                strategy["address"]
                 not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
             ):
-                safe_earn(earner, vault, strategy)
+                safe_earn(
+                    earner, vault["contract"], strategy["contract"], strategy["name"]
+                )

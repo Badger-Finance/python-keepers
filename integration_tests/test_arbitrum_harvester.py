@@ -16,6 +16,7 @@ from integration_tests.utils import test_address
 from integration_tests.utils import test_key
 from src.general_harvester import GeneralHarvester
 from src.utils import get_abi
+from src.web3_utils import get_strategies_and_vaults
 
 
 def mock_send_discord(
@@ -82,11 +83,8 @@ def harvester(keeper_address, keeper_key) -> GeneralHarvester:
     )
 
 
-@pytest.mark.parametrize(
-    "strategy", [ARB_SLP_WBTC_WETH_STRATEGY, ARB_SLP_WETH_SUSHI_STRATEGY], indirect=True
-)
 @pytest.mark.require_network("hardhat-arbitrum-fork")
-def test_harvest(keeper_address, harvester, strategy):
+def test_harvest(keeper_address, harvester):
     """
     Check if the contract should be harvestable, then call the harvest function
 
@@ -96,23 +94,29 @@ def test_harvest(keeper_address, harvester, strategy):
     """
     accounts[0].transfer(keeper_address, "10 ether")
 
-    strategy_name = strategy.functions.getName().call()
+    strategies, _ = get_strategies_and_vaults(web3, Network.Arbitrum)
 
-    # Hack: For some reason, harvest call() fails without first calling estimateGas()
-    harvester.estimate_gas_fee(strategy.address)
+    for strategy in strategies:
 
-    before_claimable = harvester.estimate_harvest_amount(strategy)
-    print(f"{strategy_name} before_claimable: {before_claimable}")
+        strategy_name = strategy["name"]
+        strategy_address = strategy["address"]
+        strategy_contract = strategy["contract"]
 
-    should_harvest = harvester.is_profitable()
-    print(strategy_name, "should_harvest:", should_harvest)
+        # Hack: For some reason, harvest call() fails without first calling estimateGas()
+        harvester.estimate_gas_fee(strategy_address)
 
-    harvester.harvest(strategy)
+        before_claimable = harvester.estimate_harvest_amount(strategy_contract)
+        print(f"{strategy_name} before_claimable: {before_claimable}")
 
-    after_claimable = harvester.estimate_harvest_amount(strategy)
-    print(f"{strategy_name} after_claimable: {after_claimable}")
+        should_harvest = harvester.is_profitable()
+        print(strategy_name, "should_harvest:", should_harvest)
 
-    if should_harvest and before_claimable > 0:
-        assert after_claimable / before_claimable < 0.01
-    else:
-        assert before_claimable == after_claimable
+        harvester.harvest(strategy_contract)
+
+        after_claimable = harvester.estimate_harvest_amount(strategy_contract)
+        print(f"{strategy_name} after_claimable: {after_claimable}")
+
+        if should_harvest and before_claimable > 0:
+            assert after_claimable / before_claimable < 0.01
+        else:
+            assert before_claimable == after_claimable
