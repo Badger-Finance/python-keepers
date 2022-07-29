@@ -10,6 +10,7 @@ from config.constants import ETH_BBTC_VAULT
 from config.constants import ETH_BDIGG_VAULT
 from config.constants import ETH_BVECVX_VAULT
 from config.constants import ETH_BVECVX_CVX_LP_VAULT
+from config.constants import ETH_DIGG_STABILITY_VAULT
 from config.constants import ETH_DIGG_WBTC_SUSHI_VAULT
 from config.constants import ETH_DIGG_WBTC_UNI_VAULT
 from config.constants import ETH_FRAX_CRV_VAULT
@@ -48,6 +49,7 @@ INVALID_VAULTS = [
     ETH_DIGG_WBTC_UNI_VAULT,
     ETH_BVECVX_VAULT,
     ETH_GRAVIAURA_VAULT,
+    ETH_DIGG_STABILITY_VAULT,
 ]
 
 
