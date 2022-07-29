@@ -48,7 +48,13 @@ def test_get_production_vaults():
         eth=MagicMock(
             contract=MagicMock(
                 return_value=MagicMock(
-                    getProductionVaults=MagicMock(return_value=PRODUCTION_VAULT_RAW)
+                    functions=MagicMock(
+                        getProductionVaults=MagicMock(
+                            return_value=MagicMock(
+                                call=MagicMock(return_value=PRODUCTION_VAULT_RAW)
+                            )
+                        )
+                    )
                 )
             )
         )

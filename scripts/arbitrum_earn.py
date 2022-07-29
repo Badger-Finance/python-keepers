@@ -12,10 +12,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def safe_earn(earner: Earner, vault: contract, strategy: contract, name: str):
+def safe_earn(earner: Earner, vault: contract, strategy: contract, strategy_name: str):
     try:
-        logger.info(f"+-----Earning {name}-----+")
-        earner.earn(vault, strategy, sett_name=name)
+        logger.info(f"+-----Earning {strategy_name}-----+")
+        earner.earn(vault, strategy, sett_name=strategy_name)
     except Exception as e:
         logger.error(f"Error running earn: {e}")
 

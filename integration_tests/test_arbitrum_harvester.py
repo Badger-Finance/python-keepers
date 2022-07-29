@@ -9,8 +9,6 @@ from web3 import contract
 
 from config.constants import ARB_ETH_USD_CHAINLINK
 from config.constants import ARB_KEEPER_ACL
-from config.constants import ARB_SLP_WBTC_WETH_STRATEGY
-from config.constants import ARB_SLP_WETH_SUSHI_STRATEGY
 from config.enums import Network
 from integration_tests.utils import test_address
 from integration_tests.utils import test_key
