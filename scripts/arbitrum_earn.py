@@ -1,6 +1,6 @@
 import logging
 
-from web3 import Web3
+from web3 import Web3, contract
 
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def safe_earn(earner, vault, strategy, name):
+def safe_earn(earner: Earner, vault: contract, strategy: contract, name: str):
     try:
         logger.info(f"+-----Earning {name}-----+")
         earner.earn(vault, strategy, sett_name=name)
