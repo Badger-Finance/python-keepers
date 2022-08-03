@@ -22,20 +22,20 @@ def safe_harvest(
 ) -> str:
     try:
         logger.info(f"+-----Harvesting {strategy_name} {strategy_address}-----+")
-        harvester.harvest(strategy_contract)
+        harvester.harvest(strategy_contract, strategy_name=strategy_name)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running harvest: {e}")
     logger.info("Trying to run harvestNoReturn")
     try:
-        harvester.harvest_no_return(strategy_contract)
+        harvester.harvest_no_return(strategy_contract, strategy_name=strategy_name)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running harvestNoReturn: {e}")
 
     logger.info("Tend first, then harvest")
     try:
-        harvester.tend_then_harvest(strategy_contract)
+        harvester.tend_then_harvest(strategy_contract, strategy_name=strategy_name)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running tend_then_harvest: {e}")
