@@ -110,6 +110,7 @@ class GeneralHarvester(IHarvester):
     def harvest(
         self,
         strategy: contract.Contract,
+        strategy_name: str = "",
     ):
         """Orchestration function that harvests outstanding rewards.
 
@@ -119,7 +120,11 @@ class GeneralHarvester(IHarvester):
         Raises:
             ValueError: If the keeper isn't whitelisted, throw an error and alert user.
         """
-        strategy_name = strategy.functions.getName().call()
+        strategy_name = (
+            strategy.functions.getName().call()
+            if strategy_name == ""
+            else strategy_name
+        )
 
         # TODO: update for ACL
         if not self.__is_keeper_whitelisted("harvest"):
