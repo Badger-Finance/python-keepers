@@ -90,8 +90,6 @@ def test_earn(keeper_address, earner):
 
     for strategy, vault in zip(strategies, vaults):
 
-        strategy_name = strategy.functions.getName().call()
-
         override_threshold = EARN_OVERRIDE_THRESHOLD
 
         want = earner.web3.eth.contract(
@@ -99,21 +97,23 @@ def test_earn(keeper_address, earner):
             abi=get_abi(Network.Ethereum, "erc20"),
         )
 
-        vault_before, strategy_before = earner.get_balances(vault, strategy, want)
+        vault_before, strategy_before = earner.get_balances(
+            vault.contract, strategy.contract, want
+        )
 
-        logger.info(f"{strategy_name} vault_before: {vault_before}")
-        logger.info(f"{strategy_name} strategy_before: {strategy_before}")
+        logger.info(f"{strategy.name} vault_before: {vault_before}")
+        logger.info(f"{strategy.name} strategy_before: {strategy_before}")
 
         should_earn = earner.should_earn(
             override_threshold, vault_before, strategy_before
         )
-        logger.info(f"{strategy_name} should_earn: {should_earn}")
+        logger.info(f"{strategy.name} should_earn: {should_earn}")
 
-        earner.earn(vault, strategy)
+        earner.earn(vault.contract, strategy.contract, sett_name=strategy.name)
 
         vault_after, strategy_after = earner.get_balances(vault, strategy, want)
-        logger.info(f"{strategy_name} vault_after: {vault_after}")
-        logger.info(f"{strategy_name} strategy_after: {strategy_after}")
+        logger.info(f"{strategy.name} vault_after: {vault_after}")
+        logger.info(f"{strategy.name} strategy_after: {strategy_after}")
 
         if should_earn:
             assert vault_after < vault_before

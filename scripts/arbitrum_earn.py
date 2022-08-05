@@ -46,9 +46,7 @@ if __name__ == "__main__":
 
         for strategy, vault in zip(strategies, vaults):
             if (
-                strategy["address"]
+                strategy.address
                 not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
             ):
-                safe_earn(
-                    earner, vault["contract"], strategy["contract"], strategy["name"]
-                )
+                safe_earn(earner, vault.contract, strategy.contract, strategy.name)
