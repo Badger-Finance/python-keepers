@@ -12,7 +12,6 @@ ETH_INFLUENCE_STRATEGIES = [ETH_BVECVX_STRATEGY, ETH_GRAVIAURA_STRATEGY]
 
 @dataclass
 class EarnSettings:
-    """Represents smart contract."""
 
     influence_strategies: List[str]
     influence_vaults: List[str]
