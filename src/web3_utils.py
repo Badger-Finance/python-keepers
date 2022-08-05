@@ -72,8 +72,8 @@ def get_strategy_from_vault(
 def get_strategies_and_vaults(
     node: Web3, chain: str
 ) -> Tuple[List[Contract], List[Contract]]:
-    strategies = []
-    vaults = []
+    strategies: List[Contract] = []
+    vaults: List[Contract] = []
 
     vaults_by_version = get_production_vaults(node, chain)
 
