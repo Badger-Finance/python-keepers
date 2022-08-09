@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal
+from typing import List
 
 import pytest
 from brownie import Contract
@@ -9,11 +10,16 @@ from hexbytes import HexBytes
 
 from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
+from config.constants import ETH_BVECVX_VAULT
+from config.constants import ETH_GRAVIAURA_STRATEGY
+from config.constants import ETH_GRAVIAURA_VAULT
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from integration_tests.utils import test_address
 from integration_tests.utils import test_key
+from src.data_classes.contract import Contract as BadgerContract
 from src.earner import Earner
+from src.settings.earn_settings import ETH_EARN_SETTINGS
 from src.utils import get_abi
 from src.web3_utils import get_strategies_and_vaults
 
@@ -88,12 +94,25 @@ def test_earn(keeper_address, earner):
     accounts[0].transfer(keeper_address, "10 ether")
     strategies, vaults = get_strategies_and_vaults(web3, Network.Ethereum)
 
+    vaults_to_earn: List[BadgerContract] = []
+    strats_to_earn: List[BadgerContract] = []
+
     for strategy, vault in zip(strategies, vaults):
+        if vault.address not in ETH_EARN_SETTINGS.influence_vaults:
+            vaults_to_earn.append(vault)
+            strats_to_earn.append(strategy)
+
+    assert ETH_BVECVX_VAULT not in vaults_to_earn
+    assert ETH_GRAVIAURA_VAULT not in vaults_to_earn
+    assert ETH_BVECVX_STRATEGY not in strats_to_earn
+    assert ETH_GRAVIAURA_STRATEGY not in strats_to_earn
+
+    for strategy, vault in zip(strats_to_earn, vaults_to_earn):
 
         override_threshold = EARN_OVERRIDE_THRESHOLD
 
         want = earner.web3.eth.contract(
-            address=vault.functions.token().call(),
+            address=vault.contract.functions.token().call(),
             abi=get_abi(Network.Ethereum, "erc20"),
         )
 
@@ -111,7 +130,9 @@ def test_earn(keeper_address, earner):
 
         earner.earn(vault.contract, strategy.contract, sett_name=strategy.name)
 
-        vault_after, strategy_after = earner.get_balances(vault, strategy, want)
+        vault_after, strategy_after = earner.get_balances(
+            vault.contract, strategy.contract, want
+        )
         logger.info(f"{strategy.name} vault_after: {vault_after}")
         logger.info(f"{strategy.name} strategy_after: {strategy_after}")
 
@@ -130,7 +151,7 @@ def test_bvecvx_unlock(keeper_address, earner):
     unlocker = Contract.from_explorer(ETH_BVECVX_STRATEGY)
     locker = Contract.from_explorer("0x72a19342e8F1838460eBFCCEf09F6585e32db86E")
 
-    should_unlock = unlocker.checkUpkeep(HexBytes(0))
+    should_unlock = unlocker.checkUpkeep(HexBytes(0))[0]
 
     locked_bal_before = locker.lockedBalanceOf(unlocker.address)
 
