@@ -7,7 +7,6 @@ from src.data_classes.contract import Contract
 from src.earner import Earner
 from src.settings.earn_settings import ETH_EARN_SETTINGS
 from src.tx_utils import get_latest_base_fee
-from src.utils import get_abi
 from src.utils import get_healthy_node
 from src.web3_utils import get_strategies_and_vaults
 
