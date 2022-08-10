@@ -17,6 +17,8 @@ RUN apt-get install zlib1g>=1:1.2.11.dfsg-2+deb11u1 -y
 RUN apt-get install gzip>=1.10-4+deb11u1 -y
 RUN apt-get install libfreetype6>=2.10.4+dfsg-1+deb11u1
 RUN apt-get install libfribidi0>=1.0.8-2+deb11u1
+RUN apt-get install libgnutls30>=3.7.1-5+deb11u2
+RUN apt-get install libtirpc-common>=1.3.1-1+deb11u1
 RUN apt-get install git -y
 COPY requirements.txt .
 RUN pip install -r requirements.txt
