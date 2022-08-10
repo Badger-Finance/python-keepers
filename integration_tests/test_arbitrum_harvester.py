@@ -96,23 +96,19 @@ def test_harvest(keeper_address, harvester):
 
     for strategy in strategies:
 
-        strategy_name = strategy["name"]
-        strategy_address = strategy["address"]
-        strategy_contract = strategy["contract"]
-
         # Hack: For some reason, harvest call() fails without first calling estimateGas()
-        harvester.estimate_gas_fee(strategy_address)
+        harvester.estimate_gas_fee(strategy.address)
 
-        before_claimable = harvester.estimate_harvest_amount(strategy_contract)
-        print(f"{strategy_name} before_claimable: {before_claimable}")
+        before_claimable = harvester.estimate_harvest_amount(strategy.contract)
+        print(f"{strategy.name} before_claimable: {before_claimable}")
 
         should_harvest = harvester.is_profitable()
-        print(strategy_name, "should_harvest:", should_harvest)
+        print(strategy.name, "should_harvest:", should_harvest)
 
-        harvester.harvest(strategy_contract)
+        harvester.harvest(strategy.contract)
 
-        after_claimable = harvester.estimate_harvest_amount(strategy_contract)
-        print(f"{strategy_name} after_claimable: {after_claimable}")
+        after_claimable = harvester.estimate_harvest_amount(strategy.contract)
+        print(f"{strategy.name} after_claimable: {after_claimable}")
 
         if should_harvest and before_claimable > 0:
             assert after_claimable / before_claimable < 0.01

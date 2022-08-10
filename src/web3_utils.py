@@ -12,7 +12,9 @@ from web3 import exceptions
 
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network, VaultVersion
+from src.data_classes.contract import Contract
 from src.registry_utils import get_production_vaults
+from src.settings.registry_settings import ETH_REGISTRY_SETTINGS
 from src.utils import get_abi
 from src.aws import get_secret
 
@@ -68,31 +70,34 @@ def get_strategy_from_vault(
     return strategy_contract, vault_contract
 
 
-def get_strategies_and_vaults(node: Web3, chain: str) -> Tuple[List[Dict], List[Dict]]:
-    strategies = []
-    vaults = []
+def get_strategies_and_vaults(
+    node: Web3, chain: str
+) -> Tuple[List[Contract], List[Contract]]:
+    strategies: List[Contract] = []
+    vaults: List[Contract] = []
 
     vaults_by_version = get_production_vaults(node, chain)
 
     for version in vaults_by_version.keys():
         for vault_address in vaults_by_version[version].keys():
-            strategy, vault = get_strategy_from_vault(
-                node, chain, vault_address, version=version
-            )
-
-            vault_data = {
-                "address": vault_address,
-                "contract": vault,
-                "name": vaults_by_version[version][vault_address]["name"],
-            }
-            vaults.append(vault_data)
-
-            strategy_data = {
-                "address": strategy.address,
-                "contract": strategy,
-                "name": vaults_by_version[version][vault_address]["name"],
-            }
-            strategies.append(strategy_data)
+            if vault_address not in ETH_REGISTRY_SETTINGS.externally_managed_vaults:
+                strategy, vault = get_strategy_from_vault(
+                    node, chain, vault_address, version=version
+                )
+                vaults.append(
+                    Contract(
+                        name=vaults_by_version[version][vault_address]["name"],
+                        contract=vault,
+                        address=vault_address,
+                    )
+                )
+                strategies.append(
+                    Contract(
+                        name=vaults_by_version[version][vault_address]["name"],
+                        contract=strategy,
+                        address=strategy.address,
+                    )
+                )
 
     return strategies, vaults
 

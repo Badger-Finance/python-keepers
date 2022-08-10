@@ -68,12 +68,10 @@ if __name__ == "__main__":
 
     for strategy in strategies:
         if (
-            strategy["address"]
+            strategy.address
             not in MULTICHAIN_CONFIG[Network.Arbitrum]["harvest"]["invalid_strategies"]
         ):
-            safe_harvest(
-                harvester, strategy["contract"], strategy["address"], strategy["name"]
-            )
+            safe_harvest(harvester, strategy.contract, strategy.address, strategy.name)
 
             # Sleep for a few blocks in between harvests
             time.sleep(30)
