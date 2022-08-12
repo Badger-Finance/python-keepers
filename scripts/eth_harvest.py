@@ -1,7 +1,6 @@
 import logging
 import time
 
-from eth_account.account import Account
 from web3 import contract
 from web3 import Web3
 
@@ -36,7 +35,9 @@ def conditional_harvest(harvester: GeneralHarvester, strategy: Contract) -> str:
     latest_base_fee = get_latest_base_fee(harvester.web3)
     logger.info(f"Checking harvests for {strategy.name} {strategy.address}")
 
-    if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
+    if harvester.is_time_to_harvest(
+        strategy.contract, HOURS_96
+    ) and latest_base_fee < int(80e9):
         logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy.name}")
         res = safe_harvest(harvester, strategy)
         logger.info(res)
