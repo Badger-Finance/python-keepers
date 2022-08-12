@@ -7,7 +7,10 @@ from web3 import Web3
 from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import ETH_KEEPER_ACL
 from config.constants import ETH_SLP_BADGER_WBTC_STRATEGY
+from config.constants import GWEI_150
+from config.constants import GWEI_80
 from config.constants import MULTICHAIN_CONFIG
+from config.constants import SECONDS_PER_BLOCK
 from config.enums import Network
 from src.aws import get_secret
 from src.data_classes.contract import Contract
@@ -28,6 +31,8 @@ HOURS_72 = hours(72)
 HOURS_96 = hours(96)
 HOURS_120 = hours(120)
 
+BLOCKS_TO_SLEEP = 2
+
 rewards_manager_strategies = {ETH_SLP_BADGER_WBTC_STRATEGY}
 
 
@@ -37,12 +42,12 @@ def conditional_harvest(harvester: GeneralHarvester, strategy: Contract) -> str:
 
     if harvester.is_time_to_harvest(
         strategy.contract, HOURS_96
-    ) and latest_base_fee < int(80e9):
+    ) and latest_base_fee < int(GWEI_80):
         logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy.name}")
         res = safe_harvest(harvester, strategy)
         logger.info(res)
     elif harvester.is_time_to_harvest(strategy.contract) and latest_base_fee < int(
-        150e9
+        GWEI_150
     ):
         logger.info(
             f"Been longer than 120 hours harvest no matter what for {strategy.name}"
@@ -57,14 +62,16 @@ def conditional_harvest_rewards_manager(
     latest_base_fee = get_latest_base_fee(harvester.web3)
 
     # regular thresholds for rest of vaults
-    if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(80e9):
+    if harvester.is_time_to_harvest(strategy, HOURS_96) and latest_base_fee < int(
+        GWEI_80
+    ):
         logger.info(f"Been longer than 96 hours and base fee < 80 for {strategy_name}")
         logger.info(f"+-----Harvesting {strategy_name} {strategy.address}-----+")
         try:
             harvester.harvest_rewards_manager(strategy)
         except Exception as e:
             logger.error(f"Error running {strategy_name} harvest: {e}")
-    elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(150e9):
+    elif harvester.is_time_to_harvest(strategy) and latest_base_fee < int(GWEI_150):
         logger.info(
             f"Been longer than 120 hours harvest no matter what for {strategy_name}"
         )
@@ -120,7 +127,7 @@ if __name__ == "__main__":
             conditional_harvest(harvester, strategy)
 
             # Sleep for 2 blocks in between harvests
-            time.sleep(30)
+            time.sleep(BLOCKS_TO_SLEEP * SECONDS_PER_BLOCK)
 
     # Harvest rewards manager strategies
     rewards_manager = harvester.web3.eth.contract(
@@ -146,4 +153,4 @@ if __name__ == "__main__":
         conditional_harvest_rewards_manager(harvester, strategy_name, strategy)
 
         # Sleep for 2 blocks in between harvests
-        time.sleep(30)
+        time.sleep(BLOCKS_TO_SLEEP * SECONDS_PER_BLOCK)
