@@ -18,8 +18,10 @@ from integration_tests.utils import test_key
 from src.general_harvester import GeneralHarvester
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
+from src.settings.harvest_settings import ETH_HARVEST_SETTINGS
 from src.utils import get_abi
 from src.web3_utils import get_last_harvest_times
+from src.web3_utils import get_strategies_and_vaults
 
 ETH_USD_CHAINLINK = web3.toChecksumAddress(
     MULTICHAIN_CONFIG[Network.Ethereum]["gas_oracle"]
@@ -30,8 +32,8 @@ REWARDS_MANAGER = web3.toChecksumAddress(
 )
 
 
-def mock_get_last_harvest_times(web3, keeper_acl, start_block):
-    return get_last_harvest_times(web3, keeper_acl, start_block)
+def mock_get_last_harvest_times(web3, keeper_acl, start_block, chain):
+    return {}
 
 
 def mock_send_discord(
@@ -181,28 +183,31 @@ def test_harvest(keeper_address, harvester, strategy):
     """
     accounts[0].transfer(keeper_address, "10 ether")
 
-    strategy_name = strategy.functions.getName().call()
+    strategies, vaults = get_strategies_and_vaults(web3, Network.Ethereum)
 
-    # Hack: For some reason, harvest call() fails without first calling estimateGas()
-    harvester.estimate_gas_fee(strategy.address)
+    to_harvest = {
+        vault.address: strategy for strategy, vault in zip(strategies, vaults)
+    }
 
-    before_claimable = harvester.estimate_harvest_amount(strategy)
-    print(f"{strategy_name} before_claimable: {before_claimable}")
+    for vault_address in to_harvest.keys():
+        if (
+            vault_address not in ETH_HARVEST_SETTINGS.restitution_vaults
+            and vault_address not in ETH_HARVEST_SETTINGS.rewards_manager_vaults
+        ):
+            strategy: Contract = to_harvest[vault_address]
 
-    # current_price_eth = harvester.get_current_rewards_price()
-    # gas_fee = harvester.estimate_gas_fee(strategy.address)
+            before_claimable = harvester.estimate_harvest_amount(strategy.contract)
+            harvester.logger.info(
+                f"{strategy.name} before_claimable: {before_claimable}"
+            )
 
-    should_harvest = harvester.is_profitable()
-    print(strategy_name, "should_harvest:", should_harvest)
+            should_harvest = harvester.is_profitable()
+            harvester.logger.info(f"{strategy.name} should_harvest: {should_harvest}")
 
-    harvester.harvest(strategy)
+            harvester.harvest(strategy.contract)
 
-    after_claimable = harvester.estimate_harvest_amount(strategy)
-    print(f"{strategy_name} after_claimable: {after_claimable}")
-
-    assert (should_harvest and before_claimable != 0 and after_claimable == 0) or (
-        before_claimable == after_claimable and not should_harvest
-    )
+            after_claimable = harvester.estimate_harvest_amount(strategy.contract)
+            harvester.logger.info(f"{strategy.name} after_claimable: {after_claimable}")
 
 
 def test_btc_profit_est(harvester, btc_strategy):
