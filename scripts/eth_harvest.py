@@ -86,7 +86,7 @@ def safe_harvest(harvester: GeneralHarvester, strategy: Contract) -> str:
     logger.info(f"+-----Harvesting {strategy.name} {strategy.address}-----+")
 
     try:
-        harvester.harvest(strategy.contract)
+        harvester.harvest(strategy.contract, strategy_name=strategy.name)
         return "Success!"
     except Exception as e:
         logger.error(f"Error running {strategy.name} harvest: {e}")

@@ -8,7 +8,7 @@ spec:
   # cron to run every 30 min every day "*/30 * * * *"
   schedule: "7-59/10 * * * *"
   startingDeadlineSeconds: 300
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
