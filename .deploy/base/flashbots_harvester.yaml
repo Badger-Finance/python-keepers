@@ -6,7 +6,6 @@ metadata:
     app: flashbots-harvester-keeper
 spec:
   schedule: "*/30 * * * *"
-  # schedule: "55 19 * * *"
   startingDeadlineSeconds: 300
   suspend: false
   jobTemplate:
@@ -22,4 +21,33 @@ spec:
             env:
               - name: LOG_LEVEL
                 value: "info"
+          ## Running the Agent as a side-car
+          - image: datadog/agent
+            name: datadog-agent
+            env:
+            - name: DD_API_KEY
+              valueFrom:
+                  secretKeyRef:
+                    name: datadog-api-key
+                    key: api_key
+              ## Set DD_SITE to "datadoghq.eu" to send your
+              ## Agent data to the Datadog EU site
+            - name: DD_SITE
+              value: "datadoghq.eu"
+            - name: DD_EKS_FARGATE
+              value: "true"
+            - name: DD_CLUSTER_NAME
+              value: "badger-prod"
+            - name: DD_KUBERNETES_KUBELET_NODENAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "200m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "200m"
           restartPolicy: OnFailure
