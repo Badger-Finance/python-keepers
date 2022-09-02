@@ -13,11 +13,12 @@ spec:
       template:
         spec:
           serviceAccountName: flashbots-harvester-keeper
+          shareProcessNamespace: true
           containers:
           - name: flashbots-harvester-keeper
             image: IMAGE_NAME
             imagePullPolicy: IfNotPresent
-            command: ["python", "-m", "scripts.eth_harvest"]
+            command: ["sh", "-c", "python -m scripts.eth_harvest && sh kill_dd_sidecar.sh"]
             env:
               - name: LOG_LEVEL
                 value: "info"
