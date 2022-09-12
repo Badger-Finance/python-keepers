@@ -39,13 +39,8 @@ def get_gas_price_of_tx(
     total_gas_used = Decimal(tx_receipt.get("gasUsed", 0))
     logger.info(f"gas used: {total_gas_used}")
 
-    if chain == Network.Arbitrum:
-        gas_prices = tx_receipt.get("feeStats", {}).get("paid", {})
-        gas_cost_base = Decimal(sum([int(x, 16) for x in gas_prices.values()]) / 1e18)
-    else:
-        # ETH/Poly
-        gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 1e18)
-        gas_cost_base = total_gas_used * gas_price_base
+    gas_price_base = Decimal(tx_receipt.get("effectiveGasPrice", 0) / 1e18)
+    gas_cost_base = total_gas_used * gas_price_base
 
     gas_usd = Decimal(
         gas_oracle.functions.latestAnswer().call()
