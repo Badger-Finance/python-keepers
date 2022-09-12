@@ -22,6 +22,12 @@ RUN apt-get install libtirpc-common>=1.3.1-1+deb11u1 -y
 RUN apt-get install libtirpc-dev>=1.3.1-1+deb11u1 -y
 RUN apt-get install libtirpc3>=1.3.1-1+deb11u1 -y
 RUN apt-get install libxslt1.1>=1.1.34-4+deb11u1 -y
+RUN apt-get install libc-bin>=2.31-13+deb11u4 -y
+RUN apt-get install libgdk-pixbuf2.0-common>=2.42.2+dfsg-1+deb11u1 -y
+RUN apt-get install libpcre2-16-0>=10.36-2+deb11u1 -y
+RUN apt-get install libpcre2-32-0>=10.36-2+deb11u1 -y
+RUN apt-get install libpcre2-8-0>=10.36-2+deb11u1 -y
+RUN apt-get install libpcre2-posix2>=10.36-2+deb11u1 -y
 RUN apt-get install git -y
 COPY requirements.txt .
 RUN pip install -r requirements.txt
