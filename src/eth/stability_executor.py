@@ -1,4 +1,3 @@
-import logging
 import os
 from decimal import Decimal
 
@@ -7,15 +6,14 @@ from web3 import Web3
 from web3 import contract
 
 from config.enums import Network
+from src.discord_utils import send_error_to_discord
+from src.discord_utils import send_success_to_discord
+from src.json_logger import logger
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
-from src.web3_utils import confirm_transaction
 from src.utils import get_abi
-from src.discord_utils import send_error_to_discord
-from src.discord_utils import send_success_to_discord
-
-logging.basicConfig(level=logging.INFO)
+from src.web3_utils import confirm_transaction
 
 GAS_LIMIT = 1000000
 MAX_GAS_PRICE = int(200e9)  # 200 gwei
@@ -33,7 +31,6 @@ class StabilityExecutor:
         base_oracle_address: str = os.getenv("ETH_USD_CHAINLINK"),
         use_flashbots=False,
     ):
-        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key
@@ -67,12 +64,12 @@ class StabilityExecutor:
             raise ValueError(f"Keeper is not whitelisted for {strategy_name}")
 
         amt_to_trade = strategy.functions.tradeAmountLeft().call()
-        self.logger.info(f"amt left to trade: {amt_to_trade}")
+        logger.info(f"amt left to trade: {amt_to_trade}")
 
         if amt_to_trade > 0:
 
             gas_fee = self.estimate_gas_fee(strategy)
-            self.logger.info(f"estimated gas cost: {gas_fee}")
+            logger.info(f"estimated gas cost: {gas_fee}")
 
             self.__process_batch_execute(
                 strategy=strategy,
@@ -133,7 +130,7 @@ class StabilityExecutor:
                         message=msg,
                     )
         except Exception as e:
-            self.logger.error(f"Error processing execute trade batch tx: {e}")
+            logger.error(f"Error processing execute trade batch tx: {e}")
             send_error_to_discord(strategy_name, "Execute Trade Batch", error=e)
 
     def __send_batch_execute_tx(self, strategy: contract) -> HexBytes:
@@ -171,10 +168,10 @@ class StabilityExecutor:
                         bundle, target_block_number=block_number + i
                     )
                 max_target_block = block_number + NUM_FLASHBOTS_BUNDLES
-                self.logger.info(f"Bundle broadcasted at {max_target_block}")
+                logger.info(f"Bundle broadcasted at {max_target_block}")
 
         except ValueError as e:
-            self.logger.error(f"Error in sending execute trade batch tx: {e}")
+            logger.error(f"Error in sending execute trade batch tx: {e}")
         finally:
             return tx_hash, max_target_block
 
@@ -189,7 +186,7 @@ class StabilityExecutor:
         """
         # Use x times recommended priority fee as miner tip
         priority_fee = get_priority_fee(self.web3)
-        self.logger.info(f"max_priority_fee: {priority_fee}")
+        logger.info(f"max_priority_fee: {priority_fee}")
         options = {
             "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
             "from": self.keeper_address,
@@ -206,6 +203,6 @@ class StabilityExecutor:
         estimated_gas = strategy.functions.executeTradeBatch().estimateGas(
             {"from": self.keeper_address}
         )
-        self.logger.info(f"estimated gas fee: {estimated_gas}")
+        logger.info(f"estimated gas fee: {estimated_gas}")
 
         return Decimal(current_gas_price * estimated_gas)

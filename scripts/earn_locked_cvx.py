@@ -1,5 +1,3 @@
-import logging
-
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_BVECVX_VAULT
 from config.constants import ETH_GRAVIAURA_STRATEGY
@@ -8,11 +6,9 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.aws import get_secret
 from src.earner import Earner
+from src.json_logger import logger
 from src.utils import get_abi
 from src.utils import get_healthy_node
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":

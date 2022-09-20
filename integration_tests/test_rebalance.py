@@ -1,6 +1,5 @@
 from decimal import Decimal
 from hexbytes import HexBytes
-import logging
 import pytest
 from brownie import accounts, Contract, web3
 from web3 import contract
@@ -10,13 +9,11 @@ from config.constants import (
     ETH_KEEPER_ACL,
     ETH_STABILIZE_STRATEGY,
 )
+from src.json_logger import logger
 from src.utils import get_abi
 from integration_tests.utils import test_address, test_key
 from src.eth.rebalancer import Rebalancer
 from config.enums import Network
-
-
-logger = logging.getLogger(__name__)
 
 
 def mock_send_discord(

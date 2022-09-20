@@ -1,4 +1,3 @@
-import logging
 import time
 
 from config.constants import ARB_SWAPR_WBTC_WETH_STRATEGY
@@ -6,11 +5,9 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
+from src.json_logger import logger
 from src.utils import get_abi
 from src.utils import get_healthy_node
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 strategies = {ARB_SWAPR_WBTC_WETH_STRATEGY}
 

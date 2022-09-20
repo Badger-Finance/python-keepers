@@ -1,17 +1,15 @@
-import logging
-
 from web3 import Web3
 
 from config.constants import FTM_OXD_BVEOXD_VAULT
-from config.constants import FTM_VAULTS_1, FTM_VAULTS_15
+from config.constants import FTM_VAULTS_1
+from config.constants import FTM_VAULTS_15
 from config.constants import MULTICHAIN_CONFIG
-from config.enums import Network, VaultVersion
-from src.earner import Earner
+from config.enums import Network
+from config.enums import VaultVersion
 from src.aws import get_secret
+from src.earner import Earner
+from src.json_logger import logger
 from src.web3_utils import get_strategy_from_vault
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 INVALID_VAULTS = [FTM_OXD_BVEOXD_VAULT]
 

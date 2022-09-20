@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from typing import Optional
 from typing import Tuple
@@ -11,8 +10,7 @@ from config.constants import ABI_DIRS
 from config.constants import NODE_URL_SECRET_NAMES
 from config.enums import Network
 from src.aws import get_secret
-
-logger = logging.getLogger(__name__)
+from src.json_logger import logger
 
 
 class NoHealthyNode(Exception):

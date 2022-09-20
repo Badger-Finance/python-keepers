@@ -1,15 +1,11 @@
-import logging
-
 from web3 import Web3, contract
 
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.earner import Earner
 from src.aws import get_secret
+from src.json_logger import logger
 from src.web3_utils import get_strategies_and_vaults
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 def safe_earn(earner: Earner, vault: contract, strategy: contract, strategy_name: str):
