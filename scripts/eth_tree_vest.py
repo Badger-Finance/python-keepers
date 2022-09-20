@@ -1,18 +1,12 @@
-import logging
-
-from config.constants import ETH_ETH_USD_CHAINLINK, ETH_REMDRIPPER_Q2_22
+from config.constants import ETH_ETH_USD_CHAINLINK
+from config.constants import ETH_REMDRIPPER_Q2_22
 from config.enums import Network
 from src.aws import get_secret
+from src.json_logger import logger
 from src.utils import get_healthy_node
 from src.vester import Vester
 
-logging.basicConfig(level=logging.INFO)
-
-
 if __name__ == "__main__":
-
-    logger = logging.getLogger(__name__)
-
     chain = Network.Ethereum
 
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")

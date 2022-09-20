@@ -1,8 +1,7 @@
-import logging
 import time
 
-from web3 import contract
 from web3 import Web3
+from web3 import contract
 
 from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import ETH_KEEPER_ACL
@@ -15,6 +14,7 @@ from config.enums import Network
 from src.aws import get_secret
 from src.data_classes.contract import Contract
 from src.general_harvester import GeneralHarvester
+from src.json_logger import logger
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
 from src.settings.harvest_settings import ETH_HARVEST_SETTINGS
@@ -22,9 +22,6 @@ from src.tx_utils import get_latest_base_fee
 from src.utils import get_abi
 from src.web3_utils import get_last_harvest_times
 from src.web3_utils import get_strategies_and_vaults
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 HOURS_24 = hours(24)
 HOURS_72 = hours(72)

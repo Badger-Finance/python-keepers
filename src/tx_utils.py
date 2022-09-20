@@ -1,19 +1,17 @@
 # TODO: Move this module as a shared functionality to badger utils lib
-import logging
-import requests
 import traceback
-
 from decimal import Decimal
-from hexbytes import HexBytes
 from typing import Dict
+
+import requests
+from hexbytes import HexBytes
+from web3 import Web3
 from web3 import contract
 from web3 import exceptions
-from web3 import Web3
 
 from config.constants import GAS_LIMITS
 from config.enums import Network
-
-logger = logging.getLogger(__name__)
+from src.json_logger import logger
 
 
 def get_gas_price_of_tx(

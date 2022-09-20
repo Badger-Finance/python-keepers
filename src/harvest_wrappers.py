@@ -1,14 +1,12 @@
-import logging
-
 from web3.contract import Contract
 
 from src.general_harvester import GeneralHarvester
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from src.json_logger import logger
 
 
 # TODO: Reuse this in all harvest scripts
+
+
 def safe_harvest(harvester: GeneralHarvester, strategy: Contract) -> str:
     try:
         strategy_name = strategy.functions.getName().call()

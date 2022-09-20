@@ -1,4 +1,3 @@
-import logging
 import time
 
 from eth_account.account import Account
@@ -9,11 +8,9 @@ from config.constants import ETH_KEEPER_ACL
 from config.enums import Network
 from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
+from src.json_logger import logger
 from src.utils import get_abi
 from src.utils import get_healthy_node
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 strategies = {}
 
