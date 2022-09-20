@@ -1,4 +1,3 @@
-import logging
 import os
 import traceback
 from typing import Tuple
@@ -21,6 +20,7 @@ from src.discord_utils import get_hash_from_failed_tx_error
 from src.discord_utils import send_critical_error_to_discord
 from src.discord_utils import send_error_to_discord
 from src.discord_utils import send_success_to_discord
+from src.json_logger import logger
 from src.token_utils import get_token_price
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
@@ -28,8 +28,6 @@ from src.tx_utils import get_tx_options
 from src.tx_utils import sign_and_send_tx
 from src.utils import get_abi
 from src.web3_utils import confirm_transaction
-
-logging.basicConfig(level=logging.INFO)
 
 GAS_LIMITS = {
     Network.Ethereum: 1_500_000,
@@ -51,7 +49,6 @@ class Earner:
         web3: Web3 = None,
         discord_url: str = None,
     ):
-        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key
@@ -77,7 +74,6 @@ class Earner:
 
         # Pre safety checks
         swant_address = strategy.functions.want().call()
-        self.logger.info(f"{want.address} == {swant_address}")
         assert want.address == swant_address
 
         vault_balance, strategy_balance = self.get_balances(vault, strategy, want)
@@ -111,7 +107,7 @@ class Earner:
         else:
             price_per_want = get_token_price(want.address, currency, self.chain)
 
-        self.logger.info(f"price per want: {price_per_want} {currency}")
+        logger.info(f"price per want: {price_per_want} {currency}")
 
         want_decimals = want.functions.decimals().call()
 
@@ -127,34 +123,35 @@ class Earner:
         self, override_threshold: int, vault_balance: int, strategy_balance: int
     ) -> bool:
         # Always allow earn on first run
-        self.logger.info(
+        logger.info(
             {"strategy_balance": strategy_balance, "vault_balance": vault_balance}
         )
         if strategy_balance == 0:
             if vault_balance == 0:
-                self.logger.info("No strategy balance or vault balance")
+                logger.info("No strategy balance or vault balance")
                 return False
             else:
-                self.logger.info("No strategy balance, earn")
+                logger.info("No strategy balance, earn")
                 return True
         # Earn if deposits have accumulated over a static threshold
         if vault_balance >= override_threshold:
-            self.logger.info(
+            logger.info(
                 f"Vault balance of {vault_balance} "
                 f"over earn threshold override of {override_threshold}"
             )
             return True
         # Earn if deposits have accumulated over % threshold
         if vault_balance / strategy_balance > EARN_PCT_THRESHOLD:
-            self.logger.info(
+            logger.info(
                 f"Vault balance of {vault_balance} and strategy balance "
                 f"of {strategy_balance} over standard % threshold of {EARN_PCT_THRESHOLD}"
             )
 
             return True
         else:
-            self.logger.info(
-                {
+            logger.info(
+                "Balances",
+                extra={
                     "vault_balance": vault_balance,
                     "strategy_balance": strategy_balance,
                     "override_threshold": override_threshold,
@@ -198,7 +195,7 @@ class Earner:
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
-                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Earn {sett_name}",
                     tx_hash=tx_hash,
@@ -214,7 +211,7 @@ class Earner:
                     url=self.discord_url,
                 )
         except Exception as e:
-            self.logger.error(f"Error processing earn tx: {e}")
+            logger.error(f"Error processing earn tx: {e}")
             if vault and vault.address in CRITICAL_VAULTS.keys():
                 send_critical_error_to_discord(
                     sett_name,
@@ -251,10 +248,10 @@ class Earner:
                 tx, private_key=self.keeper_key
             )
             tx_hash = signed_tx.hash
-            self.logger.info(f"attempted tx_hash: {tx_hash}")
+            logger.info(f"attempted tx_hash: {tx_hash}")
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending earn tx: {traceback.format_exc()}")
+            logger.error(f"Error in sending earn tx: {traceback.format_exc()}")
             tx_hash = get_hash_from_failed_tx_error(
                 e, "Earn", chain=self.chain, keeper_address=self.keeper_address
             )
@@ -297,7 +294,7 @@ class Earner:
             tx = voter.functions.vote().buildTransaction(options)
             tx_hash = sign_and_send_tx(self.web3, tx, self.keeper_key)
         except Exception:
-            self.logger.error(f"Error in sending vote tx: {traceback.format_exc()}")
+            logger.error(f"Error in sending vote tx: {traceback.format_exc()}")
             tx_hash = HexBytes(0)
 
         try:
@@ -306,7 +303,7 @@ class Earner:
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
-                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type="Vote bveOXD",
                     tx_hash=tx_hash,
@@ -322,7 +319,7 @@ class Earner:
                     url=self.discord_url,
                 )
         except Exception as e:
-            self.logger.error(f"Error processing earn tx: {e}")
+            logger.error(f"Error processing earn tx: {e}")
             send_error_to_discord(
                 "bveOXD",
                 "Vote bveOXD",
@@ -340,7 +337,7 @@ class Earner:
         should_unlock = unlocker.functions.checkUpkeep(HexBytes(0)).call()[
             0
         ]  # returns Tuple[bool, calldata], get bool
-        self.logger.info(f"should_unlock: {should_unlock}")
+        logger.info(f"should_unlock: {should_unlock}")
         if should_unlock:
             try:
                 options = get_tx_options(self.web3, self.chain, self.keeper_address)
@@ -349,7 +346,7 @@ class Earner:
                 )
                 tx_hash = sign_and_send_tx(self.web3, tx, self.keeper_key)
             except Exception:
-                self.logger.error(f"Error in sending vote tx: {traceback.format_exc()}")
+                logger.error(f"Error in sending vote tx: {traceback.format_exc()}")
                 tx_hash = HexBytes(0)
 
             try:
@@ -358,7 +355,7 @@ class Earner:
                     gas_price_of_tx = get_gas_price_of_tx(
                         self.web3, self.base_usd_oracle, tx_hash, self.chain
                     )
-                    self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                    logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                     send_success_to_discord(
                         tx_type="Unlock bveCVX",
                         tx_hash=tx_hash,
@@ -374,7 +371,7 @@ class Earner:
                         url=self.discord_url,
                     )
             except Exception as e:
-                self.logger.error(f"Error processing earn tx: {e}")
+                logger.error(f"Error processing earn tx: {e}")
                 send_critical_error_to_discord(
                     "bveCVX",
                     "Unlock bveCVX",

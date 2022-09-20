@@ -1,24 +1,23 @@
-import logging
-import requests
-
-from hexbytes import HexBytes
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
+
+import requests
+from hexbytes import HexBytes
 from web3 import Web3
 from web3 import contract
 from web3 import exceptions
 
 from config.constants import MULTICHAIN_CONFIG
-from config.enums import Network, VaultVersion
+from config.enums import Network
+from config.enums import VaultVersion
+from src.aws import get_secret
 from src.data_classes.contract import Contract
+from src.json_logger import logger
 from src.registry_utils import get_production_vaults
 from src.settings.registry_settings import ETH_REGISTRY_SETTINGS
 from src.utils import get_abi
-from src.aws import get_secret
-
-logger = logging.getLogger(__name__)
 
 
 def get_strategies_from_registry(node: Web3, chain: str) -> list:

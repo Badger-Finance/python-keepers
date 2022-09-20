@@ -1,4 +1,3 @@
-import logging
 import os
 from decimal import Decimal
 from time import sleep
@@ -13,21 +12,20 @@ from config.constants import BASE_CURRENCIES
 from config.constants import GAS_LIMITS
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
+from src.discord_utils import get_hash_from_failed_tx_error
+from src.discord_utils import send_error_to_discord
+from src.discord_utils import send_success_to_discord
 from src.harvester import IHarvester
+from src.json_logger import logger
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
+from src.token_utils import get_token_price
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
-from src.web3_utils import confirm_transaction
 from src.utils import get_abi
-from src.discord_utils import get_hash_from_failed_tx_error
+from src.web3_utils import confirm_transaction
 from src.web3_utils import get_last_harvest_times
-from src.token_utils import get_token_price
-from src.discord_utils import send_error_to_discord
-from src.discord_utils import send_success_to_discord
-
-logging.basicConfig(level=logging.INFO)
 
 MAX_TIME_BETWEEN_HARVESTS = hours(120)
 HARVEST_THRESHOLD = 0.0005  # min ratio of want to total vault AUM required to harvest
@@ -47,7 +45,6 @@ class GeneralHarvester(IHarvester):
         use_flashbots: bool = False,
         discord_url: str = None,
     ):
-        self.logger = logging.getLogger(__name__)
         self.chain = chain
         self.web3 = web3
         self.keeper_key = keeper_key
@@ -99,7 +96,7 @@ class GeneralHarvester(IHarvester):
         try:
             last_harvest = self.last_harvest_times[strategy.address]
             current_time = self.web3.eth.get_block("latest")["timestamp"]
-            self.logger.info(
+            logger.info(
                 f"Time since last harvest: {(current_time - last_harvest) / 3600}"
             )
 
@@ -136,24 +133,24 @@ class GeneralHarvester(IHarvester):
             abi=get_abi(self.chain, "erc20"),
         )
         vault_balance = want.functions.balanceOf(strategy.address).call()
-        self.logger.info(f"vault balance: {vault_balance}")
+        logger.info(f"vault balance: {vault_balance}")
 
         want_to_harvest = (
             self.estimate_harvest_amount(strategy)
             / 10 ** want.functions.decimals().call()
         )
-        self.logger.info(f"estimated want change: {want_to_harvest}")
+        logger.info(f"estimated want change: {want_to_harvest}")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
-        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
+        # logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
         gas_fee = self.estimate_gas_fee(strategy.address)
-        self.logger.info(f"estimated gas cost: {gas_fee}")
+        logger.info(f"estimated gas cost: {gas_fee}")
 
         # for now we'll just harvest every hour
         should_harvest = self.is_profitable()
-        self.logger.info(f"Should we harvest: {should_harvest}")
+        logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
             self.__process_harvest(
@@ -179,18 +176,18 @@ class GeneralHarvester(IHarvester):
             abi=get_abi(self.chain, "erc20"),
         )
         vault_balance = want.functions.balanceOf(strategy.address).call()
-        self.logger.info(f"vault balance: {vault_balance}")
+        logger.info(f"vault balance: {vault_balance}")
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
-        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
+        # logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
         gas_fee = self.estimate_gas_fee(strategy.address, returns=False)
-        self.logger.info(f"estimated gas cost: {gas_fee}")
+        logger.info(f"estimated gas cost: {gas_fee}")
 
         # for now we'll just harvest every hour
         should_harvest = self.is_profitable()
-        self.logger.info(f"Should we harvest: {should_harvest}")
+        logger.info(f"Should we harvest: {should_harvest}")
 
         if should_harvest:
             self.__process_harvest(
@@ -220,10 +217,10 @@ class GeneralHarvester(IHarvester):
             abi=get_abi(self.chain, "erc20"),
         )
         vault_balance = want.functions.balanceOf(strategy.address).call()
-        self.logger.info(f"vault balance: {vault_balance}")
+        logger.info(f"vault balance: {vault_balance}")
 
         gas_fee = self.estimate_gas_fee(strategy.address)
-        self.logger.info(f"estimated gas cost: {gas_fee}")
+        logger.info(f"estimated gas cost: {gas_fee}")
 
         self.__process_harvest(
             strategy=strategy,
@@ -239,10 +236,10 @@ class GeneralHarvester(IHarvester):
             raise ValueError("Keeper ACL is not whitelisted for calling harvestMta")
 
         gas_fee = self.estimate_gas_fee(voter_proxy.address, function="harvestMta")
-        self.logger.info(f"estimated gas cost: {gas_fee}")
+        logger.info(f"estimated gas cost: {gas_fee}")
 
         should_harvest_mta = self.is_profitable()
-        self.logger.info(f"Should we call harvestMta: {should_harvest_mta}")
+        logger.info(f"Should we call harvestMta: {should_harvest_mta}")
 
         if should_harvest_mta:
             self.__process_harvest_mta(voter_proxy)
@@ -255,10 +252,10 @@ class GeneralHarvester(IHarvester):
 
         # TODO: figure out how to handle profit estimation
         # current_price_eth = self.get_current_rewards_price()
-        # self.logger.info(f"current rewards price per token (ETH): {current_price_eth}")
+        # logger.info(f"current rewards price per token (ETH): {current_price_eth}")
 
         gas_fee = self.estimate_gas_fee(strategy.address, function="tend")
-        self.logger.info(f"estimated gas cost: {gas_fee}")
+        logger.info(f"estimated gas cost: {gas_fee}")
 
         self.__process_tend(
             strategy=strategy,
@@ -287,8 +284,8 @@ class GeneralHarvester(IHarvester):
         else:
             price_per_want = get_token_price(want.address, currency, self.chain)
 
-        self.logger.info(f"price per want: {price_per_want} {currency}")
-        self.logger.info(f"want gained: {want_gained}")
+        logger.info(f"price per want: {price_per_want} {currency}")
+        logger.info(f"want gained: {want_gained}")
         if type(want_gained) is list:
             want_gained = 0
         return price_per_want * want_gained
@@ -326,7 +323,7 @@ class GeneralHarvester(IHarvester):
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
-                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
+                logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Tend {strategy_name}",
                     tx_hash=tx_hash,
@@ -342,7 +339,7 @@ class GeneralHarvester(IHarvester):
                     url=self.discord_url,
                 )
         except Exception as e:
-            self.logger.error(f"Error processing tend tx: {e}")
+            logger.error(f"Error processing tend tx: {e}")
             send_error_to_discord(
                 strategy_name,
                 "Tend",
@@ -380,7 +377,7 @@ class GeneralHarvester(IHarvester):
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
-                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
+                logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Harvest {strategy_name}",
                     tx_hash=tx_hash,
@@ -408,7 +405,7 @@ class GeneralHarvester(IHarvester):
                         keeper_address=self.keeper_address,
                     )
         except Exception as e:
-            self.logger.error(f"Error processing harvest tx: {e}")
+            logger.error(f"Error processing harvest tx: {e}")
             send_error_to_discord(
                 strategy_name,
                 "Harvest",
@@ -436,7 +433,7 @@ class GeneralHarvester(IHarvester):
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.base_usd_oracle, tx_hash, self.chain
                 )
-                self.logger.info(f"got gas price of tx: {gas_price_of_tx}")
+                logger.info(f"got gas price of tx: {gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type="Harvest MTA",
                     tx_hash=tx_hash,
@@ -452,7 +449,7 @@ class GeneralHarvester(IHarvester):
                     url=self.discord_url,
                 )
         except Exception as e:
-            self.logger.error(f"Error processing harvestMta tx: {e}")
+            logger.error(f"Error processing harvestMta tx: {e}")
             send_error_to_discord(
                 "",
                 "Harvest MTA",
@@ -496,10 +493,10 @@ class GeneralHarvester(IHarvester):
                         bundle, target_block_number=block_number + i
                     )
                 max_target_block = block_number + NUM_FLASHBOTS_BUNDLES
-                self.logger.info(f"Bundle broadcasted at {max_target_block}")
+                logger.info(f"Bundle broadcasted at {max_target_block}")
 
         except ValueError as e:
-            self.logger.error(f"Error in sending harvest tx: {e}")
+            logger.error(f"Error in sending harvest tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
                 e, "Harvest", chain=self.chain, keeper_address=self.keeper_address
             )
@@ -529,7 +526,7 @@ class GeneralHarvester(IHarvester):
 
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending tend tx: {e}")
+            logger.error(f"Error in sending tend tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
                 e, "Tend", chain=self.chain, keeper_address=self.keeper_address
             )
@@ -559,7 +556,7 @@ class GeneralHarvester(IHarvester):
 
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending harvestMta tx: {e}")
+            logger.error(f"Error in sending harvestMta tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
                 e, "Harvest MTA", chain=self.chain, keeper_address=self.keeper_address
             )
@@ -592,15 +589,15 @@ class GeneralHarvester(IHarvester):
             options["gasPrice"] = self.__get_effective_gas_price()
 
         if function == "harvest":
-            self.logger.info(
+            logger.info(
                 f"estimated gas fee: {self.__estimate_harvest_gas(address, returns)}"
             )
             return self.__build_harvest_transaction(address, returns, options)
         elif function == "tend":
-            self.logger.info(f"estimated gas fee: {self.__estimate_tend_gas(address)}")
+            logger.info(f"estimated gas fee: {self.__estimate_tend_gas(address)}")
             return self.__build_tend_transaction(address, options)
         elif function == "harvestMta":
-            self.logger.info(
+            logger.info(
                 f"estimated gas fee: {self.__estimate_harvest_mta_gas(address)}"
             )
             return self.__build_harvest_mta_transaction(address, options)

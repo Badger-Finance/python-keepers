@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import time
 
@@ -13,14 +12,15 @@ from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import SUSHI_DIGG_WBTC
 from config.constants import UNIV2_DIGG_WBTC
 from config.enums import Network
+from src.discord_utils import get_hash_from_failed_tx_error
+from src.discord_utils import send_rebase_error_to_discord
+from src.discord_utils import send_rebase_to_discord
+from src.json_logger import logger
+from src.misc_utils import hours
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
 from src.web3_utils import confirm_transaction
-from src.discord_utils import get_hash_from_failed_tx_error
-from src.misc_utils import hours
-from src.discord_utils import send_rebase_error_to_discord
-from src.discord_utils import send_rebase_to_discord
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
 
@@ -32,7 +32,6 @@ class Rebaser:
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
     ):
-        self.logger = logging.getLogger(__name__)
         self.web3 = web3
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
@@ -76,8 +75,9 @@ class Rebaser:
         time_since_last_rebase = now - last_rebase_time
         min_time_passed = (last_rebase_time + min_rebase_time) < now
 
-        self.logger.info(
-            {
+        logger.info(
+            "Rebasing",
+            extra={
                 "last_rebase_time": last_rebase_time,
                 "in_rebase_window": in_rebase_window,
                 "now": now,
@@ -89,17 +89,17 @@ class Rebaser:
         # Rebase if sufficient time has passed since last rebase and we are in the window.
         # Give adequate time between TX attempts
         if time_since_last_rebase > hours(2) and in_rebase_window and min_time_passed:
-            self.logger.info("📈 Rebase! 📉")
+            logger.info("📈 Rebase! 📉")
 
             supply_before = self.digg_token.functions.totalSupply().call()
             spf_before = self.digg_token.functions._sharesPerFragment().call()
             sushi_reserves = self.sushi_pair.functions.getReserves().call()
             uni_reserves = self.uni_pair.functions.getReserves().call()
 
-            self.logger.info(f"spf before: {spf_before}")
-            self.logger.info(f"supply before: {supply_before}")
-            self.logger.info(f"sushi pair before: {sushi_reserves}")
-            self.logger.info(f"uni pair before: {uni_reserves}")
+            logger.info(f"spf before: {spf_before}")
+            logger.info(f"supply before: {supply_before}")
+            logger.info(f"sushi pair before: {sushi_reserves}")
+            logger.info(f"uni pair before: {uni_reserves}")
 
             self.__process_rebase()
 
@@ -108,13 +108,13 @@ class Rebaser:
             sushi_reserves = self.sushi_pair.functions.getReserves().call()
             uni_reserves = self.uni_pair.functions.getReserves().call()
 
-            self.logger.info(f"spfAfter: {spf_after}")
-            self.logger.info(f"supply after: {supply_after}")
-            self.logger.info(
+            logger.info(f"spfAfter: {spf_after}")
+            logger.info(f"supply after: {supply_after}")
+            logger.info(
                 f"supply change: %{round((supply_after - supply_before) / supply_before * 100, 2)}"
             )
-            self.logger.info(f"sushi reserves after {sushi_reserves}")
-            self.logger.info(f"uni reserves after: {uni_reserves}")
+            logger.info(f"sushi reserves after {sushi_reserves}")
+            logger.info(f"uni reserves after: {uni_reserves}")
 
             if supply_after > supply_before:
                 rebase_type = "positive"
@@ -130,7 +130,7 @@ class Rebaser:
                 "pct_change": f"%{round((supply_after - supply_before) / supply_before * 100, 2)}",
             }
         else:
-            self.logger.info("No rebase - conditions not met")
+            logger.info("No rebase - conditions not met")
             return "Rebase conditions not met"
 
     def __process_rebase(self):
@@ -148,7 +148,7 @@ class Rebaser:
             elif tx_hash != HexBytes(0):
                 send_rebase_to_discord(tx_hash=tx_hash)
         except Exception as e:
-            self.logger.error(f"Error processing rebase tx: {e}")
+            logger.error(f"Error processing rebase tx: {e}")
             send_rebase_error_to_discord(error=e)
 
     def __send_rebase_tx(self) -> HexBytes:
@@ -162,7 +162,7 @@ class Rebaser:
             HexBytes: Transaction hash for transaction that was sent.
         """
         try:
-            self.logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
+            logger.info(f"max_priority_fee: {self.web3.eth.max_priority_fee}")
             priority_fee = get_priority_fee(self.web3)
             options = {
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
@@ -177,9 +177,9 @@ class Rebaser:
             )
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending rebase tx: {e}")
+            logger.error(f"Error in sending rebase tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
-                e, self.logger, keeper_address=self.keeper_address
+                e, logger, keeper_address=self.keeper_address
             )
         finally:
             return tx_hash

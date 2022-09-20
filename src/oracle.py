@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from datetime import datetime
 from datetime import timezone
@@ -18,14 +17,15 @@ from config.constants import SUSHI_SUBGRAPH
 from config.constants import UNIV2_DIGG_WBTC
 from config.constants import UNI_SUBGRAPH
 from config.enums import Network
-from src.tx_utils import get_effective_gas_price
-from src.tx_utils import get_gas_price_of_tx
-from src.tx_utils import get_priority_fee
-from src.web3_utils import confirm_transaction
-from src.utils import get_abi
 from src.discord_utils import get_hash_from_failed_tx_error
 from src.discord_utils import send_oracle_error_to_discord
 from src.discord_utils import send_success_to_discord
+from src.json_logger import logger
+from src.tx_utils import get_effective_gas_price
+from src.tx_utils import get_gas_price_of_tx
+from src.tx_utils import get_priority_fee
+from src.utils import get_abi
+from src.web3_utils import confirm_transaction
 
 # push report to centralizedOracle
 REPORT_TIME_UTC = {"hour": 18, "minute": 30, "second": 0, "microsecond": 0}
@@ -40,7 +40,6 @@ class Oracle:
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
     ):
-        self.logger = logging.getLogger(__name__)
         self.web3 = web3
         self.keeper_key = keeper_key
         self.keeper_address = keeper_address
@@ -63,7 +62,7 @@ class Oracle:
 
     def is_negative_rebase(self):
         price = self.digg_btc_chainlink.functions.latestAnswer().call()
-        self.logger.info(f"price: [{price} - {price / 10 ** 8}]")
+        logger.info(f"price: [{price} - {price / 10 ** 8}]")
         return price / 10 ** 8 < NEGATIVE_THRESHOLD
 
     def propose_centralized_report_push(self):
@@ -99,7 +98,7 @@ class Oracle:
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
-                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type=f"Centralized Oracle {function}",
                     tx_hash=tx_hash,
@@ -110,7 +109,7 @@ class Oracle:
                     tx_type=f"Centralized Oracle {function}", tx_hash=tx_hash
                 )
         except Exception as e:
-            self.logger.error(f"Error processing oracle tx: {e}")
+            logger.error(f"Error processing oracle tx: {e}")
             send_oracle_error_to_discord(
                 tx_type=f"Centralized Oracle {function}", error=e
             )
@@ -127,7 +126,7 @@ class Oracle:
         """
         try:
             priority_fee = get_priority_fee(self.web3)
-            self.logger.info(f"priority_fee: {priority_fee}")
+            logger.info(f"priority_fee: {priority_fee}")
             options = {
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                 "from": self.keeper_address,
@@ -151,14 +150,14 @@ class Oracle:
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
         except ValueError as e:
-            self.logger.error(f"Error in sending oracle tx: {e}")
+            logger.error(f"Error in sending oracle tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
-                e, self.logger, keeper_address=self.keeper_address
+                e, logger, keeper_address=self.keeper_address
             )
         except Exception as e:
-            self.logger.error(format_exc())
+            logger.error(format_exc())
             tx_hash = get_hash_from_failed_tx_error(
-                e, self.logger, keeper_address=self.keeper_address
+                e, logger, keeper_address=self.keeper_address
             )
         finally:
             return tx_hash
@@ -186,9 +185,9 @@ class Oracle:
         uni_twap = sum(uni_prices) / len(uni_prices)
         sushi_twap = sum(sushi_prices) / len(sushi_prices)
         avg_twap = (uni_twap + sushi_twap) / 2
-        self.logger.info(f"24 Hour Uniswap TWAP: {uni_twap}")
-        self.logger.info(f"24 Hour Sushiswap TWAP: {sushi_twap}")
-        self.logger.info(f"Average TWAP: {avg_twap}")
+        logger.info(f"24 Hour Uniswap TWAP: {uni_twap}")
+        logger.info(f"24 Hour Sushiswap TWAP: {sushi_twap}")
+        logger.info(f"Average TWAP: {avg_twap}")
 
         return int(avg_twap * 10 ** 18)
 
@@ -277,7 +276,7 @@ class Oracle:
                 gas_price_of_tx = get_gas_price_of_tx(
                     self.web3, self.eth_usd_oracle, tx_hash, Network.Ethereum
                 )
-                self.logger.info(f"got gas price of tx: ${gas_price_of_tx}")
+                logger.info(f"got gas price of tx: ${gas_price_of_tx}")
                 send_success_to_discord(
                     tx_type="Chainlink Forwarder",
                     tx_hash=tx_hash,
@@ -286,7 +285,7 @@ class Oracle:
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(tx_type="Chainlink Forwarder", tx_hash=tx_hash)
         except Exception as e:
-            self.logger.error(f"Error processing chainlink tx: {e}")
+            logger.error(f"Error processing chainlink tx: {e}")
             send_oracle_error_to_discord(tx_type="Chainlink Forwarder", error=e)
 
     def __send_chainlink_tx(self) -> HexBytes:
@@ -301,7 +300,7 @@ class Oracle:
         """
         try:
             priority_fee = get_priority_fee(self.web3)
-            self.logger.info(f"priority_fee: {priority_fee}")
+            logger.info(f"priority_fee: {priority_fee}")
             options = {
                 "nonce": self.web3.eth.get_transaction_count(self.keeper_address),
                 "from": self.keeper_address,
@@ -319,9 +318,9 @@ class Oracle:
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
         except ValueError as e:
-            self.logger.error(f"Error in sending chainlink tx: {e}")
+            logger.error(f"Error in sending chainlink tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
-                e, self.logger, keeper_address=self.keeper_address
+                e, logger, keeper_address=self.keeper_address
             )
         finally:
             return tx_hash
