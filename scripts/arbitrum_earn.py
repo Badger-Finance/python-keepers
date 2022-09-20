@@ -5,6 +5,7 @@ from config.enums import Network
 from src.earner import Earner
 from src.aws import get_secret
 from src.json_logger import logger
+from src.settings.earn_settings import ARB_EARN_SETTINGS
 from src.web3_utils import get_strategies_and_vaults
 
 
@@ -41,8 +42,5 @@ if __name__ == "__main__":
         )
 
         for strategy, vault in zip(strategies, vaults):
-            if (
-                strategy.address
-                not in MULTICHAIN_CONFIG[chain]["earn"]["invalid_strategies"]
-            ):
+            if strategy.address not in ARB_EARN_SETTINGS.deprecated_vaults:
                 safe_earn(earner, vault.contract, strategy.contract, strategy.name)
