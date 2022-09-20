@@ -1,6 +1,6 @@
 import os
-import requests
 
+import requests
 from hexbytes import HexBytes
 from web3 import Web3
 
@@ -9,15 +9,15 @@ from config.constants import ARB_VESTER_Q2_22
 from config.constants import ETH_BADGER
 from config.constants import GAS_LIMITS
 from config.enums import Network
+from src.discord_utils import get_hash_from_failed_tx_error
+from src.discord_utils import send_error_to_discord
+from src.discord_utils import send_success_to_discord
 from src.json_logger import logger
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
-from src.web3_utils import confirm_transaction
-from src.discord_utils import get_hash_from_failed_tx_error
-from src.discord_utils import send_success_to_discord
-from src.discord_utils import send_error_to_discord
 from src.utils import get_abi
+from src.web3_utils import confirm_transaction
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
 CHAIN_CURRENCY = {Network.Arbitrum: ARB_BADGER, Network.Ethereum: ETH_BADGER}

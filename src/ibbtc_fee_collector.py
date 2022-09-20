@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from decimal import Decimal
 
@@ -11,13 +10,14 @@ from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import GAS_LIMITS
 from config.constants import IBBTC_CORE_ADDRESS
 from config.enums import Network
+from src.discord_utils import get_hash_from_failed_tx_error
+from src.discord_utils import send_oracle_error_to_discord
+from src.discord_utils import send_success_to_discord
+from src.json_logger import logger
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
 from src.web3_utils import confirm_transaction
-from src.discord_utils import get_hash_from_failed_tx_error
-from src.discord_utils import send_oracle_error_to_discord
-from src.discord_utils import send_success_to_discord
 
 FEE_THRESHOLD = 0.01  # ratio of gas cost to harvest amount we're ok with
 
@@ -29,7 +29,6 @@ class ibBTCFeeCollector:
         keeper_address=os.getenv("KEEPER_ADDRESS"),
         keeper_key=os.getenv("KEEPER_KEY"),
     ):
-        self.logger = logging.getLogger(__name__)
         self.web3 = web3
         self.keeper_key = keeper_key  # get secret here
         self.keeper_address = keeper_address  # get secret here
@@ -53,18 +52,18 @@ class ibBTCFeeCollector:
     def collect_fees(self):
         # get outstanding fees
         fees = self.get_outstanding_fees()
-        self.logger.info(f"Outstanding fees: {fees} BTC")
+        logger.info(f"Outstanding fees: {fees} BTC")
 
         # check profitability
         is_profitable = self.__is_profitable(fees)
 
         # Collect fees if profitable
         if is_profitable:
-            self.logger.info("Collecting profitable, beginning transaction submission")
+            logger.info("Collecting profitable, beginning transaction submission")
 
             self.__process_collection()
         else:
-            self.logger.info("No fee collection - conditions not met")
+            logger.info("No fee collection - conditions not met")
 
     def get_outstanding_fees(self) -> Decimal:
         raw_fees = self.ibbtc.functions.accumulatedFee().call()
@@ -75,10 +74,10 @@ class ibBTCFeeCollector:
             self.btc_eth_oracle.functions.latestRoundData().call()[1] / 10 ** 18
         )
         fees_eth = fees * btc_eth
-        self.logger.info(f"fees: {fees_eth} ETH")
+        logger.info(f"fees: {fees_eth} ETH")
         gas_fee_wei = self.__estimate_gas_fee()
         gas_fee_eth = self.web3.fromWei(gas_fee_wei, "ether")
-        self.logger.info(f"estimated gas fee: {gas_fee_eth} ETH")
+        logger.info(f"estimated gas fee: {gas_fee_eth} ETH")
 
         fee_percent_of_claim = 1 if fees_eth == 0 else gas_fee_eth / fees_eth
         return fee_percent_of_claim <= FEE_THRESHOLD
@@ -109,7 +108,7 @@ class ibBTCFeeCollector:
             elif tx_hash != HexBytes(0):
                 send_success_to_discord(tx_hash=tx_hash, tx_type="ibBTC Fee Collection")
         except Exception as e:
-            self.logger.error(f"Error processing collection tx: {e}")
+            logger.error(f"Error processing collection tx: {e}")
             send_oracle_error_to_discord(tx_type="ibBTC Fee Collection", error=e)
 
     def __send_collection_tx(self) -> HexBytes:
@@ -139,9 +138,9 @@ class ibBTCFeeCollector:
 
             self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         except ValueError as e:
-            self.logger.error(f"Error in sending collection tx: {e}")
+            logger.error(f"Error in sending collection tx: {e}")
             tx_hash = get_hash_from_failed_tx_error(
-                e, self.logger, keeper_address=self.keeper_address
+                e, logger, keeper_address=self.keeper_address
             )
         finally:
             return tx_hash
