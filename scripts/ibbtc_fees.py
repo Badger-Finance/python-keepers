@@ -1,17 +1,11 @@
-import logging
-
 from config.enums import Network
 from src.aws import get_secret
 from src.ibbtc_fee_collector import ibBTCFeeCollector
+from src.json_logger import logger
 from src.utils import get_healthy_node
-
-logging.basicConfig(level=logging.INFO)
 
 
 if __name__ == "__main__":
-
-    logger = logging.getLogger(__name__)
-
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")
     keeper_address = get_secret("keepers/rebaser/keeper-address", "KEEPER_ADDRESS")
     web3 = get_healthy_node(Network.Ethereum)
