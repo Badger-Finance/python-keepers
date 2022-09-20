@@ -1,4 +1,3 @@
-import logging
 import os
 import requests
 
@@ -10,6 +9,7 @@ from config.constants import ARB_VESTER_Q2_22
 from config.constants import ETH_BADGER
 from config.constants import GAS_LIMITS
 from config.enums import Network
+from src.json_logger import logger
 from src.tx_utils import get_effective_gas_price
 from src.tx_utils import get_gas_price_of_tx
 from src.tx_utils import get_priority_fee
@@ -21,8 +21,6 @@ from src.utils import get_abi
 
 MAX_GAS_PRICE = int(1000e9)  # 1000 gwei
 CHAIN_CURRENCY = {Network.Arbitrum: ARB_BADGER, Network.Ethereum: ETH_BADGER}
-
-logger = logging.getLogger(__name__)
 
 
 class Vester:
