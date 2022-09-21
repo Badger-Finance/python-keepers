@@ -21,9 +21,9 @@ ARB_DEPRECATED_VAULTS = [
 @dataclass
 class HarvestSettings:
 
-    restitution_vaults: Optional[List[str]]
-    rewards_manager_vaults: Optional[List[str]]
-    deprecated_vaults: Optional[List[str]]
+    restitution_vaults: Optional[List] = []
+    rewards_manager_vaults: Optional[List] = []
+    deprecated_vaults: Optional[List] = []
 
 
 ETH_HARVEST_SETTINGS = HarvestSettings(

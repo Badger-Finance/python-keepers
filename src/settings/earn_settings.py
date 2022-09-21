@@ -24,9 +24,9 @@ ARB_DEPRECATED_VAULTS = [
 @dataclass
 class EarnSettings:
 
-    influence_strategies: Optional[List[str]]
-    influence_vaults: Optional[List[str]]
-    deprecated_vaults: Optional[List[str]]
+    influence_strategies: Optional[List] = []
+    influence_vaults: Optional[List] = []
+    deprecated_vaults: Optional[List] = []
 
 
 ETH_EARN_SETTINGS = EarnSettings(
