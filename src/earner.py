@@ -158,7 +158,7 @@ class Earner:
                     "vault_to_strategy_ratio": vault_balance / strategy_balance
                     if strategy_balance > 0
                     else 0,
-                }
+                },
             )
             return False
 

@@ -83,7 +83,7 @@ class Rebaser:
                 "now": now,
                 "time_since_last_rebase": time_since_last_rebase,
                 "min_time_passed": min_time_passed,
-            }
+            },
         )
 
         # Rebase if sufficient time has passed since last rebase and we are in the window.
