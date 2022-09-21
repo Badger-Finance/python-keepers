@@ -42,5 +42,5 @@ if __name__ == "__main__":
         )
 
         for strategy, vault in zip(strategies, vaults):
-            if strategy.address not in ARB_EARN_SETTINGS.deprecated_vaults:
+            if vault.address not in ARB_EARN_SETTINGS.deprecated_vaults:
                 safe_earn(earner, vault.contract, strategy.contract, strategy.name)
