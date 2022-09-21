@@ -9,6 +9,7 @@ from config.enums import Network
 from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
 from src.json_logger import logger
+from src.settings.harvest_settings import ARB_HARVEST_SETTINGS
 from src.web3_utils import get_strategies_and_vaults
 
 
@@ -62,13 +63,10 @@ if __name__ == "__main__":
         discord_url=discord_url,
     )
 
-    strategies, _ = get_strategies_and_vaults(web3, Network.Arbitrum)
+    strategies, vaults = get_strategies_and_vaults(web3, Network.Arbitrum)
 
-    for strategy in strategies:
-        if (
-            strategy.address
-            not in MULTICHAIN_CONFIG[Network.Arbitrum]["harvest"]["invalid_strategies"]
-        ):
+    for strategy, vault in zip(strategies, vaults):
+        if strategy.address not in ARB_HARVEST_SETTINGS.deprecated_vaults:
             safe_harvest(harvester, strategy.contract, strategy.address, strategy.name)
 
             # Sleep for a few blocks in between harvests
