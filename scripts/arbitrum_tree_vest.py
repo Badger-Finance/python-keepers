@@ -1,10 +1,16 @@
+import sys
+
 from config.constants import ARB_ETH_USD_CHAINLINK
 from config.constants import ARB_VESTER_Q2_22
 from config.enums import Network
 from src.aws import get_secret
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.utils import get_healthy_node
 from src.vester import Vester
+
+sys.excepthook = exception_logging
+
 
 if __name__ == "__main__":
     keeper_key = get_secret("keepers/rebaser/keeper-pk", "KEEPER_KEY")

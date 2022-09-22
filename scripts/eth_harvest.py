@@ -1,3 +1,4 @@
+import sys
 import time
 
 from web3 import Web3
@@ -14,6 +15,7 @@ from config.enums import Network
 from src.aws import get_secret
 from src.data_classes.contract import Contract
 from src.general_harvester import GeneralHarvester
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.misc_utils import hours
 from src.misc_utils import seconds_to_blocks
@@ -31,6 +33,7 @@ HOURS_120 = hours(120)
 BLOCKS_TO_SLEEP = 2
 
 rewards_manager_strategies = {ETH_SLP_BADGER_WBTC_STRATEGY}
+sys.excepthook = exception_logging
 
 
 def conditional_harvest(harvester: GeneralHarvester, strategy: Contract) -> str:

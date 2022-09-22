@@ -1,12 +1,18 @@
-from web3 import Web3, contract
+import sys
+
+from web3 import Web3
+from web3 import contract
 
 from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
-from src.earner import Earner
 from src.aws import get_secret
+from src.earner import Earner
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.settings.earn_settings import ARB_EARN_SETTINGS
 from src.web3_utils import get_strategies_and_vaults
+
+sys.excepthook = exception_logging
 
 
 def safe_earn(earner: Earner, vault: contract, strategy: contract, strategy_name: str):

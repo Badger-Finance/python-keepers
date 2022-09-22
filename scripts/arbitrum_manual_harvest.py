@@ -1,3 +1,4 @@
+import sys
 import time
 
 from config.constants import ARB_SWAPR_WBTC_WETH_STRATEGY
@@ -5,11 +6,15 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.utils import get_abi
 from src.utils import get_healthy_node
 
 strategies = {ARB_SWAPR_WBTC_WETH_STRATEGY}
+
+
+sys.excepthook = exception_logging
 
 
 def safe_harvest(harvester, strategy_name, strategy) -> str:
