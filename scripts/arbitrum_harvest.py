@@ -1,3 +1,4 @@
+import sys
 import time
 
 from hexbytes import HexBytes
@@ -8,9 +9,12 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.settings.harvest_settings import ARB_HARVEST_SETTINGS
 from src.web3_utils import get_strategies_and_vaults
+
+sys.excepthook = exception_logging
 
 
 def safe_harvest(

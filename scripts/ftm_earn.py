@@ -1,3 +1,5 @@
+import sys
+
 from web3 import Web3
 
 from config.constants import FTM_OXD_BVEOXD_VAULT
@@ -8,10 +10,14 @@ from config.enums import Network
 from config.enums import VaultVersion
 from src.aws import get_secret
 from src.earner import Earner
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.web3_utils import get_strategy_from_vault
 
 INVALID_VAULTS = [FTM_OXD_BVEOXD_VAULT]
+
+
+sys.excepthook = exception_logging
 
 
 def safe_earn(earner, vault, strategy):

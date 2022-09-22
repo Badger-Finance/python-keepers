@@ -1,10 +1,16 @@
+import sys
+
 from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import ETH_REMDRIPPER_Q2_22
 from config.enums import Network
 from src.aws import get_secret
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.utils import get_healthy_node
 from src.vester import Vester
+
+sys.excepthook = exception_logging
+
 
 if __name__ == "__main__":
     chain = Network.Ethereum
