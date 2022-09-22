@@ -1,3 +1,4 @@
+import sys
 import time
 
 from web3 import Web3
@@ -9,11 +10,15 @@ from config.enums import Network
 from config.enums import VaultVersion
 from src.aws import get_secret
 from src.general_harvester import GeneralHarvester
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.misc_utils import hours
 from src.web3_utils import get_strategy_from_vault
 
 HOURS_12 = hours(12)
+
+
+sys.excepthook = exception_logging
 
 
 if __name__ == "__main__":

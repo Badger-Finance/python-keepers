@@ -1,8 +1,13 @@
+import sys
+
 from config.enums import Network
 from src.aws import get_secret
 from src.ibbtc_fee_collector import ibBTCFeeCollector
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.utils import get_healthy_node
+
+sys.excepthook = exception_logging
 
 
 if __name__ == "__main__":

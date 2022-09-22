@@ -1,3 +1,5 @@
+import sys
+
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_BVECVX_VAULT
 from config.constants import ETH_GRAVIAURA_STRATEGY
@@ -6,9 +8,12 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from src.aws import get_secret
 from src.earner import Earner
+from src.json_logger import exception_logging
 from src.json_logger import logger
 from src.utils import get_abi
 from src.utils import get_healthy_node
+
+sys.excepthook = exception_logging
 
 
 if __name__ == "__main__":
