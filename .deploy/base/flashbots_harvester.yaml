@@ -44,6 +44,10 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
+            - name: DD_ORCHESTRATOR_EXPLORER_ENABLED
+              value: "true"
+            - name: DD_CLUSTER_AGENT_URL
+              value: https://datadog-cluster-agent.default.svc.cluster.local:5005
             resources:
                 requests:
                   memory: "256Mi"
