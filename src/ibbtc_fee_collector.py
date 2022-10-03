@@ -70,6 +70,9 @@ class ibBTCFeeCollector:
         return Decimal(raw_fees / 10 ** 18)
 
     def __is_profitable(self, fees: Decimal) -> bool:
+        if fees == Decimal(0):
+            return False
+
         btc_eth = Decimal(
             self.btc_eth_oracle.functions.latestRoundData().call()[1] / 10 ** 18
         )
