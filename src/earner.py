@@ -117,6 +117,12 @@ class Earner:
         vault_balance = price_per_want * vault_balance / 10 ** want_decimals
         strategy_balance = price_per_want * strategy_balance / 10 ** want_decimals
 
+        # Include unlocked CVX in the strategy as part of the vault balance
+        if vault.address == ETH_BVECVX_VAULT:
+            unlocked_strategy = want.functions.balanceOf(strategy.address).call()
+            unlocked_strategy = price_per_want * unlocked_strategy / 10 ** want_decimals
+            vault_balance += unlocked_strategy
+
         return vault_balance, strategy_balance
 
     def should_earn(
