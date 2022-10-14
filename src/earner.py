@@ -13,6 +13,7 @@ from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import EARN_PCT_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_BVECVX_VAULT
+from config.constants import ETH_GRAVIAURA_VAULT
 from config.constants import FTM_BVEOXD_VOTER
 from config.constants import FTM_OXD_BVEOXD_VAULT
 from config.enums import Network
@@ -116,6 +117,12 @@ class Earner:
 
         vault_balance = price_per_want * vault_balance / 10 ** want_decimals
         strategy_balance = price_per_want * strategy_balance / 10 ** want_decimals
+
+        # Include unlocked AURA and CVX in the strategy as part of the vault balance
+        if vault.address in [ETH_BVECVX_VAULT, ETH_GRAVIAURA_VAULT]:
+            unlocked_strategy = want.functions.balanceOf(strategy.address).call()
+            unlocked_strategy = price_per_want * unlocked_strategy / 10 ** want_decimals
+            vault_balance += unlocked_strategy
 
         return vault_balance, strategy_balance
 
