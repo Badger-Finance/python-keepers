@@ -120,9 +120,11 @@ class Earner:
 
         # Include unlocked AURA and CVX in the strategy as part of the vault balance
         if vault.address in [ETH_BVECVX_VAULT, ETH_GRAVIAURA_VAULT]:
-            unlocked_strategy = want.functions.balanceOf(strategy.address).call()
-            unlocked_strategy = price_per_want * unlocked_strategy / 10 ** want_decimals
-            vault_balance += unlocked_strategy
+            unlocked_strategy_bal = want.functions.balanceOf(strategy.address).call()
+            unlocked_strategy_bal = (
+                price_per_want * unlocked_strategy_bal / 10 ** want_decimals
+            )
+            vault_balance += unlocked_strategy_bal
 
         return vault_balance, strategy_balance
 
