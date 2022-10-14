@@ -1,6 +1,5 @@
 import logging
 from decimal import Decimal
-from typing import List
 
 import pytest
 from brownie import Contract
@@ -9,7 +8,6 @@ from brownie import chain
 from brownie import web3
 from hexbytes import HexBytes
 
-from config.constants import EARN_OVERRIDE_THRESHOLD
 from config.constants import ETH_BVECVX_STRATEGY
 from config.constants import ETH_BVECVX_VAULT
 from config.constants import ETH_GRAVIAURA_STRATEGY
@@ -18,7 +16,6 @@ from config.constants import MULTICHAIN_CONFIG
 from config.enums import Network
 from integration_tests.utils import test_address
 from integration_tests.utils import test_key
-from src.data_classes.contract import Contract as BadgerContract
 from src.earner import Earner
 from src.utils import get_abi
 
@@ -97,7 +94,7 @@ def test_graviaura_earn_strat_unlocked(keeper_address, earner):
     num_weeks_slept = 0
 
     # sleep until locks expire and we can unlock aura to strat
-    while should_unlock == False and num_weeks_slept <= MAX_SLEEP_WEEKS:
+    while not should_unlock and num_weeks_slept <= MAX_SLEEP_WEEKS:
         num_weeks_slept += 1
         chain.sleep(SECONDS_IN_WEEK)
         chain.mine()
@@ -151,7 +148,7 @@ def test_bvecvx_earn_strat_unlocked(keeper_address, earner):
     num_weeks_slept = 0
 
     # sleep until locks expire and we can unlock cvx to strat
-    while should_unlock == False and num_weeks_slept <= MAX_SLEEP_WEEKS:
+    while not should_unlock and num_weeks_slept <= MAX_SLEEP_WEEKS:
         num_weeks_slept += 1
         chain.sleep(SECONDS_IN_WEEK)
         chain.mine()
