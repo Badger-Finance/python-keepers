@@ -70,7 +70,7 @@ if __name__ == "__main__":
     strategies, vaults = get_strategies_and_vaults(web3, Network.Arbitrum)
 
     for strategy, vault in zip(strategies, vaults):
-        if strategy.address not in ARB_HARVEST_SETTINGS.deprecated_vaults:
+        if vault.address not in ARB_HARVEST_SETTINGS.deprecated_vaults:
             safe_harvest(harvester, strategy.contract, strategy.address, strategy.name)
 
             # Sleep for a few blocks in between harvests
