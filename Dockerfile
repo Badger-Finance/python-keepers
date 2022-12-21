@@ -28,6 +28,10 @@ RUN apt-get install libpcre2-16-0>=10.36-2+deb11u1 -y
 RUN apt-get install libpcre2-32-0>=10.36-2+deb11u1 -y
 RUN apt-get install libpcre2-8-0>=10.36-2+deb11u1 -y
 RUN apt-get install libpcre2-posix2>=10.36-2+deb11u1 -y
+RUN apt-get install libmariadb3>=1:10.5.18-0+deb11u1 -y
+RUN apt-get install libtasn1-6>=4.16.0-2+deb11u1 -y
+RUN apt-get install mariadb-common>=1:10.5.18-0+deb11u1 -y
+
 RUN apt-get install git -y
 COPY requirements.txt .
 RUN pip install -r requirements.txt
