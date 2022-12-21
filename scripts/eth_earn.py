@@ -46,6 +46,7 @@ if __name__ == "__main__":
     for strategy, vault in zip(strategies, vaults):
         if (
             vault.address not in ETH_EARN_SETTINGS.influence_vaults
+            and vault.address not in ETH_EARN_SETTINGS.deprecated_vaults
             and latest_base_fee < int(150e9)
         ):
 
