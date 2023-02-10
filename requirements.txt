@@ -8,4 +8,5 @@ requests==2.26.0
 web3>=5.24.0,<6
 pytest==6.2.4
 python-json-logger==2.0.4
+setuptools>=65.5.1
 git+https://github.com/flashbots/web3-flashbots.git@master
