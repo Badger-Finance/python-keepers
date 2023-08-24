@@ -56,7 +56,7 @@ def get_latest_base_fee(
 ) -> int:  # default to 100 gwei
     latest = web3.eth.get_block("latest")
     raw_base_fee = latest.get("baseFeePerGas", hex(default))
-    if type(raw_base_fee) == str and raw_base_fee.startswith("0x"):
+    if isinstance(raw_base_fee, str) and raw_base_fee.startswith("0x"):
         base_fee = int(raw_base_fee, 0)
     else:
         base_fee = int(raw_base_fee)
