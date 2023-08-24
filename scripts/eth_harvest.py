@@ -6,7 +6,6 @@ from web3 import contract
 
 from config.constants import ETH_ETH_USD_CHAINLINK
 from config.constants import ETH_KEEPER_ACL
-from config.constants import ETH_SLP_BADGER_WBTC_STRATEGY
 from config.constants import GWEI_150
 from config.constants import GWEI_80
 from config.constants import MULTICHAIN_CONFIG
@@ -32,7 +31,7 @@ HOURS_120 = hours(120)
 
 BLOCKS_TO_SLEEP = 2
 
-rewards_manager_strategies = {ETH_SLP_BADGER_WBTC_STRATEGY}
+rewards_manager_strategies = {}
 sys.excepthook = exception_logging
 
 
